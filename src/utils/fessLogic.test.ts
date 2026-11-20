@@ -15,6 +15,11 @@ import {
   sanitizeHeaderValue,
   validateAndFormatContactEmail,
 } from './contactEmail';
+import {
+  resolveAllowedUpstreamUrl,
+  validateRegistrationPayload,
+} from './backendSecurity';
+import { SlidingWindowRateLimiter } from './rateLimiter';
 
 test('parsePageFromHash resolves valid routes including team detail pages and falls back to home', () => {
   assert.equal(parsePageFromHash('#events'), 'events');
@@ -139,4 +144,57 @@ test('validateAndFormatContactEmail escapes XSS, blocks header CRLF in email, an
     assert.ok(safeResult.data.html.includes('&lt;b&gt;Salman&lt;/b&gt;'));
   }
 });
+
+test('SlidingWindowRateLimiter enforces request ceiling and recovers after window expires', () => {
+  const limiter = new SlidingWindowRateLimiter(2, 1000);
+  assert.equal(limiter.check('1.2.3.4', 100).allowed, true);
+  assert.equal(limiter.check('1.2.3.4', 200).allowed, true);
+  const blocked = limiter.check('1.2.3.4', 300);
+  assert.equal(blocked.allowed, false);
+  assert.equal(blocked.retryAfterSeconds, 1);
+
+  assert.equal(limiter.check('1.2.3.4', 1301).allowed, true);
+});
+
+test('validateRegistrationPayload validates fields and maps fee/prefix metadata', () => {
+  const bad = validateRegistrationPayload({
+    event: 'Invalid Event',
+    fullName: 'A',
+    phone: '12',
+  });
+  assert.equal(bad.ok, false);
+
+  const good = validateRegistrationPayload({
+    event: 'Enterprise Expo',
+    fullName: 'Sara Khan',
+    phone: '0300-1234567',
+    entityName: '',
+  });
+  assert.equal(good.ok, true);
+  if (good.ok) {
+    assert.equal(good.data.codePrefix, 'EE');
+    assert.equal(good.data.entityName, 'Individual Participant');
+    assert.equal(good.data.feeLabel, 'PKR 8,000 per stall');
+  }
+});
+
+test('resolveAllowedUpstreamUrl blocks unknown services, traversal, and origin escapes', () => {
+  const registry = {
+    external: {
+      baseUrl: 'https://api.partner.example/v1',
+      apiKey: 'secret-token',
+    },
+  };
+
+  assert.equal(resolveAllowedUpstreamUrl('unknown', 'items', registry).ok, false);
+  assert.equal(resolveAllowedUpstreamUrl('external', '../secret', registry).ok, false);
+  assert.equal(resolveAllowedUpstreamUrl('external', 'https://evil.com', registry).ok, false);
+
+  const valid = resolveAllowedUpstreamUrl('external', 'events/list', registry);
+  assert.equal(valid.ok, true);
+  if (valid.ok) {
+    assert.equal(valid.url, 'https://api.partner.example/v1/events/list');
+  }
+});
+
 

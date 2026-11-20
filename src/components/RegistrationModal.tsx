@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Check, CheckCircle2, Ticket, X } from 'lucide-react';
+import { AlertCircle, Check, CheckCircle2, Loader2, Ticket, X } from 'lucide-react';
 import { COMPETITIONS, type CompetitionName } from '../data/fessData';
+import { submitRegistration } from '../utils/apiClient';
 import {
-  createRegistrationRecord,
   getCompetitionMeta,
   validateRegistrationForm,
   type RegistrationRecord,
@@ -30,6 +30,8 @@ export function RegistrationModal({
   const [phone, setPhone] = useState('');
   const [entityName, setEntityName] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [viewMode, setViewMode] = useState<'form' | 'passes'>('form');
   const [latestReceipt, setLatestReceipt] = useState<RegistrationRecord | null>(null);
 
@@ -39,6 +41,7 @@ export function RegistrationModal({
       setViewMode('form');
       setLatestReceipt(null);
       setErrors({});
+      setSubmitError(null);
     }
   }, [isOpen, initialEvent]);
 
@@ -53,8 +56,10 @@ export function RegistrationModal({
 
   const activeMeta = getCompetitionMeta(selectedEvent);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     const validation = validateRegistrationForm({
       event: selectedEvent,
       fullName,
@@ -63,19 +68,44 @@ export function RegistrationModal({
     });
     if (!validation.valid) {
       setErrors(validation.errors);
+      setSubmitError(null);
       return;
     }
 
-    const record = createRegistrationRecord(
-      { event: selectedEvent, fullName, phone, entityName },
-      registrations.length
-    );
     setErrors({});
-    setLatestReceipt(record);
-    setFullName('');
-    setPhone('');
-    setEntityName('');
-    onRegisterSuccess(record);
+    setSubmitError(null);
+    setIsSubmitting(true);
+
+    try {
+      const result = await submitRegistration({
+        event: selectedEvent,
+        fullName: fullName.trim(),
+        phone: phone.trim(),
+        entityName: entityName.trim(),
+      });
+
+      if (!result.ok || !result.record) {
+        if (result.errors) {
+          setErrors(result.errors);
+        }
+        setSubmitError(
+          result.error || 'Unable to confirm registration on the server. Please try again.'
+        );
+        return;
+      }
+
+      setLatestReceipt(result.record);
+      setFullName('');
+      setPhone('');
+      setEntityName('');
+      onRegisterSuccess(result.record);
+    } catch {
+      setSubmitError(
+        'Network error while reaching the FESS registration server. Please try again.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -245,6 +275,16 @@ export function RegistrationModal({
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} noValidate className="space-y-4">
+                  {submitError && (
+                    <div
+                      role="alert"
+                      className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-[#7F1D1D] text-xs flex items-start gap-2"
+                    >
+                      <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#991B1B]" />
+                      <span>{submitError}</span>
+                    </div>
+                  )}
+
                   <div>
                     <span className="block text-xs font-bold uppercase text-slate-600 mb-1.5">
                       Select Event
@@ -256,8 +296,9 @@ export function RegistrationModal({
                           <button
                             key={comp.id}
                             type="button"
+                            disabled={isSubmitting}
                             onClick={() => setSelectedEvent(comp.id)}
-                            className={`relative py-2.5 px-2 rounded-xl text-xs font-bold transition-colors ${
+                            className={`relative py-2.5 px-2 rounded-xl text-xs font-bold transition-colors disabled:opacity-60 ${
                               active
                                 ? 'border-2 border-[#991B1B] bg-red-50 text-[#991B1B]'
                                 : 'border border-slate-200 text-slate-600 hover:border-slate-300'
@@ -297,10 +338,11 @@ export function RegistrationModal({
                       id="reg-fullname"
                       required
                       type="text"
+                      disabled={isSubmitting}
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       placeholder="Enter your full name"
-                      className="w-full px-4 py-3 rounded-xl bg-[#FAF6F0]/70 border border-slate-200 focus:border-[#991B1B] outline-none text-sm font-medium"
+                      className="w-full px-4 py-3 rounded-xl bg-[#FAF6F0]/70 border border-slate-200 focus:border-[#991B1B] outline-none text-sm font-medium disabled:opacity-60"
                     />
                     {errors.fullName && (
                       <p className="text-xs text-[#991B1B] mt-1 font-medium">
@@ -321,10 +363,11 @@ export function RegistrationModal({
                         id="reg-phone"
                         required
                         type="tel"
+                        disabled={isSubmitting}
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="03XX-XXXXXXX"
-                        className="w-full px-4 py-3 rounded-xl bg-[#FAF6F0]/70 border border-slate-200 focus:border-[#991B1B] outline-none text-sm font-medium"
+                        className="w-full px-4 py-3 rounded-xl bg-[#FAF6F0]/70 border border-slate-200 focus:border-[#991B1B] outline-none text-sm font-medium disabled:opacity-60"
                       />
                       {errors.phone && (
                         <p className="text-xs text-[#991B1B] mt-1 font-medium">
@@ -343,20 +386,31 @@ export function RegistrationModal({
                       <input
                         id="reg-entity"
                         type="text"
+                        disabled={isSubmitting}
                         value={entityName}
                         onChange={(e) => setEntityName(e.target.value)}
                         placeholder="Optional for individual"
-                        className="w-full px-4 py-3 rounded-xl bg-[#FAF6F0]/70 border border-slate-200 focus:border-[#991B1B] outline-none text-sm font-medium"
+                        className="w-full px-4 py-3 rounded-xl bg-[#FAF6F0]/70 border border-slate-200 focus:border-[#991B1B] outline-none text-sm font-medium disabled:opacity-60"
                       />
                     </div>
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full py-3.5 rounded-xl bg-[#991B1B] hover:bg-[#7F1D1D] text-white font-bold text-sm shadow-[0_10px_28px_-6px_rgba(153,27,27,0.3)] transition-colors flex items-center justify-center gap-2"
+                    disabled={isSubmitting}
+                    className="w-full py-3.5 rounded-xl bg-[#991B1B] hover:bg-[#7F1D1D] disabled:opacity-70 disabled:cursor-not-allowed text-white font-bold text-sm shadow-[0_10px_28px_-6px_rgba(153,27,27,0.3)] transition-colors flex items-center justify-center gap-2"
                   >
-                    <span>Confirm Registration</span>
-                    <Check className="w-4 h-4" />
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Confirming Registration...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Confirm Registration</span>
+                        <Check className="w-4 h-4" />
+                      </>
+                    )}
                   </button>
                 </form>
               )}

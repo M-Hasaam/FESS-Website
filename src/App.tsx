@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, MotionConfig } from 'motion/react';
 import type { CompetitionName, PageId } from './data/fessData';
+import { fetchRegistrations } from './utils/apiClient';
 import {
   getTeamIdFromPage,
   parsePageFromHash,
@@ -70,6 +71,25 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    let active = true;
+    fetchRegistrations()
+      .then((serverRecords) => {
+        if (!active || serverRecords.length === 0) return;
+        setRegistrations((prev) => {
+          const seen = new Set(serverRecords.map((r) => r.id));
+          const merged = [...serverRecords, ...prev.filter((r) => !seen.has(r.id))];
+          try {
+            window.localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+          } catch {
+            // Ignore storage quota errors
+          }
+          return merged;
+        });
+      })
+      .catch(() => {
+        // Keep local cache if backend is temporarily unreachable
+      });
+
     const onHashChange = () => {
       const next = parsePageFromHash(window.location.hash);
       setCurrentPage(next);
@@ -77,6 +97,7 @@ export default function App() {
     };
     window.addEventListener('hashchange', onHashChange);
     return () => {
+      active = false;
       window.removeEventListener('hashchange', onHashChange);
       if (navTimerRef.current) window.clearTimeout(navTimerRef.current);
       if (exitTimerRef.current) window.clearTimeout(exitTimerRef.current);

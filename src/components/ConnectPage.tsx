@@ -10,6 +10,7 @@ import {
   Send,
 } from 'lucide-react';
 import { CONNECT_FAQS, CONNECT_TOPICS } from '../data/fessData';
+import { sendContactMessage } from '../utils/apiClient';
 import { validateConnectForm } from '../utils/fessLogic';
 import { FESS_EASE, Reveal } from './MotionPrimitives';
 
@@ -59,20 +60,9 @@ export function ConnectPage({ onShowToast }: ConnectPageProps) {
     };
 
     try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      const result = await sendContactMessage(payload);
 
-      const result = (await response.json().catch(() => ({}))) as {
-        ok?: boolean;
-        id?: string | null;
-        error?: string;
-        errors?: Record<string, string>;
-      };
-
-      if (!response.ok || !result.ok) {
+      if (!result.ok) {
         if (result.errors) {
           setErrors(result.errors);
         }

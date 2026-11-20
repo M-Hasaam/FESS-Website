@@ -69,7 +69,9 @@ export function Navbar({
             aria-label="Main Navigation"
           >
             {NAV_ITEMS.map((item) => {
-              const isActive = currentPage === item.id;
+              const isActive =
+                currentPage === item.id ||
+                (item.id === 'teams' && currentPage.startsWith('teams/'));
               return (
                 <button
                   key={item.id}
@@ -132,7 +134,9 @@ export function Navbar({
             className="md:hidden bg-white border-t border-[#991B1B]/10 px-4 pt-3 pb-5 space-y-1.5 shadow-xl"
           >
             {NAV_ITEMS.map((item) => {
-              const isActive = currentPage === item.id;
+              const isActive =
+                currentPage === item.id ||
+                (item.id === 'teams' && currentPage.startsWith('teams/'));
               return (
                 <button
                   key={item.id}

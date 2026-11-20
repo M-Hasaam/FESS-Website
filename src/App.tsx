@@ -1,17 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, MotionConfig } from 'motion/react';
 import type { CompetitionName, PageId } from './data/fessData';
-import { parsePageFromHash, type RegistrationRecord } from './utils/fessLogic';
+import {
+  getTeamIdFromPage,
+  parsePageFromHash,
+  type RegistrationRecord,
+} from './utils/fessLogic';
 import { FESS_EASE, ScrollProgressBar } from './components/MotionPrimitives';
 import { PageTransitionCurtain } from './components/PageTransitionCurtain';
 import { Navbar } from './components/Navbar';
 import { HomePage } from './components/HomePage';
 import { FlagshipEventPage } from './components/FlagshipEventPage';
 import { TeamsPage } from './components/TeamsPage';
+import { TeamDetailPage } from './components/TeamDetailPage';
 import { ConnectPage } from './components/ConnectPage';
 import { Footer } from './components/Footer';
 import { RegistrationModal } from './components/RegistrationModal';
-import { TeamRosterModal } from './components/TeamRosterModal';
 
 const STORAGE_KEY = 'fess_registrations_v1';
 
@@ -19,6 +23,8 @@ const PAGE_LABELS: Record<PageId, string> = {
   home: 'FESS Home',
   events: 'Flagship Event',
   teams: 'Meet Our Teams',
+  'teams/executive': 'Executive Council',
+  'teams/tech': 'FESS Tech Team',
   connect: 'Connect With FESS',
 };
 
@@ -50,9 +56,6 @@ export default function App() {
   const [regModalOpen, setRegModalOpen] = useState(false);
   const [regInitialEvent, setRegInitialEvent] =
     useState<CompetitionName>('Pitch Arena');
-  const [activeTeamModal, setActiveTeamModal] = useState<'executive' | 'tech' | null>(
-    null
-  );
   const [registrations, setRegistrations] = useState<RegistrationRecord[]>(() =>
     typeof window !== 'undefined' ? loadSavedRegistrations() : []
   );
@@ -130,6 +133,8 @@ export default function App() {
     [showToast]
   );
 
+  const activeTeamId = getTeamIdFromPage(currentPage);
+
   return (
     <MotionConfig reducedMotion="user">
       <div className="min-h-screen flex flex-col bg-[#FAF6F0] text-[#1E2430]">
@@ -162,7 +167,12 @@ export default function App() {
                 <FlagshipEventPage onOpenRegister={handleOpenRegister} />
               )}
               {currentPage === 'teams' && (
-                <TeamsPage onSelectTeam={(team) => setActiveTeamModal(team)} />
+                <TeamsPage
+                  onSelectTeam={(team) => navigateTo(`teams/${team}`)}
+                />
+              )}
+              {activeTeamId && (
+                <TeamDetailPage teamId={activeTeamId} onNavigate={navigateTo} />
               )}
               {currentPage === 'connect' && <ConnectPage onShowToast={showToast} />}
             </motion.div>
@@ -177,11 +187,6 @@ export default function App() {
           registrations={registrations}
           onClose={() => setRegModalOpen(false)}
           onRegisterSuccess={handleRegisterSuccess}
-        />
-
-        <TeamRosterModal
-          teamId={activeTeamModal}
-          onClose={() => setActiveTeamModal(null)}
         />
 
         {/* Toast Stack */}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, useMotionValue, useReducedMotion, useSpring } from 'motion/react';
-import { Maximize2 } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { TEAMS, type TeamGroup } from '../data/fessData';
 import { Reveal } from './MotionPrimitives';
 
@@ -96,7 +96,7 @@ function TeamShowcaseCard({ team, variant, onClick }: TeamShowcaseCardProps) {
         }
         whileHover={shouldReduce ? undefined : { y: -6 }}
         whileTap={shouldReduce ? undefined : { scale: 0.985 }}
-        aria-label={`View full roster for ${team.title}`}
+        aria-label={`Open ${team.title} 3D team showcase`}
         className="w-full text-left rounded-3xl bg-white shadow-[0_18px_38px_-14px_rgba(20,25,35,0.08)] hover:shadow-[0_28px_52px_-12px_rgba(153,27,27,0.2)] border border-slate-200/80 overflow-hidden transition-shadow duration-200 group focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#991B1B]"
       >
         <div className="bg-gradient-to-r from-[#7F1D1D] via-[#991B1B] to-[#7F1D1D] px-7 py-6 text-white flex items-start justify-between">
@@ -162,8 +162,8 @@ function TeamShowcaseCard({ team, variant, onClick }: TeamShowcaseCardProps) {
 
                 <div className="absolute inset-0 bg-gradient-to-t from-red-950/90 via-red-950/25 to-transparent opacity-85 group-hover:opacity-95 transition-opacity flex items-end justify-center pb-4 z-20">
                   <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-white font-semibold text-xs sm:text-sm group-hover:scale-105 transition-transform">
-                    <Maximize2 className="w-3.5 h-3.5 text-amber-300" />
-                    <span>Click to view full roster</span>
+                    <span>Explore Executive Council</span>
+                    <ArrowUpRight className="w-4 h-4 text-amber-300" />
                   </span>
                 </div>
               </div>
@@ -216,8 +216,8 @@ function TeamShowcaseCard({ team, variant, onClick }: TeamShowcaseCardProps) {
 
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-900/20 to-transparent opacity-85 group-hover:opacity-95 transition-opacity flex items-end justify-center pb-4 z-20">
                   <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/95 text-[#991B1B] font-bold text-xs sm:text-sm shadow-md group-hover:scale-105 transition-transform">
-                    <Maximize2 className="w-3.5 h-3.5" />
-                    <span>Click to view full roster</span>
+                    <span>Explore Tech Team</span>
+                    <ArrowUpRight className="w-4 h-4" />
                   </span>
                 </div>
               </div>

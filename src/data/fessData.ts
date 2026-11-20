@@ -1,4 +1,12 @@
-export type PageId = 'home' | 'events' | 'teams' | 'connect';
+export type TeamId = 'executive' | 'tech';
+
+export type PageId =
+  | 'home'
+  | 'events'
+  | 'teams'
+  | 'teams/executive'
+  | 'teams/tech'
+  | 'connect';
 
 export type CompetitionName = 'Enterprise Expo' | 'Pitch Arena' | 'Sell Me This Pen';
 
@@ -31,20 +39,29 @@ export interface ScheduleItem {
 }
 
 export interface TeamMember {
+  id: string;
   name: string;
   role: string;
+  code: string;
   dept: string;
+  batch: string;
   focus: string;
+  bio: string;
+  highlights: string[];
+  skills: string[];
+  quote: string;
 }
 
 export interface TeamGroup {
-  id: 'executive' | 'tech';
+  id: TeamId;
   tag: string;
   title: string;
   cardSubtitle: string;
   modalTitle: string;
   desc: string;
+  heroVision: string;
   badgeText: string;
+  stats: { label: string; value: string }[];
   members: TeamMember[];
 }
 
@@ -228,7 +245,7 @@ export const EVENING_NIGHTS = [
   },
 ];
 
-export const TEAMS: Record<'executive' | 'tech', TeamGroup> = {
+export const TEAMS: Record<TeamId, TeamGroup> = {
   executive: {
     id: 'executive',
     tag: 'Task Force 26–27',
@@ -236,31 +253,82 @@ export const TEAMS: Record<'executive' | 'tech', TeamGroup> = {
     cardSubtitle: 'Leading the vision and strategy of FESS',
     modalTitle: 'Executive Council Roster',
     desc: 'Leading the vision and strategy of FAST Entrepreneurship and Startup Society.',
+    heroVision:
+      'Setting the strategic compass for FAST’s founder ecosystem—from boardroom-level industry panels and flagship competitions to cross-campus startup mentorship.',
     badgeText: 'FESS Executive Board',
+    stats: [
+      { label: 'Tenure', value: '2026 – 2027' },
+      { label: 'Core Portfolios', value: '4 Leads' },
+      { label: 'Flagship Tracks', value: '3 Competitions · 2 Nights' },
+    ],
     members: [
       {
+        id: 'hamza-tariq',
         name: 'Hamza Tariq',
         role: 'President FESS',
+        code: 'PRES',
         dept: 'Executive Council',
+        batch: 'FAST Batch ’23 · BS Computer Science',
         focus: 'Vision, Industry Partnerships & Flagship Strategy',
+        bio: 'Architects the society’s annual roadmap, forging direct alliances with angel investors, corporate founders, and campus incubators so student builders pitch on real industry stages.',
+        highlights: [
+          'Leads executive sponsorship & business leader panel curation for Pitch Arena',
+          'Spearheads the 2-Day Flagship Enterprise Expo & evening cultural nights',
+          'Mentors early-stage student founders from ideation through demo day',
+        ],
+        skills: ['Strategic Leadership', 'Venture Partnerships', 'Public Speaking', 'Fundraising'],
+        quote: 'We do not wait for opportunities to arrive on campus—we engineer the stage for them.',
       },
       {
+        id: 'ayesha-siddiqui',
         name: 'Ayesha Siddiqui',
         role: 'General Secretary',
+        code: 'GEN SEC',
         dept: 'Executive Council',
-        focus: 'Governance, Society Operations & Governance',
+        batch: 'FAST Batch ’23 · BS Software Engineering',
+        focus: 'Governance, Society Operations & Coordination',
+        bio: 'The operational backbone of FESS—orchestrating cross-wing charters, faculty clearances, delegate communications, and seamless execution across every campus touchpoint.',
+        highlights: [
+          'Manages inter-departmental workflows across 40+ active society ambassadors',
+          'Oversees official FESS governance, competition rulebooks, and judging rubrics',
+          'Coordinates registration desks, certificates, and winner shields distribution',
+        ],
+        skills: ['Governance', 'Program Management', 'Stakeholder Alignment', 'Documentation'],
+        quote: 'Precision behind the scenes is what lets founders shine on stage.',
       },
       {
+        id: 'bilal-ahmed',
         name: 'Bilal Ahmed',
         role: 'Vice President Operations',
+        code: 'VP OPS',
         dept: 'Executive Council',
+        batch: 'FAST Batch ’24 · BS FinTech',
         focus: 'Enterprise Expo Logistics & Event Execution',
+        bio: 'Turns floorplans into thriving student marketplaces—managing stall infrastructure, vendor onboarding, crowd flow, and rapid logistics across all two days of the flagship fest.',
+        highlights: [
+          'Directs 12-hour daily Enterprise Expo stall operations (10:30 AM – 10:00 PM)',
+          'Produces Movie Night and Qawali Night courtyard staging & sound logistics',
+          'Runs real-time resource dispatch and campus security coordination',
+        ],
+        skills: ['Venue Logistics', 'Vendor Ops', 'Crisis Execution', 'Budget Control'],
+        quote: 'Great events feel effortless because every hour was stress-tested weeks ahead.',
       },
       {
+        id: 'mahnoor-raza',
         name: 'Mahnoor Raza',
         role: 'Vice President Strategy',
+        code: 'VP STRAT',
         dept: 'Executive Council',
+        batch: 'FAST Batch ’24 · BS Business Analytics',
         focus: 'Pitch Arena Judging Panels & Startup Mentorship',
+        bio: 'Designs the competitive rigor behind Pitch Arena and Sell Me This Pen—calibrating scoring criteria, founder prep workshops, and alumni mentorship cohorts.',
+        highlights: [
+          'Curates the judging rubric for Pitch Arena & Sell Me This Pen challenges',
+          'Pairs competing teams with industry operators for pre-event pitch clinics',
+          'Drives Audience Favourite & Most Unique Stall analytics at Enterprise Expo',
+        ],
+        skills: ['Market Strategy', 'Pitch Coaching', 'Evaluation Design', 'Growth Analytics'],
+        quote: 'A bold idea becomes fundable the moment clarity meets conviction.',
       },
     ],
   },
@@ -271,31 +339,82 @@ export const TEAMS: Record<'executive' | 'tech', TeamGroup> = {
     cardSubtitle: 'Building the digital infrastructure of FESS',
     modalTitle: 'FESS Tech Team Roster',
     desc: 'Building the digital infrastructure of FESS.',
+    heroVision:
+      'Engineering FESS’s high-craft web platforms, competition pass pipelines, interactive 3D experiences, and zero-downtime flagship event tooling.',
     badgeText: 'Digital Infrastructure',
+    stats: [
+      { label: 'Division', value: 'Engineering & Design' },
+      { label: 'Core Builders', value: '4 Leads' },
+      { label: 'Stack', value: 'React · TypeScript · Node' },
+    ],
     members: [
       {
+        id: 'zaim-abbasi',
         name: 'Zaim Abbasi',
         role: 'Head of Tech Team',
+        code: 'TECH LEAD',
         dept: 'Digital Infrastructure',
+        batch: 'FAST Batch ’23 · BS Computer Science',
         focus: 'Systems Architecture & Engineering Leadership',
+        bio: 'Leads technical direction across every digital initiative at FESS—setting architectural standards, reviewing production releases, and mentoring student developers.',
+        highlights: [
+          'Architected the FESS flagship digital platform and automated pass workflows',
+          'Leads engineering sprints, code reviews, and production cloud deployments',
+          'Designs scalable event-day check-in and leaderboard telemetry tools',
+        ],
+        skills: ['System Architecture', 'TypeScript', 'Cloud Infra', 'Team Leadership'],
+        quote: 'Our software should match the ambition of the founders using it.',
       },
       {
+        id: 'usman-khalid',
         name: 'Usman Khalid',
         role: 'Frontend & UI Lead',
+        code: 'UI / 3D',
         dept: 'Digital Infrastructure',
-        focus: 'Design Systems, Motion & Interactive Interfaces',
+        batch: 'FAST Batch ’24 · BS Software Engineering',
+        focus: 'Design Systems, Motion & Interactive 3D Interfaces',
+        bio: 'Crafts expressive typography, tactile 3D interactions, and responsive layouts—translating FESS’s signature crimson and ivory identity into memorable web motion.',
+        highlights: [
+          'Built the 3D perspective canvas scenes, tilt showcases, and curtain transitions',
+          'Maintains the FESS design system tokens and accessible component library',
+          'Optimizes 60fps GPU-composited animations across mobile and desktop viewports',
+        ],
+        skills: ['React & Motion', '3D Web Canvas', 'Design Systems', 'Accessibility'],
+        quote: 'Motion isn’t decoration—it’s spatial storytelling that guides attention.',
       },
       {
+        id: 'sara-javed',
         name: 'Sara Javed',
         role: 'Backend & Systems Lead',
+        code: 'SYSTEMS',
         dept: 'Digital Infrastructure',
+        batch: 'FAST Batch ’23 · BS Artificial Intelligence',
         focus: 'Registrations, Data Integrity & API Reliability',
+        bio: 'Builds resilient APIs, validation pipelines, and transactional messaging integrations—ensuring every stall booking, pitch registration, and inquiry lands reliably.',
+        highlights: [
+          'Engineered server-side validation, Resend email delivery, and pass ID pipelines',
+          'Implements strict input sanitization and zero-leak credential boundaries',
+          'Automates automated test suites covering core routing and registration rules',
+        ],
+        skills: ['Node.js & Express', 'API Security', 'Transactional Mail', 'Automated Testing'],
+        quote: 'Reliability under peak registration traffic is non-negotiable.',
       },
       {
+        id: 'daniyal-mir',
         name: 'Daniyal Mir',
         role: 'Web Operations Lead',
+        code: 'DEVOPS',
         dept: 'Digital Infrastructure',
+        batch: 'FAST Batch ’24 · BS Cyber Security',
         focus: 'Performance, Deployments & Event Tooling',
+        bio: 'Keeps FESS digital services fast, hardened, and battle-ready—handling CI checks, bundle optimization, and live flagship event uptime monitoring.',
+        highlights: [
+          'Optimizes build pipelines, asset delivery, and Core Web Vitals performance',
+          'Manages production environment variables, domain DNS, and SSL health',
+          'Supports live AV screen graphics and real-time schedule boards at the venue',
+        ],
+        skills: ['DevOps & CI/CD', 'Web Security', 'Performance Tuning', 'Event Ops'],
+        quote: 'Zero downtime on flagship day starts with ruthless pre-flight checks.',
       },
     ],
   },

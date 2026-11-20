@@ -5,6 +5,7 @@ import {
   createRegistrationRecord,
   filterScheduleByDay,
   formatCurrencyPKR,
+  getTeamIdFromPage,
   parsePageFromHash,
   validateConnectForm,
   validateRegistrationForm,
@@ -15,12 +16,18 @@ import {
   validateAndFormatContactEmail,
 } from './contactEmail';
 
-test('parsePageFromHash resolves valid routes and falls back to home', () => {
+test('parsePageFromHash resolves valid routes including team detail pages and falls back to home', () => {
   assert.equal(parsePageFromHash('#events'), 'events');
   assert.equal(parsePageFromHash('#/teams'), 'teams');
+  assert.equal(parsePageFromHash('#teams/executive'), 'teams/executive');
+  assert.equal(parsePageFromHash('#/teams/tech/'), 'teams/tech');
   assert.equal(parsePageFromHash('#connect'), 'connect');
   assert.equal(parsePageFromHash(''), 'home');
   assert.equal(parsePageFromHash('#unknown'), 'home');
+
+  assert.equal(getTeamIdFromPage('teams/executive'), 'executive');
+  assert.equal(getTeamIdFromPage('teams/tech'), 'tech');
+  assert.equal(getTeamIdFromPage('teams'), null);
 });
 
 test('filterScheduleByDay returns full list or specific day items accurately', () => {

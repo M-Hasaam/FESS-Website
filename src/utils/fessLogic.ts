@@ -4,6 +4,7 @@ import {
   type DayFilter,
   type PageId,
   type ScheduleItem,
+  type TeamId,
 } from '../data/fessData';
 
 export interface RegistrationFormInput {
@@ -36,14 +37,27 @@ export interface ValidationResult {
   errors: Record<string, string>;
 }
 
-const VALID_PAGES: PageId[] = ['home', 'events', 'teams', 'connect'];
+const VALID_PAGES: PageId[] = [
+  'home',
+  'events',
+  'teams',
+  'teams/executive',
+  'teams/tech',
+  'connect',
+];
 
 export function parsePageFromHash(hash: string): PageId {
-  const cleaned = hash.replace(/^#\/?/, '').trim().toLowerCase();
+  const cleaned = hash.replace(/^#\/?/, '').replace(/\/+$/, '').trim().toLowerCase();
   if (VALID_PAGES.includes(cleaned as PageId)) {
     return cleaned as PageId;
   }
   return 'home';
+}
+
+export function getTeamIdFromPage(page: PageId): TeamId | null {
+  if (page === 'teams/executive') return 'executive';
+  if (page === 'teams/tech') return 'tech';
+  return null;
 }
 
 export function filterScheduleByDay(items: ScheduleItem[], filter: DayFilter): ScheduleItem[] {

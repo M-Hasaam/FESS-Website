@@ -10,6 +10,7 @@ import {
 import { FESS_EASE, ScrollProgressBar } from './components/MotionPrimitives';
 import { PageTransitionCurtain } from './components/PageTransitionCurtain';
 import { Navbar } from './components/Navbar';
+import { MobileBottomNav } from './components/MobileBottomNav';
 import { HomePage } from './components/HomePage';
 import { FlagshipEventPage } from './components/FlagshipEventPage';
 import { TeamsPage } from './components/TeamsPage';
@@ -202,6 +203,13 @@ export default function App() {
 
         <Footer onNavigate={navigateTo} onSocialToast={showToast} />
 
+        <MobileBottomNav
+          currentPage={currentPage}
+          onNavigate={navigateTo}
+          onOpenPasses={handleOpenRegister}
+          registrationCount={registrations.length}
+        />
+
         <RegistrationModal
           isOpen={regModalOpen}
           initialEvent={regInitialEvent}
@@ -213,7 +221,7 @@ export default function App() {
         {/* Toast Stack */}
         <div
           aria-live="polite"
-          className="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none max-w-[calc(100vw-2.5rem)]"
+          className="fixed bottom-24 md:bottom-5 right-4 sm:right-5 z-50 flex flex-col gap-2 pointer-events-none max-w-[calc(100vw-2rem)]"
         >
           <AnimatePresence>
             {toasts.map((toast) => (

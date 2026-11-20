@@ -221,10 +221,19 @@ export function Team3DCanvas({ teamId }: Team3DCanvasProps) {
       { threshold: 0.05 }
     );
 
-    const onMouseMove = (e: MouseEvent) => {
+    const updateOffset = (clientX: number, clientY: number) => {
       const rect = canvas.getBoundingClientRect();
-      targetOffsetX = ((e.clientX - rect.left) / Math.max(1, rect.width) - 0.5) * 1.4;
-      targetOffsetY = ((e.clientY - rect.top) / Math.max(1, rect.height) - 0.5) * 1.4;
+      targetOffsetX = ((clientX - rect.left) / Math.max(1, rect.width) - 0.5) * 1.4;
+      targetOffsetY = ((clientY - rect.top) / Math.max(1, rect.height) - 0.5) * 1.4;
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      updateOffset(e.clientX, e.clientY);
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      const t = e.touches[0];
+      if (t) updateOffset(t.clientX, t.clientY);
     };
 
     const onMouseLeave = () => {
@@ -237,15 +246,19 @@ export function Team3DCanvas({ teamId }: Team3DCanvasProps) {
     draw();
 
     window.addEventListener('resize', resize);
-    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
     window.addEventListener('mouseleave', onMouseLeave);
+    window.addEventListener('touchend', onMouseLeave, { passive: true });
 
     return () => {
       cancelAnimationFrame(animId);
       observer.disconnect();
       window.removeEventListener('resize', resize);
-      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('mouseleave', onMouseLeave);
+      window.removeEventListener('touchend', onMouseLeave);
     };
   }, [teamId, shouldReduce]);
 

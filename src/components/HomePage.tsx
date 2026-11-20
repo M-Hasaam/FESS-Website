@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react';
 import {
   ArrowRight,
@@ -40,6 +40,9 @@ interface HomePageProps {
 
 export function HomePage({ onNavigate, onOpenRegister }: HomePageProps) {
   const heroRef = useRef<HTMLDivElement>(null);
+  const compCarouselRef = useRef<HTMLDivElement>(null);
+  const [activeCompSlide, setActiveCompSlide] = useState(0);
+  const [selectedPillar, setSelectedPillar] = useState<string | null>(null);
   const shouldReduce = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -54,12 +57,28 @@ export function HomePage({ onNavigate, onOpenRegister }: HomePageProps) {
     launch: Rocket,
   };
 
+  const handleCarouselScroll = () => {
+    const el = compCarouselRef.current;
+    if (!el || el.clientWidth === 0) return;
+    const cardWidth = el.scrollWidth / COMPETITIONS.length;
+    const idx = Math.round(el.scrollLeft / Math.max(1, cardWidth));
+    setActiveCompSlide(Math.max(0, Math.min(COMPETITIONS.length - 1, idx)));
+  };
+
+  const scrollToCompSlide = (idx: number) => {
+    const el = compCarouselRef.current;
+    if (!el) return;
+    const cardWidth = el.scrollWidth / COMPETITIONS.length;
+    el.scrollTo({ left: idx * cardWidth, behavior: shouldReduce ? 'auto' : 'smooth' });
+    setActiveCompSlide(idx);
+  };
+
   return (
     <div>
       {/* 1A. CINEMATIC SOCIETY HERO */}
       <section
         ref={heroRef}
-        className="relative min-h-[86vh] flex items-center justify-center overflow-hidden bg-[#141923] text-white"
+        className="relative min-h-[78vh] sm:min-h-[86vh] flex items-center justify-center overflow-hidden bg-[#141923] text-white"
       >
         {/* Parallax Architectural Skyscraper Backdrop */}
         <motion.div
@@ -81,25 +100,25 @@ export function HomePage({ onNavigate, onOpenRegister }: HomePageProps) {
 
         {/* Hero Foreground Content */}
         <div
-          className="relative z-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 text-center"
+          className="relative z-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-24 text-center"
           style={shouldReduce ? undefined : { perspective: 1200 }}
         >
           <motion.p
             initial={shouldReduce ? false : { opacity: 0, y: 12, rotateX: 25 }}
             animate={{ opacity: 1, y: 0, rotateX: 0 }}
             transition={{ duration: 0.5, ease: FESS_EASE }}
-            className="text-xs sm:text-sm font-semibold tracking-[0.18em] uppercase text-amber-200/95 mb-5"
+            className="text-[11px] sm:text-sm font-semibold tracking-[0.16em] sm:tracking-[0.18em] uppercase text-amber-200/95 mb-4 sm:mb-5"
           >
             FAST Entrepreneurship and Startup Society
           </motion.p>
 
-          <div className="overflow-hidden mb-6">
+          <div className="overflow-hidden mb-4 sm:mb-6">
             <motion.h1
               initial={shouldReduce ? false : { opacity: 0, y: 36, rotateX: 22 }}
               animate={{ opacity: 1, y: 0, rotateX: 0 }}
               transition={{ duration: 0.7, delay: 0.08, ease: FESS_EASE }}
               className="font-extrabold tracking-tight leading-[1.06] text-white"
-              style={{ fontSize: 'clamp(2.65rem, 5.4vw, 4.75rem)' }}
+              style={{ fontSize: 'clamp(2.45rem, 5.4vw, 4.75rem)' }}
             >
               Your Startup{' '}
               <span className="block bg-gradient-to-r from-white via-amber-100 to-red-200 bg-clip-text text-transparent">
@@ -112,7 +131,7 @@ export function HomePage({ onNavigate, onOpenRegister }: HomePageProps) {
             initial={shouldReduce ? false : { opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, delay: 0.18, ease: FESS_EASE }}
-            className="max-w-2xl mx-auto text-base sm:text-xl text-slate-200/95 leading-relaxed mb-10"
+            className="max-w-2xl mx-auto text-sm sm:text-xl text-slate-200/95 leading-relaxed mb-7 sm:mb-10"
           >
             Join ambitious students building the next unicorn startups. Don&apos;t just
             dream it—launch it.
@@ -123,11 +142,11 @@ export function HomePage({ onNavigate, onOpenRegister }: HomePageProps) {
             initial={shouldReduce ? false : { opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, delay: 0.26, ease: FESS_EASE }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-3.5 sm:gap-4 mb-14"
+            className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-9 sm:mb-14"
           >
             <MagneticButton
               onClick={() => onNavigate('events')}
-              className="w-full sm:w-auto px-7 py-4 rounded-xl bg-[#991B1B] hover:bg-[#B91C1C] text-white font-semibold text-sm sm:text-base shadow-[0_14px_34px_-6px_rgba(153,27,27,0.5)] border border-red-400/25 transition-colors duration-150 flex items-center justify-center gap-2 group whitespace-nowrap shrink-0"
+              className="w-full sm:w-auto min-h-[48px] px-7 py-3.5 sm:py-4 rounded-xl bg-[#991B1B] hover:bg-[#B91C1C] text-white font-semibold text-sm sm:text-base shadow-[0_14px_34px_-6px_rgba(153,27,27,0.5)] border border-red-400/25 transition-colors duration-150 flex items-center justify-center gap-2 group whitespace-nowrap shrink-0"
             >
               <span>Explore Our Flagship Event</span>
               <Flame className="w-4 h-4 text-amber-300 group-hover:scale-110 transition-transform" />
@@ -135,7 +154,7 @@ export function HomePage({ onNavigate, onOpenRegister }: HomePageProps) {
 
             <MagneticButton
               onClick={() => onNavigate('teams')}
-              className="w-full sm:w-auto px-7 py-4 rounded-xl bg-white hover:bg-[#FAF6F0] text-[#991B1B] font-bold text-sm sm:text-base shadow-xl transition-colors duration-150 flex items-center justify-center gap-2 group whitespace-nowrap shrink-0"
+              className="w-full sm:w-auto min-h-[48px] px-7 py-3.5 sm:py-4 rounded-xl bg-white hover:bg-[#FAF6F0] text-[#991B1B] font-bold text-sm sm:text-base shadow-xl transition-colors duration-150 flex items-center justify-center gap-2 group whitespace-nowrap shrink-0"
             >
               <span>Meet Our Teams</span>
               <Users className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -143,7 +162,7 @@ export function HomePage({ onNavigate, onOpenRegister }: HomePageProps) {
 
             <MagneticButton
               onClick={() => onNavigate('connect')}
-              className="w-full sm:w-auto px-7 py-4 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-semibold text-sm sm:text-base border border-white/20 transition-colors duration-150 flex items-center justify-center gap-2 whitespace-nowrap shrink-0"
+              className="w-full sm:w-auto min-h-[48px] px-7 py-3.5 sm:py-4 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-semibold text-sm sm:text-base border border-white/20 transition-colors duration-150 flex items-center justify-center gap-2 whitespace-nowrap shrink-0"
             >
               <span>Connect With FESS</span>
               <ArrowUpRight className="w-4 h-4 text-amber-300" />
@@ -155,9 +174,9 @@ export function HomePage({ onNavigate, onOpenRegister }: HomePageProps) {
             initial={shouldReduce ? false : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.34, ease: FESS_EASE }}
-            className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-5 max-w-3xl mx-auto"
+            className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5 max-w-3xl mx-auto"
           >
-            <div className="px-5 py-4 rounded-2xl bg-white/8 backdrop-blur-md border border-white/15 flex items-center gap-3.5 text-left">
+            <div className="px-4 sm:px-5 py-3.5 sm:py-4 rounded-2xl bg-white/8 backdrop-blur-md border border-white/15 flex items-center gap-3.5 text-left">
               <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-300 shrink-0">
                 <Rocket className="w-5 h-5" />
               </div>
@@ -171,7 +190,7 @@ export function HomePage({ onNavigate, onOpenRegister }: HomePageProps) {
               </div>
             </div>
 
-            <div className="px-5 py-4 rounded-2xl bg-white/8 backdrop-blur-md border border-white/15 flex items-center gap-3.5 text-left">
+            <div className="px-4 sm:px-5 py-3.5 sm:py-4 rounded-2xl bg-white/8 backdrop-blur-md border border-white/15 flex items-center gap-3.5 text-left">
               <div className="w-10 h-10 rounded-xl bg-red-500/25 flex items-center justify-center text-red-300 shrink-0">
                 <Award className="w-5 h-5" />
               </div>
@@ -185,10 +204,11 @@ export function HomePage({ onNavigate, onOpenRegister }: HomePageProps) {
               </div>
             </div>
 
-            <button
+            <motion.button
               type="button"
+              whileTap={shouldReduce ? undefined : { scale: 0.97 }}
               onClick={() => onNavigate('events')}
-              className="px-5 py-4 rounded-2xl bg-white/10 hover:bg-white/18 backdrop-blur-md border border-amber-400/35 flex items-center gap-3.5 text-left transition-colors duration-150 group"
+              className="px-4 sm:px-5 py-3.5 sm:py-4 rounded-2xl bg-white/10 hover:bg-white/18 backdrop-blur-md border border-amber-400/35 flex items-center gap-3.5 text-left transition-colors duration-150 group"
             >
               <div className="w-10 h-10 rounded-xl bg-amber-500/25 flex items-center justify-center text-amber-300 shrink-0 group-hover:scale-105 transition-transform">
                 <CalendarDays className="w-5 h-5" />
@@ -201,7 +221,7 @@ export function HomePage({ onNavigate, onOpenRegister }: HomePageProps) {
                   3 Competitions · 2 Nights
                 </div>
               </div>
-            </button>
+            </motion.button>
           </motion.div>
         </div>
       </section>
@@ -227,27 +247,28 @@ export function HomePage({ onNavigate, onOpenRegister }: HomePageProps) {
       </div>
 
       {/* 1C. #GameChangersOnly CORE SOCIETY PILLARS */}
-      <section className="py-20 sm:py-24 bg-[#FAF6F0] bg-arch-grid border-b border-[#991B1B]/10">
+      <section className="py-14 sm:py-24 bg-[#FAF6F0] bg-arch-grid border-b border-[#991B1B]/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Reveal className="text-center max-w-3xl mx-auto mb-16">
+          <Reveal className="text-center max-w-3xl mx-auto mb-10 sm:mb-16">
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#991B1B] mb-3">
               Who We Are
             </p>
             <h2 className="font-extrabold text-3xl sm:text-5xl text-[#991B1B] tracking-tight mb-4">
               #GameChangersOnly
             </h2>
-            <div className="w-24 h-1 mx-auto rounded-full bg-gradient-to-r from-transparent via-[#991B1B] to-transparent mb-6" />
-            <p className="text-slate-600 text-base sm:text-lg leading-relaxed">
+            <div className="w-24 h-1 mx-auto rounded-full bg-gradient-to-r from-transparent via-[#991B1B] to-transparent mb-5 sm:mb-6" />
+            <p className="text-slate-600 text-sm sm:text-lg leading-relaxed">
               While others talk about changing the world, we&apos;re building it. Join the
               most ambitious student entrepreneurs who refuse to settle for ordinary. Your
               breakthrough startup is one decision away.
             </p>
           </Reveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-7 lg:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-7 lg:gap-8">
             {SOCIETY_PILLARS.map((pillar, idx) => {
               const Icon = pillarIcons[pillar.id as keyof typeof pillarIcons];
               const isWarm = pillar.tone === 'amber';
+              const isTapped = selectedPillar === pillar.id;
               const iconBg =
                 pillar.tone === 'amber'
                   ? 'bg-amber-100/90 border-amber-300/60 text-amber-700'
@@ -257,31 +278,41 @@ export function HomePage({ onNavigate, onOpenRegister }: HomePageProps) {
 
               return (
                 <Reveal key={pillar.id} delay={idx * 0.08}>
-                  <SpotlightCard
-                    className={`group h-full rounded-3xl p-8 sm:p-9 text-center shadow-[0_18px_38px_-14px_rgba(20,25,35,0.08)] hover:shadow-[0_26px_48px_-12px_rgba(153,27,27,0.15)] border ${
-                      isWarm
-                        ? 'bg-[#F7F1E7] border-amber-900/12 fess-card-border-warm'
-                        : 'bg-white border-slate-200/80 fess-card-border'
-                    }`}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSelectedPillar((prev) => (prev === pillar.id ? null : pillar.id))
+                    }
+                    className="w-full h-full text-center focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#991B1B] rounded-3xl"
                   >
-                    <div
-                      className={`w-16 h-16 mx-auto mb-6 rounded-2xl border flex items-center justify-center shadow-sm transition-transform duration-200 group-hover:scale-110 ${iconBg}`}
-                    >
-                      <Icon className="w-8 h-8" />
-                    </div>
-                    <h3
-                      className={`font-extrabold text-2xl mb-3 transition-colors ${
-                        isWarm
-                          ? 'text-[#991B1B]'
-                          : 'text-slate-900 group-hover:text-[#991B1B]'
+                    <SpotlightCard
+                      className={`group h-full rounded-3xl p-6 sm:p-9 text-center shadow-[0_18px_38px_-14px_rgba(20,25,35,0.08)] hover:shadow-[0_26px_48px_-12px_rgba(153,27,27,0.15)] border transition-all ${
+                        isTapped
+                          ? 'ring-2 ring-[#991B1B]/50 border-[#991B1B]/40'
+                          : isWarm
+                            ? 'bg-[#F7F1E7] border-amber-900/12 fess-card-border-warm'
+                            : 'bg-white border-slate-200/80 fess-card-border'
                       }`}
                     >
-                      {pillar.title}
-                    </h3>
-                    <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-                      {pillar.description}
-                    </p>
-                  </SpotlightCard>
+                      <div
+                        className={`w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-5 sm:mb-6 rounded-2xl border flex items-center justify-center shadow-sm transition-transform duration-200 group-hover:scale-110 ${iconBg}`}
+                      >
+                        <Icon className="w-7 h-7 sm:w-8 sm:h-8" />
+                      </div>
+                      <h3
+                        className={`font-extrabold text-xl sm:text-2xl mb-2.5 sm:mb-3 transition-colors ${
+                          isWarm || isTapped
+                            ? 'text-[#991B1B]'
+                            : 'text-slate-900 group-hover:text-[#991B1B]'
+                        }`}
+                      >
+                        {pillar.title}
+                      </h3>
+                      <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+                        {pillar.description}
+                      </p>
+                    </SpotlightCard>
+                  </button>
                 </Reveal>
               );
             })}
@@ -290,18 +321,18 @@ export function HomePage({ onNavigate, onOpenRegister }: HomePageProps) {
       </section>
 
       {/* 1D. FLAGSHIP EVENT SPOTLIGHT */}
-      <section className="py-20 sm:py-24 bg-white border-b border-[#991B1B]/10">
+      <section className="py-14 sm:py-24 bg-white border-b border-[#991B1B]/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Reveal className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-5">
+          <Reveal className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-12 gap-4 sm:gap-5">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#991B1B] mb-2.5">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#991B1B] mb-2">
                 Upcoming Flagship Event
               </p>
-              <h2 className="font-extrabold text-3xl sm:text-4xl text-slate-900 tracking-tight">
+              <h2 className="font-extrabold text-2xl sm:text-4xl text-slate-900 tracking-tight">
                 Two Days. Three Competitions.{' '}
                 <span className="text-[#991B1B]">Two Evening Nights.</span>
               </h2>
-              <p className="text-slate-600 text-sm sm:text-base max-w-2xl mt-2.5 leading-relaxed">
+              <p className="text-slate-600 text-sm sm:text-base max-w-2xl mt-2 leading-relaxed">
                 Over two days we are hosting an Enterprise Expo, a startup Pitch Arena, and
                 a Sell Me This Pen challenge, with a Movie Night and a Qawali Night to close
                 each day.
@@ -310,65 +341,96 @@ export function HomePage({ onNavigate, onOpenRegister }: HomePageProps) {
             <button
               type="button"
               onClick={() => onNavigate('events')}
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#FAF6F0] border border-[#991B1B]/20 text-[#991B1B] font-semibold text-sm hover:bg-[#991B1B] hover:text-white transition-colors duration-150 shrink-0 whitespace-nowrap"
+              className="w-full md:w-auto min-h-[44px] inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#FAF6F0] border border-[#991B1B]/20 text-[#991B1B] font-semibold text-sm hover:bg-[#991B1B] hover:text-white transition-colors duration-150 shrink-0 whitespace-nowrap"
             >
               <span>Full Timeline &amp; Rules</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </Reveal>
 
-          {/* 3 Competitions Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          {/* Mobile Swipeable Snap Carousel / Desktop 3-Column Grid */}
+          <div className="md:hidden flex items-center justify-between text-xs font-mono text-slate-500 mb-3">
+            <span>Swipe competitions</span>
+            <span className="text-[#991B1B] font-bold">
+              0{activeCompSlide + 1} / 0{COMPETITIONS.length}
+            </span>
+          </div>
+
+          <div
+            ref={compCarouselRef}
+            onScroll={handleCarouselScroll}
+            className="flex md:grid md:grid-cols-3 gap-4 md:gap-6 overflow-x-auto md:overflow-visible snap-x snap-mandatory no-scrollbar -mx-4 px-4 md:mx-0 md:px-0 pb-2 md:pb-0 mb-4 md:mb-10"
+          >
             {COMPETITIONS.map((comp, idx) => (
-              <Reveal key={comp.id} delay={idx * 0.08}>
-                <SpotlightCard className="group h-full rounded-3xl bg-[#FAF6F0]/75 border border-slate-200/85 shadow-[0_16px_34px_-14px_rgba(20,25,35,0.08)] hover:shadow-[0_24px_44px_-12px_rgba(153,27,27,0.16)] fess-card-border flex flex-col">
-                  <div className="flex flex-col justify-between h-full p-6 sm:p-7">
-                    <div>
-                      <div className="aspect-[16/10] rounded-2xl overflow-hidden mb-5 border border-slate-200/80">
-                        <ImageWithFallback
-                          src={comp.image}
-                          alt={comp.imageAlt}
-                          fallbackLabel={comp.id}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
+              <div
+                key={comp.id}
+                className="w-[86vw] sm:w-[70vw] md:w-auto shrink-0 snap-center"
+              >
+                <Reveal delay={idx * 0.08} className="h-full">
+                  <SpotlightCard className="group h-full rounded-3xl bg-[#FAF6F0]/75 border border-slate-200/85 shadow-[0_16px_34px_-14px_rgba(20,25,35,0.08)] hover:shadow-[0_24px_44px_-12px_rgba(153,27,27,0.16)] fess-card-border flex flex-col">
+                    <div className="flex flex-col justify-between h-full p-5 sm:p-7">
+                      <div>
+                        <div className="aspect-[16/10] rounded-2xl overflow-hidden mb-4 sm:mb-5 border border-slate-200/80">
+                          <ImageWithFallback
+                            src={comp.image}
+                            alt={comp.imageAlt}
+                            fallbackLabel={comp.id}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between gap-2 text-xs text-slate-500 mb-2.5">
+                          <span className="font-mono font-semibold text-slate-700">
+                            {comp.dayLabel}
+                          </span>
+                          <span className="font-mono font-bold text-[#991B1B] tabular-nums">
+                            {comp.feeShort}
+                          </span>
+                        </div>
+
+                        <h3 className="font-extrabold text-xl sm:text-2xl text-slate-900 mb-2 group-hover:text-[#991B1B] transition-colors">
+                          {comp.id}
+                        </h3>
+                        <p className="text-sm text-slate-600 leading-relaxed mb-4 sm:mb-5">
+                          {comp.shortDesc}
+                        </p>
+
+                        <div className="py-3 px-4 rounded-xl bg-white border border-slate-200/70 text-xs text-slate-700 mb-5">
+                          <span className="font-bold text-[#991B1B]">Prizes &amp; Awards: </span>
+                          <span>{comp.prizeSummary}</span>
+                        </div>
                       </div>
 
-                      <div className="flex items-center justify-between gap-2 text-xs text-slate-500 mb-3">
-                        <span className="font-mono font-semibold text-slate-700">
-                          {comp.dayLabel}
-                        </span>
-                        <span className="font-mono font-bold text-[#991B1B] tabular-nums">
-                          {comp.feeShort}
-                        </span>
-                      </div>
-
-                      <h3 className="font-extrabold text-2xl text-slate-900 mb-2.5 group-hover:text-[#991B1B] transition-colors">
-                        {comp.id}
-                      </h3>
-                      <p className="text-sm text-slate-600 leading-relaxed mb-5">
-                        {comp.shortDesc}
-                      </p>
-
-                      <div className="py-3 px-4 rounded-xl bg-white border border-slate-200/70 text-xs text-slate-700 mb-6">
-                        <span className="font-bold text-[#991B1B]">Prizes &amp; Awards: </span>
-                        <span>{comp.prizeSummary}</span>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => onOpenRegister(comp.id)}
+                        className={`w-full min-h-[46px] py-3 px-4 rounded-xl font-semibold text-sm transition-colors duration-150 whitespace-nowrap ${
+                          comp.id === 'Enterprise Expo'
+                            ? 'bg-slate-900 hover:bg-[#991B1B] text-white'
+                            : 'bg-[#991B1B] hover:bg-[#7F1D1D] text-white'
+                        }`}
+                      >
+                        {comp.ctaLabel}
+                      </button>
                     </div>
+                  </SpotlightCard>
+                </Reveal>
+              </div>
+            ))}
+          </div>
 
-                    <button
-                      type="button"
-                      onClick={() => onOpenRegister(comp.id)}
-                      className={`w-full py-3 px-4 rounded-xl font-semibold text-sm transition-colors duration-150 whitespace-nowrap ${
-                        comp.id === 'Enterprise Expo'
-                          ? 'bg-slate-900 hover:bg-[#991B1B] text-white'
-                          : 'bg-[#991B1B] hover:bg-[#7F1D1D] text-white'
-                      }`}
-                    >
-                      {comp.ctaLabel}
-                    </button>
-                  </div>
-                </SpotlightCard>
-              </Reveal>
+          {/* Mobile Carousel Dots */}
+          <div className="flex md:hidden items-center justify-center gap-2 mb-8">
+            {COMPETITIONS.map((comp, idx) => (
+              <button
+                key={comp.id}
+                type="button"
+                aria-label={`Show ${comp.id}`}
+                onClick={() => scrollToCompSlide(idx)}
+                className={`h-2 rounded-full transition-all ${
+                  activeCompSlide === idx ? 'w-7 bg-[#991B1B]' : 'w-2 bg-slate-300'
+                }`}
+              />
             ))}
           </div>
 

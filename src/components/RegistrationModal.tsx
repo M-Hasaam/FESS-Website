@@ -117,49 +117,55 @@ export function RegistrationModal({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
           onClick={onClose}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/75 backdrop-blur-md"
         >
           <motion.div
             role="dialog"
             aria-modal="true"
             aria-labelledby="reg-modal-title"
-            initial={{ opacity: 0, scale: 0.96, y: 12 }}
+            initial={{ opacity: 0, scale: 0.97, y: 28 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 12 }}
+            exit={{ opacity: 0, scale: 0.97, y: 28 }}
             transition={{ duration: 0.24, ease: FESS_EASE }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200 max-h-[90vh] flex flex-col"
+            className="bg-white rounded-t-3xl sm:rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200 max-h-[92dvh] sm:max-h-[90vh] flex flex-col"
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-[#7F1D1D] to-[#141923] px-6 py-5 text-white flex items-center justify-between shrink-0">
-              <div>
-                <span className="text-[10px] font-mono uppercase tracking-widest text-amber-300 block">
-                  Event Registration
-                </span>
-                <h2 id="reg-modal-title" className="font-extrabold text-lg">
-                  Register for FESS Event
-                </h2>
+            <div className="bg-gradient-to-r from-[#7F1D1D] to-[#141923] px-5 sm:px-6 pt-3 sm:pt-5 pb-4 sm:pb-5 text-white shrink-0">
+              <div
+                aria-hidden="true"
+                className="w-10 h-1 rounded-full bg-white/30 mx-auto mb-3 sm:hidden"
+              />
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-amber-300 block">
+                    Event Registration
+                  </span>
+                  <h2 id="reg-modal-title" className="font-extrabold text-lg">
+                    Register for FESS Event
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  aria-label="Close registration modal"
+                  className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 text-white transition-all"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={onClose}
-                aria-label="Close registration modal"
-                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
             </div>
 
             {/* Optional switcher if user has saved passes */}
             {registrations.length > 0 && (
-              <div className="px-6 pt-4 flex gap-2 border-b border-slate-100 pb-3 bg-[#FAF6F0]/60">
+              <div className="px-5 sm:px-6 pt-3 flex gap-2 border-b border-slate-100 pb-3 bg-[#FAF6F0]/60 shrink-0">
                 <button
                   type="button"
                   onClick={() => {
                     setViewMode('form');
                     setLatestReceipt(null);
                   }}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                  className={`min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-bold transition-colors ${
                     viewMode === 'form'
                       ? 'bg-[#991B1B] text-white'
                       : 'text-slate-600 hover:text-[#991B1B]'
@@ -170,7 +176,7 @@ export function RegistrationModal({
                 <button
                   type="button"
                   onClick={() => setViewMode('passes')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold inline-flex items-center gap-1.5 transition-colors ${
+                  className={`min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 transition-colors ${
                     viewMode === 'passes'
                       ? 'bg-[#991B1B] text-white'
                       : 'text-slate-600 hover:text-[#991B1B]'
@@ -183,7 +189,7 @@ export function RegistrationModal({
             )}
 
             {/* Modal Body */}
-            <div className="p-6 sm:p-7 overflow-y-auto">
+            <div className="p-5 sm:p-7 pb-8 sm:pb-7 overflow-y-auto overscroll-contain">
               {viewMode === 'passes' ? (
                 <div className="space-y-3">
                   {registrations.map((pass) => (
@@ -298,7 +304,7 @@ export function RegistrationModal({
                             type="button"
                             disabled={isSubmitting}
                             onClick={() => setSelectedEvent(comp.id)}
-                            className={`relative py-2.5 px-2 rounded-xl text-xs font-bold transition-colors disabled:opacity-60 ${
+                            className={`relative min-h-[44px] py-2.5 px-3 rounded-xl text-xs font-bold active:scale-[0.98] transition-all disabled:opacity-60 ${
                               active
                                 ? 'border-2 border-[#991B1B] bg-red-50 text-[#991B1B]'
                                 : 'border border-slate-200 text-slate-600 hover:border-slate-300'
@@ -338,11 +344,12 @@ export function RegistrationModal({
                       id="reg-fullname"
                       required
                       type="text"
+                      autoComplete="name"
                       disabled={isSubmitting}
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       placeholder="Enter your full name"
-                      className="w-full px-4 py-3 rounded-xl bg-[#FAF6F0]/70 border border-slate-200 focus:border-[#991B1B] outline-none text-sm font-medium disabled:opacity-60"
+                      className="w-full min-h-[48px] px-4 py-3 rounded-xl bg-[#FAF6F0]/70 border border-slate-200 focus:border-[#991B1B] outline-none text-base sm:text-sm font-medium disabled:opacity-60"
                     />
                     {errors.fullName && (
                       <p className="text-xs text-[#991B1B] mt-1 font-medium">
@@ -363,11 +370,13 @@ export function RegistrationModal({
                         id="reg-phone"
                         required
                         type="tel"
+                        autoComplete="tel"
+                        inputMode="tel"
                         disabled={isSubmitting}
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="03XX-XXXXXXX"
-                        className="w-full px-4 py-3 rounded-xl bg-[#FAF6F0]/70 border border-slate-200 focus:border-[#991B1B] outline-none text-sm font-medium disabled:opacity-60"
+                        className="w-full min-h-[48px] px-4 py-3 rounded-xl bg-[#FAF6F0]/70 border border-slate-200 focus:border-[#991B1B] outline-none text-base sm:text-sm font-medium disabled:opacity-60"
                       />
                       {errors.phone && (
                         <p className="text-xs text-[#991B1B] mt-1 font-medium">
@@ -386,11 +395,12 @@ export function RegistrationModal({
                       <input
                         id="reg-entity"
                         type="text"
+                        autoComplete="organization"
                         disabled={isSubmitting}
                         value={entityName}
                         onChange={(e) => setEntityName(e.target.value)}
                         placeholder="Optional for individual"
-                        className="w-full px-4 py-3 rounded-xl bg-[#FAF6F0]/70 border border-slate-200 focus:border-[#991B1B] outline-none text-sm font-medium disabled:opacity-60"
+                        className="w-full min-h-[48px] px-4 py-3 rounded-xl bg-[#FAF6F0]/70 border border-slate-200 focus:border-[#991B1B] outline-none text-base sm:text-sm font-medium disabled:opacity-60"
                       />
                     </div>
                   </div>
@@ -398,7 +408,7 @@ export function RegistrationModal({
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full py-3.5 rounded-xl bg-[#991B1B] hover:bg-[#7F1D1D] disabled:opacity-70 disabled:cursor-not-allowed text-white font-bold text-sm shadow-[0_10px_28px_-6px_rgba(153,27,27,0.3)] transition-colors flex items-center justify-center gap-2"
+                    className="w-full min-h-[48px] py-3.5 rounded-xl bg-[#991B1B] hover:bg-[#7F1D1D] active:scale-[0.985] disabled:opacity-70 disabled:cursor-not-allowed text-white font-bold text-sm shadow-[0_10px_28px_-6px_rgba(153,27,27,0.3)] transition-all flex items-center justify-center gap-2"
                   >
                     {isSubmitting ? (
                       <>

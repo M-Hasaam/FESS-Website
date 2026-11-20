@@ -80,7 +80,7 @@ export function FlagshipEventPage({ onOpenRegister }: FlagshipEventPageProps) {
                 <div
                   role="tablist"
                   aria-label="Filter event schedule by day"
-                  className="inline-flex gap-1 bg-[#FAF6F0] p-1.5 rounded-xl border border-[#991B1B]/12 self-start sm:self-auto"
+                  className="flex w-full sm:w-auto gap-1 bg-[#FAF6F0] p-1.5 rounded-xl border border-[#991B1B]/12"
                 >
                   {DAY_TABS.map((tab) => {
                     const active = dayFilter === tab.id;
@@ -91,7 +91,7 @@ export function FlagshipEventPage({ onOpenRegister }: FlagshipEventPageProps) {
                         role="tab"
                         aria-selected={active}
                         onClick={() => setDayFilter(tab.id)}
-                        className={`relative px-4 py-2 rounded-lg text-xs sm:text-sm font-bold whitespace-nowrap transition-colors ${
+                        className={`relative flex-1 sm:flex-none min-h-[40px] px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-bold whitespace-nowrap transition-colors ${
                           active
                             ? 'text-white'
                             : 'text-slate-600 hover:text-[#991B1B]'
@@ -119,16 +119,16 @@ export function FlagshipEventPage({ onOpenRegister }: FlagshipEventPageProps) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.22, ease: FESS_EASE }}
-                  className={`grid grid-cols-1 gap-8 ${
+                  className={`grid grid-cols-1 gap-6 sm:gap-8 ${
                     dayFilter === 'all' ? 'lg:grid-cols-2' : ''
                   }`}
                 >
                   {day1Items.length > 0 && (
-                    <div className="rounded-2xl bg-[#FAF6F0]/80 border border-[#991B1B]/10 p-6">
-                      <div className="font-mono text-xs font-bold uppercase tracking-wider text-[#991B1B] mb-5">
+                    <div className="rounded-2xl bg-[#FAF6F0]/80 border border-[#991B1B]/10 p-4 sm:p-6">
+                      <div className="font-mono text-xs font-bold uppercase tracking-wider text-[#991B1B] mb-4 sm:mb-5">
                         Day 1
                       </div>
-                      <div className="space-y-4">
+                      <div className="space-y-3.5 sm:space-y-4">
                         {day1Items.map((item) => (
                           <div
                             key={`d1-${item.title}`}
@@ -137,10 +137,10 @@ export function FlagshipEventPage({ onOpenRegister }: FlagshipEventPageProps) {
                             <div className="font-mono text-xs font-bold text-[#991B1B] tabular-nums mb-1">
                               {item.time}
                             </div>
-                            <div className="font-extrabold text-lg text-slate-900">
+                            <div className="font-extrabold text-base sm:text-lg text-slate-900">
                               {item.title}
                             </div>
-                            <div className="text-sm text-slate-600 mt-0.5">{item.desc}</div>
+                            <div className="text-xs sm:text-sm text-slate-600 mt-0.5">{item.desc}</div>
                           </div>
                         ))}
                       </div>
@@ -148,11 +148,11 @@ export function FlagshipEventPage({ onOpenRegister }: FlagshipEventPageProps) {
                   )}
 
                   {day2Items.length > 0 && (
-                    <div className="rounded-2xl bg-[#FAF6F0]/80 border border-[#991B1B]/10 p-6">
-                      <div className="font-mono text-xs font-bold uppercase tracking-wider text-[#991B1B] mb-5">
+                    <div className="rounded-2xl bg-[#FAF6F0]/80 border border-[#991B1B]/10 p-4 sm:p-6">
+                      <div className="font-mono text-xs font-bold uppercase tracking-wider text-[#991B1B] mb-4 sm:mb-5">
                         Day 2
                       </div>
-                      <div className="space-y-4">
+                      <div className="space-y-3.5 sm:space-y-4">
                         {day2Items.map((item) => (
                           <div
                             key={`d2-${item.title}`}
@@ -161,10 +161,10 @@ export function FlagshipEventPage({ onOpenRegister }: FlagshipEventPageProps) {
                             <div className="font-mono text-xs font-bold text-[#991B1B] tabular-nums mb-1">
                               {item.time}
                             </div>
-                            <div className="font-extrabold text-lg text-slate-900">
+                            <div className="font-extrabold text-base sm:text-lg text-slate-900">
                               {item.title}
                             </div>
-                            <div className="text-sm text-slate-600 mt-0.5">{item.desc}</div>
+                            <div className="text-xs sm:text-sm text-slate-600 mt-0.5">{item.desc}</div>
                           </div>
                         ))}
                       </div>
@@ -175,18 +175,53 @@ export function FlagshipEventPage({ onOpenRegister }: FlagshipEventPageProps) {
             </div>
           </Reveal>
 
-          {/* SECTION B: REGISTRATION FEES AT A GLANCE TABLE */}
+          {/* SECTION B: REGISTRATION FEES AT A GLANCE */}
           <Reveal>
             <div className="mb-6">
               <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#991B1B]">
                 Summary
               </span>
-              <h2 className="font-extrabold text-3xl text-slate-900 mt-1">
+              <h2 className="font-extrabold text-2xl sm:text-3xl text-slate-900 mt-1">
                 Registration Fees at a Glance
               </h2>
             </div>
 
-            <div className="bg-white rounded-3xl shadow-[0_18px_38px_-14px_rgba(20,25,35,0.08)] border border-slate-200/80 overflow-hidden">
+            {/* Mobile-First Stacked Interactive Fee Cards */}
+            <div className="md:hidden space-y-3.5">
+              {COMPETITIONS.map((comp) => (
+                <div
+                  key={`m-${comp.id}`}
+                  className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 space-y-3"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="font-extrabold text-lg text-slate-900">{comp.id}</h3>
+                      <p className="text-xs text-slate-500">{comp.participantsLabel}</p>
+                    </div>
+                    <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-[#FAF6F0] border border-[#991B1B]/20 text-[#991B1B] tabular-nums shrink-0">
+                      {comp.feeShort}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-700 leading-relaxed">
+                    <strong className="text-slate-900">Awards:</strong> {comp.prizeSummary}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => onOpenRegister(comp.id)}
+                    className={`w-full min-h-[44px] py-2.5 px-4 rounded-xl text-white text-xs font-bold transition-colors ${
+                      comp.id === 'Enterprise Expo'
+                        ? 'bg-slate-900 hover:bg-[#991B1B]'
+                        : 'bg-[#991B1B] hover:bg-[#7F1D1D]'
+                    }`}
+                  >
+                    Register for {comp.id}
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table */}
+            <div className="hidden md:block bg-white rounded-3xl shadow-[0_18px_38px_-14px_rgba(20,25,35,0.08)] border border-slate-200/80 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
@@ -239,21 +274,41 @@ export function FlagshipEventPage({ onOpenRegister }: FlagshipEventPageProps) {
 
           {/* SECTION C: DETAILED COMPETITION BREAKDOWN */}
           <div>
-            <Reveal className="mb-8">
+            <Reveal className="mb-6 sm:mb-8">
               <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#991B1B]">
                 Rules &amp; Formats
               </span>
-              <h2 className="font-extrabold text-3xl text-slate-900 mt-1">
+              <h2 className="font-extrabold text-2xl sm:text-3xl text-slate-900 mt-1">
                 Detailed Competition Breakdown
               </h2>
+
+              {/* Mobile quick-jump strip */}
+              <div className="flex sm:hidden gap-2 overflow-x-auto no-scrollbar pt-4 pb-1">
+                {COMPETITIONS.map((comp) => (
+                  <button
+                    key={comp.id}
+                    type="button"
+                    onClick={() => {
+                      const el = document.getElementById(`comp-detail-${comp.number}`);
+                      el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}
+                    className="shrink-0 min-h-[40px] px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-800 active:scale-95 transition-transform shadow-sm"
+                  >
+                    {Number(comp.number)}. {comp.id}
+                  </button>
+                ))}
+              </div>
             </Reveal>
 
-            <div className="space-y-8">
+            <div className="space-y-6 sm:space-y-8">
               {COMPETITIONS.map((comp, idx) => (
                 <Reveal key={comp.id} delay={idx * 0.06}>
-                  <article className="bg-white rounded-3xl overflow-hidden shadow-[0_18px_38px_-14px_rgba(20,25,35,0.08)] border border-slate-200/80">
+                  <article
+                    id={`comp-detail-${comp.number}`}
+                    className="scroll-mt-24 bg-white rounded-3xl overflow-hidden shadow-[0_18px_38px_-14px_rgba(20,25,35,0.08)] border border-slate-200/80"
+                  >
                     <div
-                      className={`px-7 py-5 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${
+                      className={`px-5 sm:px-7 py-5 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${
                         idx === 1
                           ? 'bg-gradient-to-r from-[#7F1D1D] to-[#141923]'
                           : 'bg-gradient-to-r from-[#7F1D1D] to-[#991B1B]'
@@ -263,7 +318,7 @@ export function FlagshipEventPage({ onOpenRegister }: FlagshipEventPageProps) {
                         <span className="font-mono text-xs uppercase tracking-widest text-amber-200">
                           Competition {comp.number}
                         </span>
-                        <h3 className="font-extrabold text-2xl">
+                        <h3 className="font-extrabold text-xl sm:text-2xl">
                           {Number(comp.number)}. {comp.id}
                         </h3>
                       </div>
@@ -272,8 +327,8 @@ export function FlagshipEventPage({ onOpenRegister }: FlagshipEventPageProps) {
                       </span>
                     </div>
 
-                    <div className="p-7 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-7 items-stretch">
-                      <div className="lg:col-span-4 rounded-2xl overflow-hidden border border-slate-200/80 min-h-[200px]">
+                    <div className="p-5 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-7 items-stretch">
+                      <div className="lg:col-span-4 rounded-2xl overflow-hidden border border-slate-200/80 min-h-[190px] sm:min-h-[200px]">
                         <ImageWithFallback
                           src={comp.image}
                           alt={comp.imageAlt}
@@ -284,15 +339,15 @@ export function FlagshipEventPage({ onOpenRegister }: FlagshipEventPageProps) {
 
                       <div className="lg:col-span-8 flex flex-col justify-between">
                         <div>
-                          <p className="text-slate-700 text-base leading-relaxed mb-6">
+                          <p className="text-slate-700 text-sm sm:text-base leading-relaxed mb-5 sm:mb-6">
                             {comp.fullDesc}
                           </p>
 
-                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6">
                             {comp.facts.map((fact) => (
                               <div
                                 key={fact.label}
-                                className={`p-4 rounded-2xl bg-[#FAF6F0] border border-[#991B1B]/10 ${
+                                className={`p-3.5 sm:p-4 rounded-2xl bg-[#FAF6F0] border border-[#991B1B]/10 ${
                                   fact.spanTwo ? 'sm:col-span-2' : ''
                                 }`}
                               >
@@ -315,7 +370,7 @@ export function FlagshipEventPage({ onOpenRegister }: FlagshipEventPageProps) {
                           <button
                             type="button"
                             onClick={() => onOpenRegister(comp.id)}
-                            className={`px-6 py-3 rounded-xl text-white font-semibold text-sm transition-colors whitespace-nowrap ${
+                            className={`w-full sm:w-auto min-h-[48px] px-6 py-3 rounded-xl text-white font-semibold text-sm active:scale-[0.98] transition-all whitespace-nowrap ${
                               comp.id === 'Enterprise Expo'
                                 ? 'bg-slate-900 hover:bg-[#991B1B]'
                                 : 'bg-[#991B1B] hover:bg-[#7F1D1D]'

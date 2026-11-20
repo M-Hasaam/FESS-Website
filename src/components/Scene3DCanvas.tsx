@@ -236,10 +236,19 @@ export function Scene3DCanvas() {
       { threshold: 0.05 }
     );
 
-    const handlePointerMove = (e: MouseEvent) => {
+    const updateOffset = (clientX: number, clientY: number) => {
       const rect = canvas.getBoundingClientRect();
-      targetOffsetX = ((e.clientX - rect.left) / Math.max(1, rect.width) - 0.5) * 1.4;
-      targetOffsetY = ((e.clientY - rect.top) / Math.max(1, rect.height) - 0.5) * 1.4;
+      targetOffsetX = ((clientX - rect.left) / Math.max(1, rect.width) - 0.5) * 1.4;
+      targetOffsetY = ((clientY - rect.top) / Math.max(1, rect.height) - 0.5) * 1.4;
+    };
+
+    const handlePointerMove = (e: PointerEvent) => {
+      updateOffset(e.clientX, e.clientY);
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      const t = e.touches[0];
+      if (t) updateOffset(t.clientX, t.clientY);
     };
 
     const handlePointerLeave = () => {
@@ -252,15 +261,19 @@ export function Scene3DCanvas() {
     draw();
 
     window.addEventListener('resize', resize);
-    window.addEventListener('mousemove', handlePointerMove);
+    window.addEventListener('pointermove', handlePointerMove, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
     window.addEventListener('mouseleave', handlePointerLeave);
+    window.addEventListener('touchend', handlePointerLeave, { passive: true });
 
     return () => {
       cancelAnimationFrame(animId);
       observer.disconnect();
       window.removeEventListener('resize', resize);
-      window.removeEventListener('mousemove', handlePointerMove);
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('mouseleave', handlePointerLeave);
+      window.removeEventListener('touchend', handlePointerLeave);
     };
   }, [shouldReduce]);
 

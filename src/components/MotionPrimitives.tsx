@@ -101,11 +101,11 @@ export function SpotlightCard({
 
   const background = useMotionTemplate`radial-gradient(440px circle at ${mouseX}px ${mouseY}px, ${spotlightColor}, transparent 76%)`;
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const updateTiltFromClientPoint = (clientX: number, clientY: number) => {
     if (shouldReduce || !cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
     mouseX.set(x);
     mouseY.set(y);
     const rx = ((y - rect.height / 2) / (rect.height / 2)) * -7;
@@ -115,7 +115,18 @@ export function SpotlightCard({
     hoverScale.set(1.015);
   };
 
-  const handleMouseLeave = () => {
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    updateTiltFromClientPoint(e.clientX, e.clientY);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    const touch = e.touches[0];
+    if (touch) {
+      updateTiltFromClientPoint(touch.clientX, touch.clientY);
+    }
+  };
+
+  const handleReset = () => {
     rotateX.set(0);
     rotateY.set(0);
     hoverScale.set(1);
@@ -124,8 +135,11 @@ export function SpotlightCard({
   return (
     <motion.div
       ref={cardRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handleReset}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleReset}
+      whileTap={shouldReduce ? undefined : { scale: 0.985 }}
       style={
         shouldReduce
           ? undefined

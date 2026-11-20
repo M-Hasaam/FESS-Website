@@ -231,6 +231,20 @@ export function TeamDetailPage({ teamId, onNavigate }: TeamDetailPageProps) {
                           opacity,
                         }
                   }
+                  drag={isActive && !shouldReduce ? 'x' : false}
+                  dragConstraints={{ left: 0, right: 0 }}
+                  dragElastic={0.22}
+                  onDragEnd={
+                    isActive
+                      ? (_event, info) => {
+                          if (info.offset.x < -45 || info.velocity.x < -300) {
+                            stepMember(1);
+                          } else if (info.offset.x > 45 || info.velocity.x > 300) {
+                            stepMember(-1);
+                          }
+                        }
+                      : undefined
+                  }
                   transition={{ duration: 0.55, ease: FESS_EASE }}
                   style={{
                     transformStyle: 'preserve-3d',
@@ -238,17 +252,24 @@ export function TeamDetailPage({ teamId, onNavigate }: TeamDetailPageProps) {
                     pointerEvents: isActive || absOffset === 1 ? 'auto' : 'none',
                   }}
                   onClick={!isActive ? () => setActiveIndex(idx) : undefined}
-                  className={`w-full max-w-2xl rounded-3xl p-6 sm:p-8 border shadow-2xl ${
+                  className={`w-full max-w-2xl rounded-3xl p-5 sm:p-8 border shadow-2xl ${
                     isActive
-                      ? 'relative bg-gradient-to-br from-white via-[#FAF6F0] to-white text-slate-900 border-amber-400/50 shadow-[0_32px_70px_-15px_rgba(0,0,0,0.55)]'
+                      ? 'relative bg-gradient-to-br from-white via-[#FAF6F0] to-white text-slate-900 border-amber-400/50 shadow-[0_32px_70px_-15px_rgba(0,0,0,0.55)] cursor-grab active:cursor-grabbing'
                       : 'hidden md:block absolute bg-[#1E2430]/95 text-white border-white/12 cursor-pointer hover:border-amber-300/40'
                   }`}
                 >
                   {isActive ? (
                     <div
-                      className="space-y-5"
+                      className="space-y-4 sm:space-y-5"
                       style={shouldReduce ? undefined : { transformStyle: 'preserve-3d' }}
                     >
+                      <div className="flex items-center justify-between md:hidden text-[11px] font-mono text-slate-500 pb-1 border-b border-slate-200/70">
+                        <span>Swipe card to switch leader</span>
+                        <span className="text-[#991B1B] font-bold">
+                          0{activeIndex + 1} / 0{members.length}
+                        </span>
+                      </div>
+
                       <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5">
                         <div
                           style={
@@ -256,7 +277,7 @@ export function TeamDetailPage({ teamId, onNavigate }: TeamDetailPageProps) {
                               ? undefined
                               : { transform: 'translateZ(36px)' }
                           }
-                          className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-[#991B1B] via-[#7F1D1D] to-[#141923] text-white font-extrabold text-xl sm:text-2xl flex items-center justify-center shadow-[0_14px_30px_-8px_rgba(153,27,27,0.55)] border border-amber-300/30 shrink-0"
+                          className="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-[#991B1B] via-[#7F1D1D] to-[#141923] text-white font-extrabold text-lg sm:text-2xl flex items-center justify-center shadow-[0_14px_30px_-8px_rgba(153,27,27,0.55)] border border-amber-300/30 shrink-0"
                         >
                           {initials}
                         </div>
@@ -270,7 +291,7 @@ export function TeamDetailPage({ teamId, onNavigate }: TeamDetailPageProps) {
                               {member.batch}
                             </span>
                           </div>
-                          <h3 className="font-extrabold text-2xl sm:text-3xl text-slate-900">
+                          <h3 className="font-extrabold text-xl sm:text-3xl text-slate-900">
                             {member.name}
                           </h3>
                           <p className="text-sm font-bold text-[#991B1B]">{member.role}</p>
@@ -339,8 +360,8 @@ export function TeamDetailPage({ teamId, onNavigate }: TeamDetailPageProps) {
             })}
           </div>
 
-          {/* 3D Carousel Member Selector Dock */}
-          <div className="flex flex-wrap items-center justify-center gap-2.5">
+          {/* 3D Carousel Member Selector Dock (horizontal swipe on mobile) */}
+          <div className="flex md:flex-wrap items-center md:justify-center gap-2.5 overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0 py-1">
             {members.map((member, idx) => {
               const selected = idx === activeIndex;
               return (
@@ -348,7 +369,7 @@ export function TeamDetailPage({ teamId, onNavigate }: TeamDetailPageProps) {
                   key={member.id}
                   type="button"
                   onClick={() => setActiveIndex(idx)}
-                  className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 ${
+                  className={`min-h-[44px] px-4 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 whitespace-nowrap shrink-0 ${
                     selected
                       ? 'bg-[#991B1B] text-white shadow-lg ring-2 ring-amber-300/60'
                       : 'bg-white text-slate-700 border border-slate-200 hover:border-[#991B1B]/40'
@@ -460,16 +481,25 @@ function Member3DFlipCard({
     .map((n) => n[0])
     .join('');
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const updateTilt = (clientX: number, clientY: number, el: HTMLDivElement) => {
     if (shouldReduce) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const rect = el.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
     tiltX.set(((y - rect.height / 2) / (rect.height / 2)) * -7);
     tiltY.set(((x - rect.width / 2) / (rect.width / 2)) * 7);
   };
 
-  const handleMouseLeave = () => {
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    updateTilt(e.clientX, e.clientY, e.currentTarget);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    const touch = e.touches[0];
+    if (touch) updateTilt(touch.clientX, touch.clientY, e.currentTarget);
+  };
+
+  const handleResetTilt = () => {
     tiltX.set(0);
     tiltY.set(0);
   };
@@ -477,8 +507,10 @@ function Member3DFlipCard({
   return (
     <Reveal delay={index * 0.08}>
       <div
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
+        onPointerMove={handlePointerMove}
+        onTouchMove={handleTouchMove}
+        onPointerLeave={handleResetTilt}
+        onTouchEnd={handleResetTilt}
         style={
           shouldReduce
             ? undefined
@@ -487,6 +519,7 @@ function Member3DFlipCard({
         className="h-full"
       >
         <motion.div
+          whileTap={shouldReduce ? undefined : { scale: 0.99 }}
           style={
             shouldReduce
               ? undefined
@@ -510,7 +543,7 @@ function Member3DFlipCard({
                 ? undefined
                 : { transformStyle: 'preserve-3d' }
             }
-            className="relative min-h-[480px] h-full rounded-3xl"
+            className="relative min-h-[460px] sm:min-h-[480px] h-full rounded-3xl"
           >
             {/* FRONT FACE */}
             <div
@@ -524,20 +557,20 @@ function Member3DFlipCard({
                       pointerEvents: isFlipped ? 'none' : 'auto',
                     }
               }
-              className={`h-full rounded-3xl bg-white p-7 sm:p-8 shadow-[0_18px_40px_-14px_rgba(20,25,35,0.09)] border flex flex-col justify-between ${
+              className={`h-full rounded-3xl bg-white p-5 sm:p-8 shadow-[0_18px_40px_-14px_rgba(20,25,35,0.09)] border flex flex-col justify-between ${
                 isSpotlighted ? 'border-[#991B1B]/45' : 'border-slate-200/80'
               }`}
             >
               <div>
-                <div className="flex items-start justify-between gap-4 mb-6">
-                  <div className="flex items-center gap-4">
+                <div className="flex items-start justify-between gap-4 mb-5 sm:mb-6">
+                  <div className="flex items-center gap-3.5 sm:gap-4">
                     <div
                       style={
                         shouldReduce
                           ? undefined
                           : { transform: 'translateZ(28px)' }
                       }
-                      className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#991B1B] via-[#7F1D1D] to-[#141923] text-white font-extrabold text-xl flex items-center justify-center shadow-lg shrink-0"
+                      className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-[#991B1B] via-[#7F1D1D] to-[#141923] text-white font-extrabold text-lg sm:text-xl flex items-center justify-center shadow-lg shrink-0"
                     >
                       {initials}
                     </div>
@@ -545,7 +578,7 @@ function Member3DFlipCard({
                       <span className="inline-block px-2.5 py-0.5 rounded-md bg-[#FAF6F0] border border-[#991B1B]/20 text-[10px] font-mono font-bold uppercase tracking-wider text-[#991B1B] mb-1">
                         0{index + 1} · {member.code}
                       </span>
-                      <h3 className="font-extrabold text-2xl text-slate-900 leading-tight">
+                      <h3 className="font-extrabold text-xl sm:text-2xl text-slate-900 leading-tight">
                         {member.name}
                       </h3>
                       <p className="text-sm font-bold text-[#991B1B]">{member.role}</p>
@@ -582,12 +615,12 @@ function Member3DFlipCard({
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-slate-100">
+              <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 pt-4 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={onToggleFlip}
                   tabIndex={isFlipped ? -1 : 0}
-                  className="flex-1 min-w-[160px] py-3 px-4 rounded-xl bg-[#991B1B] hover:bg-[#7F1D1D] text-white font-bold text-xs sm:text-sm inline-flex items-center justify-center gap-2 transition-colors"
+                  className="flex-1 min-w-[150px] min-h-[44px] py-3 px-4 rounded-xl bg-[#991B1B] hover:bg-[#7F1D1D] active:scale-[0.98] text-white font-bold text-xs sm:text-sm inline-flex items-center justify-center gap-2 transition-all"
                 >
                   <RotateCw className="w-4 h-4" />
                   <span>Flip 3D Dossier</span>
@@ -596,7 +629,7 @@ function Member3DFlipCard({
                   type="button"
                   onClick={onFocusStage}
                   tabIndex={isFlipped ? -1 : 0}
-                  className="py-3 px-4 rounded-xl bg-[#FAF6F0] hover:bg-slate-200/70 border border-slate-200 text-slate-800 font-semibold text-xs sm:text-sm inline-flex items-center justify-center gap-1.5 transition-colors"
+                  className="min-h-[44px] py-3 px-4 rounded-xl bg-[#FAF6F0] hover:bg-slate-200/70 active:scale-[0.98] border border-slate-200 text-slate-800 font-semibold text-xs sm:text-sm inline-flex items-center justify-center gap-1.5 transition-all"
                 >
                   <Sparkles className="w-4 h-4 text-[#991B1B]" />
                   <span>3D Stage</span>

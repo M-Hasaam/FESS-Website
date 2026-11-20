@@ -20,6 +20,7 @@
   html {
     scroll-behavior: smooth;
     overflow-x: clip;
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
@@ -33,6 +34,19 @@
     font-family: var(--font-display);
     text-wrap: balance;
   }
+
+  button, a, select, input, textarea {
+    touch-action: manipulation;
+  }
+}
+
+/* Hide scrollbars cleanly on touch swipe carousels */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 /* Custom sleek scrollbar */

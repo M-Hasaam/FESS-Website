@@ -63,16 +63,25 @@ function TeamShowcaseCard({ team, variant, onClick }: TeamShowcaseCardProps) {
   const rotateX = useSpring(useMotionValue(0), { stiffness: 240, damping: 22 });
   const rotateY = useSpring(useMotionValue(0), { stiffness: 240, damping: 22 });
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const updateTilt = (clientX: number, clientY: number, el: HTMLButtonElement) => {
     if (shouldReduce) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const rect = el.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
     rotateX.set(((y - rect.height / 2) / (rect.height / 2)) * -6);
     rotateY.set(((x - rect.width / 2) / (rect.width / 2)) * 6);
   };
 
-  const handleMouseLeave = () => {
+  const handlePointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+    updateTilt(e.clientX, e.clientY, e.currentTarget);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLButtonElement>) => {
+    const touch = e.touches[0];
+    if (touch) updateTilt(touch.clientX, touch.clientY, e.currentTarget);
+  };
+
+  const handleResetTilt = () => {
     rotateX.set(0);
     rotateY.set(0);
   };
@@ -82,8 +91,10 @@ function TeamShowcaseCard({ team, variant, onClick }: TeamShowcaseCardProps) {
       <motion.button
         type="button"
         onClick={onClick}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
+        onPointerMove={handlePointerMove}
+        onTouchMove={handleTouchMove}
+        onPointerLeave={handleResetTilt}
+        onTouchEnd={handleResetTilt}
         style={
           shouldReduce
             ? undefined

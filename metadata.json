@@ -1,0 +1,8 @@
+{
+  "name": "FESS — FAST Entrepreneurship and Startup Society",
+  "description": "Where Future Leaders Are Born. Explore FESS startup culture, flagship competitions (Enterprise Expo, Pitch Arena, Sell Me This Pen), Executive Council & Tech Team, and connect with FAST's entrepreneurial community.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

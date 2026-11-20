@@ -1,0 +1,369 @@
+import React, { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import { Check, CheckCircle2, Ticket, X } from 'lucide-react';
+import { COMPETITIONS, type CompetitionName } from '../data/fessData';
+import {
+  createRegistrationRecord,
+  getCompetitionMeta,
+  validateRegistrationForm,
+  type RegistrationRecord,
+} from '../utils/fessLogic';
+import { FESS_EASE } from './MotionPrimitives';
+
+interface RegistrationModalProps {
+  isOpen: boolean;
+  initialEvent: CompetitionName;
+  registrations: RegistrationRecord[];
+  onClose: () => void;
+  onRegisterSuccess: (record: RegistrationRecord) => void;
+}
+
+export function RegistrationModal({
+  isOpen,
+  initialEvent,
+  registrations,
+  onClose,
+  onRegisterSuccess,
+}: RegistrationModalProps) {
+  const [selectedEvent, setSelectedEvent] = useState<CompetitionName>(initialEvent);
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [entityName, setEntityName] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [viewMode, setViewMode] = useState<'form' | 'passes'>('form');
+  const [latestReceipt, setLatestReceipt] = useState<RegistrationRecord | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedEvent(initialEvent);
+      setViewMode('form');
+      setLatestReceipt(null);
+      setErrors({});
+    }
+  }, [isOpen, initialEvent]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [isOpen, onClose]);
+
+  const activeMeta = getCompetitionMeta(selectedEvent);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const validation = validateRegistrationForm({
+      event: selectedEvent,
+      fullName,
+      phone,
+      entityName,
+    });
+    if (!validation.valid) {
+      setErrors(validation.errors);
+      return;
+    }
+
+    const record = createRegistrationRecord(
+      { event: selectedEvent, fullName, phone, entityName },
+      registrations.length
+    );
+    setErrors({});
+    setLatestReceipt(record);
+    setFullName('');
+    setPhone('');
+    setEntityName('');
+    onRegisterSuccess(record);
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={onClose}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md"
+        >
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="reg-modal-title"
+            initial={{ opacity: 0, scale: 0.96, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 12 }}
+            transition={{ duration: 0.24, ease: FESS_EASE }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200 max-h-[90vh] flex flex-col"
+          >
+            {/* Header */}
+            <div className="bg-gradient-to-r from-[#7F1D1D] to-[#141923] px-6 py-5 text-white flex items-center justify-between shrink-0">
+              <div>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-amber-300 block">
+                  Event Registration
+                </span>
+                <h2 id="reg-modal-title" className="font-extrabold text-lg">
+                  Register for FESS Event
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close registration modal"
+                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Optional switcher if user has saved passes */}
+            {registrations.length > 0 && (
+              <div className="px-6 pt-4 flex gap-2 border-b border-slate-100 pb-3 bg-[#FAF6F0]/60">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setViewMode('form');
+                    setLatestReceipt(null);
+                  }}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                    viewMode === 'form'
+                      ? 'bg-[#991B1B] text-white'
+                      : 'text-slate-600 hover:text-[#991B1B]'
+                  }`}
+                >
+                  New Registration
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('passes')}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold inline-flex items-center gap-1.5 transition-colors ${
+                    viewMode === 'passes'
+                      ? 'bg-[#991B1B] text-white'
+                      : 'text-slate-600 hover:text-[#991B1B]'
+                  }`}
+                >
+                  <Ticket className="w-3.5 h-3.5" />
+                  <span>My Passes ({registrations.length})</span>
+                </button>
+              </div>
+            )}
+
+            {/* Modal Body */}
+            <div className="p-6 sm:p-7 overflow-y-auto">
+              {viewMode === 'passes' ? (
+                <div className="space-y-3">
+                  {registrations.map((pass) => (
+                    <div
+                      key={pass.id}
+                      className="p-4 rounded-2xl bg-[#FAF6F0] border border-[#991B1B]/15 space-y-1.5"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-extrabold text-sm text-slate-900">
+                          {pass.event}
+                        </span>
+                        <span className="font-mono text-xs font-bold text-[#991B1B]">
+                          {pass.id}
+                        </span>
+                      </div>
+                      <div className="text-xs text-slate-700">
+                        {pass.fullName} · {pass.entityName}
+                      </div>
+                      <div className="text-[11px] font-mono text-slate-500 flex items-center justify-between pt-1">
+                        <span>{pass.timing}</span>
+                        <span className="font-bold text-slate-800">{pass.feeLabel}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : latestReceipt ? (
+                <div className="space-y-5 text-center py-2">
+                  <div className="w-14 h-14 mx-auto rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center">
+                    <CheckCircle2 className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <p className="font-mono text-xs uppercase tracking-wider text-emerald-700 font-bold">
+                      Registration Confirmed
+                    </p>
+                    <h3 className="font-extrabold text-2xl text-slate-900 mt-1">
+                      {latestReceipt.event}
+                    </h3>
+                    <p className="text-sm text-slate-600 mt-1">
+                      Pass ID:{' '}
+                      <strong className="font-mono text-[#991B1B]">
+                        {latestReceipt.id}
+                      </strong>
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-[#FAF6F0] border border-[#991B1B]/15 text-left text-xs space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Participant / Lead</span>
+                      <span className="font-bold text-slate-900">
+                        {latestReceipt.fullName}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Business / Team</span>
+                      <span className="font-bold text-slate-900">
+                        {latestReceipt.entityName}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Schedule</span>
+                      <span className="font-mono text-slate-800">
+                        {latestReceipt.timing}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Fee Due</span>
+                      <span className="font-mono font-bold text-[#991B1B]">
+                        {latestReceipt.feeLabel}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setLatestReceipt(null)}
+                      className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-colors"
+                    >
+                      Register Another
+                    </button>
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      className="flex-1 py-3 rounded-xl bg-[#991B1B] hover:bg-[#7F1D1D] text-white font-semibold text-sm transition-colors"
+                    >
+                      Done
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} noValidate className="space-y-4">
+                  <div>
+                    <span className="block text-xs font-bold uppercase text-slate-600 mb-1.5">
+                      Select Event
+                    </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      {COMPETITIONS.map((comp) => {
+                        const active = selectedEvent === comp.id;
+                        return (
+                          <button
+                            key={comp.id}
+                            type="button"
+                            onClick={() => setSelectedEvent(comp.id)}
+                            className={`relative py-2.5 px-2 rounded-xl text-xs font-bold transition-colors ${
+                              active
+                                ? 'border-2 border-[#991B1B] bg-red-50 text-[#991B1B]'
+                                : 'border border-slate-200 text-slate-600 hover:border-slate-300'
+                            }`}
+                          >
+                            {comp.id}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Dynamic Event Fee & Rule Summary */}
+                  <div className="p-4 rounded-2xl bg-[#FAF6F0] border border-[#991B1B]/12 text-xs space-y-1">
+                    <div className="flex items-center justify-between font-bold text-slate-900">
+                      <span>{activeMeta.id}</span>
+                      <span className="font-mono text-[#991B1B] tabular-nums">
+                        {activeMeta.feeLabel}
+                      </span>
+                    </div>
+                    <div className="font-mono text-[11px] text-slate-500 tabular-nums">
+                      {activeMeta.timing}
+                    </div>
+                    <div className="text-slate-600 pt-1 leading-relaxed">
+                      {activeMeta.shortDesc}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="reg-fullname"
+                      className="block text-xs font-bold uppercase text-slate-600 mb-1.5"
+                    >
+                      Participant / Team Lead Name
+                    </label>
+                    <input
+                      id="reg-fullname"
+                      required
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Enter your full name"
+                      className="w-full px-4 py-3 rounded-xl bg-[#FAF6F0]/70 border border-slate-200 focus:border-[#991B1B] outline-none text-sm font-medium"
+                    />
+                    {errors.fullName && (
+                      <p className="text-xs text-[#991B1B] mt-1 font-medium">
+                        {errors.fullName}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label
+                        htmlFor="reg-phone"
+                        className="block text-xs font-bold uppercase text-slate-600 mb-1.5"
+                      >
+                        Contact Number
+                      </label>
+                      <input
+                        id="reg-phone"
+                        required
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="03XX-XXXXXXX"
+                        className="w-full px-4 py-3 rounded-xl bg-[#FAF6F0]/70 border border-slate-200 focus:border-[#991B1B] outline-none text-sm font-medium"
+                      />
+                      {errors.phone && (
+                        <p className="text-xs text-[#991B1B] mt-1 font-medium">
+                          {errors.phone}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="reg-entity"
+                        className="block text-xs font-bold uppercase text-slate-600 mb-1.5"
+                      >
+                        Business / Team Name
+                      </label>
+                      <input
+                        id="reg-entity"
+                        type="text"
+                        value={entityName}
+                        onChange={(e) => setEntityName(e.target.value)}
+                        placeholder="Optional for individual"
+                        className="w-full px-4 py-3 rounded-xl bg-[#FAF6F0]/70 border border-slate-200 focus:border-[#991B1B] outline-none text-sm font-medium"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full py-3.5 rounded-xl bg-[#991B1B] hover:bg-[#7F1D1D] text-white font-bold text-sm shadow-[0_10px_28px_-6px_rgba(153,27,27,0.3)] transition-colors flex items-center justify-center gap-2"
+                  >
+                    <span>Confirm Registration</span>
+                    <Check className="w-4 h-4" />
+                  </button>
+                </form>
+              )}
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}

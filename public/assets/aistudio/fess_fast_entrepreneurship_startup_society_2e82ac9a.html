@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FESS — FAST Entrepreneurship and Startup Society | Where Future Leaders Are Born</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans, Inter, Playfair Display, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Playfair+Display:ital,wght@0,600;1,500;1,600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Tailwind Custom Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            fess: {
+              crimson: '#991B1B',
+              crimsonDark: '#7F1D1D',
+              crimsonBright: '#B91C1C',
+              ivory: '#FAF6F0',
+              ivoryDark: '#F2EAE0',
+              midnight: '#141923',
+              slateDeep: '#1E2430',
+              gold: '#D97706',
+            }
+          },
+          fontFamily: {
+            display: ['"Plus Jakarta Sans"', 'sans-serif'],
+            sans: ['Inter', 'sans-serif'],
+            serif: ['"Playfair Display"', 'serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          boxShadow: {
+            'crimson-glow': '0 10px 30px -5px rgba(153, 27, 27, 0.25)',
+            'card-elevated': '0 20px 40px -15px rgba(20, 25, 35, 0.08)',
+            'card-hover': '0 28px 50px -12px rgba(153, 27, 27, 0.16)',
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root {
+      --crimson: #991B1B;
+      --crimson-bright: #B91C1C;
+      --ivory: #FAF6F0;
+      --midnight: #141923;
+      --gold: #D97706;
+    }
+
+    body {
+      background-color: #FAF6F0;
+      color: #1E2430;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4, .font-display {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    /* Custom Sleek Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #FAF6F0;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #991B1B;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #7F1D1D;
+    }
+
+    /* Top Scroll Progress Indicator */
+    #scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      width: 0%;
+      background: linear-gradient(90deg, #7F1D1D, #DC2626, #D97706);
+      z-index: 100;
+      transition: width 0.1s ease-out;
+    }
+
+    /* Page Transition Curtain */
+    #page-curtain {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #141923 0%, #450A0A 55%, #991B1B 100%);
+      z-index: 90;
+      transform: translateY(100%);
+      pointer-events: none;
+      transition: transform 0.55s cubic-bezier(0.77, 0, 0.175, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #page-curtain.active {
+      transform: translateY(0%);
+      pointer-events: auto;
+    }
+    #page-curtain.exit {
+      transform: translateY(-100%);
+    }
+
+    /* Hero Ken Burns Background Animation */
+    @keyframes kenBurns {
+      0% { transform: scale(1.0) translate(0, 0); }
+      50% { transform: scale(1.08) translate(-1%, -1%); }
+      100% { transform: scale(1.0) translate(0, 0); }
+    }
+    .animate-ken-burns {
+      animation: kenBurns 26s ease-in-out infinite;
+    }
+
+    /* Infinite Marquee Animation */
+    @keyframes marqueeScroll {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-50%); }
+    }
+    .marquee-track {
+      display: flex;
+      width: max-content;
+      animation: marqueeScroll 32s linear infinite;
+    }
+    .marquee-wrapper:hover .marquee-track {
+      animation-play-state: paused;
+    }
+
+    /* Scroll Reveal Animations */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal.reveal-left {
+      transform: translateX(-32px);
+    }
+    .reveal.reveal-right {
+      transform: translateX(32px);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translate(0, 0) scale(1);
+    }
+
+    .delay-100 { transition-delay: 100ms; }
+    .delay-200 { transition-delay: 200ms; }
+    .delay-300 { transition-delay: 300ms; }
+
+    /* 3D Perspective Tilt Card + Spotlight Sheen */
+    .tilt-card {
+      transform-style: preserve-3d;
+      transition: transform 0.2s cubic-bezier(0.03, 0.98, 0.52, 0.99), box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .tilt-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        420px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(153, 27, 27, 0.08),
+        transparent 75%
+      );
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .tilt-card:hover::before {
+      opacity: 1;
+    }
+
+    /* Signature Crimson Bottom Border Glow */
+    .fess-card-border {
+      border-bottom: 3px solid transparent;
+      background-image: linear-gradient(#ffffff, #ffffff), linear-gradient(90deg, transparent 10%, #991B1B 50%, transparent 90%);
+      background-origin: border-box;
+      background-clip: padding-box, border-box;
+    }
+
+    /* Architectural Corner Brackets (Team Cards) */
+    .corner-brackets {
+      position: relative;
+    }
+    .corner-brackets::before {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: -8px;
+      width: 24px;
+      height: 24px;
+      border-top: 2px solid rgba(153, 27, 27, 0.45);
+      border-left: 2px solid rgba(153, 27, 27, 0.45);
+      border-top-left-radius: 10px;
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+    .corner-brackets::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      right: -8px;
+      width: 24px;
+      height: 24px;
+      border-bottom: 2px solid rgba(153, 27, 27, 0.45);
+      border-right: 2px solid rgba(153, 27, 27, 0.45);
+      border-bottom-right-radius: 10px;
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+    .group:hover .corner-brackets::before,
+    .group:hover .corner-brackets::after {
+      border-color: #991B1B;
+      width: 32px;
+      height: 32px;
+    }
+
+    /* Subtle Architectural Grid Pattern */
+    .bg-arch-grid {
+      background-image: 
+        linear-gradient(to right, rgba(153, 27, 27, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(153, 27, 27, 0.04) 1px, transparent 1px);
+      background-size: 44px 44px;
+    }
+
+    /* Floating Animation */
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-7px); }
+    }
+    .animate-float {
+      animation: floatSlow 4.5s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-red-800 selection:text-white">
+
+  <!-- Top Reading Progress Bar -->
+  <div id="scroll-progress"></div>
+
+  <!-- Page Transition Curtain -->
+  <div id="page-curtain" aria-hidden="true">
+    <div class="text-center text-white">
+      <div class="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-3">
+        <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+        <span class="font-mono text-xs tracking-widest uppercase text-amber-200">FAST ENTREPRENEURSHIP &amp; STARTUP SOCIETY</span>
+      </div>
+      <div id="curtain-label" class="font-display text-3xl sm:text-4xl font-extrabold tracking-tight">Loading...</div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- STICKY GLASSMORPHIC NAVBAR                                            -->
+  <!-- ===================================================================== -->
+  <header id="main-navbar" class="fixed top-0 inset-x-0 z-50 transition-all duration-300 bg-white/90 backdrop-blur-lg border-b border-red-900/10 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 sm:h-20">
+        <!-- Brand Monogram -->
+        <button type="button" onclick="navigateTo('home')" class="flex items-center gap-3 group focus:outline-none text-left">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-800 to-red-950 flex items-center justify-center text-white font-display font-extrabold text-lg shadow-crimson-glow group-hover:scale-105 transition-transform">
+            F
+          </div>
+          <div>
+            <span class="font-display font-extrabold text-xl tracking-tight text-fess-crimson block leading-none">FESS</span>
+            <span class="text-[10px] font-medium tracking-wider uppercase text-slate-500 hidden sm:block">FAST Startup Society</span>
+          </div>
+        </button>
+
+        <!-- Desktop Navigation Links -->
+        <nav class="hidden md:flex items-center gap-1.5 bg-fess-ivory/80 p-1.5 rounded-full border border-red-900/10" aria-label="Main Navigation">
+          <button type="button" onclick="navigateTo('home')" data-nav="home" class="nav-pill px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 bg-fess-crimson text-white shadow-sm">
+            Home
+          </button>
+          <button type="button" onclick="navigateTo('events')" data-nav="events" class="nav-pill px-4 py-2 rounded-full text-sm font-semibold text-slate-700 hover:text-fess-crimson transition-all duration-200">
+            Flagship Event
+          </button>
+          <button type="button" onclick="navigateTo('teams')" data-nav="teams" class="nav-pill px-4 py-2 rounded-full text-sm font-semibold text-slate-700 hover:text-fess-crimson transition-all duration-200">
+            Our Teams
+          </button>
+          <button type="button" onclick="navigateTo('connect')" data-nav="connect" class="nav-pill px-4 py-2 rounded-full text-sm font-semibold text-slate-700 hover:text-fess-crimson transition-all duration-200">
+            Connect
+          </button>
+        </nav>
+
+        <!-- Right Register CTA & Mobile Menu Toggle -->
+        <div class="flex items-center gap-2.5">
+          <button type="button" onclick="navigateTo('events')" class="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-fess-crimson hover:bg-fess-crimsonDark text-white text-sm font-semibold shadow-crimson-glow transition-all hover:-translate-y-0.5 active:translate-y-0">
+            <span>Flagship Event</span>
+            <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+          </button>
+
+          <!-- Mobile Drawer Trigger -->
+          <button type="button" id="mobile-menu-btn" onclick="toggleMobileMenu()" class="md:hidden p-2.5 rounded-xl bg-fess-ivory text-slate-800 hover:text-fess-crimson border border-red-900/10" aria-label="Toggle Menu">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-red-900/10 px-4 pt-3 pb-6 space-y-2 shadow-xl">
+      <button type="button" onclick="navigateTo('home'); toggleMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm bg-red-50 text-fess-crimson flex items-center justify-between">
+        <span>Home</span>
+        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+      </button>
+      <button type="button" onclick="navigateTo('events'); toggleMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm text-slate-700 hover:bg-fess-ivory flex items-center justify-between">
+        <span>Flagship Event</span>
+        <i data-lucide="calendar" class="w-4 h-4 text-slate-400"></i>
+      </button>
+      <button type="button" onclick="navigateTo('teams'); toggleMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm text-slate-700 hover:bg-fess-ivory flex items-center justify-between">
+        <span>Our Teams</span>
+        <i data-lucide="users" class="w-4 h-4 text-slate-400"></i>
+      </button>
+      <button type="button" onclick="navigateTo('connect'); toggleMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm text-slate-700 hover:bg-fess-ivory flex items-center justify-between">
+        <span>Connect</span>
+        <i data-lucide="mail" class="w-4 h-4 text-slate-400"></i>
+      </button>
+      <div class="pt-2">
+        <button type="button" onclick="toggleMobileMenu(); openRegModal('Pitch Arena')" class="w-full py-3 rounded-xl bg-fess-crimson text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-crimson-glow">
+          <span>Register for Competitions</span>
+          <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- MAIN CONTENT CONTAINER (4 FOCUSED PAGES)                              -->
+  <!-- ===================================================================== -->
+  <main id="app-pages" class="pt-16 sm:pt-20">
+
+    <!-- =================================================================== -->
+    <!-- PAGE 1: HOME (SOCIETY IDENTITY FIRST + FLAGSHIP EVENT SPOTLIGHT)    -->
+    <!-- =================================================================== -->
+    <section id="page-home" class="page-section block">
+      
+      <!-- 1A. CINEMATIC SOCIETY HERO -->
+      <div class="relative min-h-[88vh] flex items-center justify-center overflow-hidden bg-fess-midnight text-white">
+        <!-- High-Rise Architectural Skyscraper Backdrop with Ken Burns Animation -->
+        <div class="absolute inset-0 z-0 overflow-hidden">
+          <img
+            src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2000&q=85"
+            alt="Modern corporate glass skyscrapers upward perspective"
+            onerror="this.style.display='none'"
+            class="w-full h-full object-cover object-center opacity-45 animate-ken-burns"
+          />
+          <div class="absolute inset-0 bg-gradient-to-b from-slate-950/75 via-slate-900/65 to-fess-midnight"></div>
+          <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(153,27,27,0.22)_0%,transparent_70%)]"></div>
+        </div>
+
+        <!-- Interactive Subtle Particle Network Canvas -->
+        <canvas id="hero-canvas" class="absolute inset-0 z-10 pointer-events-none opacity-65"></canvas>
+
+        <!-- Hero Foreground Content -->
+        <div class="relative z-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 text-center">
+          <!-- Society Identity Pill -->
+          <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs sm:text-sm font-medium text-amber-100 mb-7 animate-float">
+            <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+            <span class="tracking-wide uppercase font-mono text-[11px] sm:text-xs">FAST ENTREPRENEURSHIP AND STARTUP SOCIETY</span>
+          </div>
+
+          <!-- Signature Bold Society Headline -->
+          <h1 class="font-display font-extrabold text-4xl sm:text-6xl lg:text-7xl tracking-tight leading-[1.08] mb-6 drop-shadow-sm">
+            Your Startup<br />
+            <span class="bg-gradient-to-r from-white via-amber-100 to-red-200 bg-clip-text text-transparent">Starts Here.</span>
+          </h1>
+
+          <!-- Society Vision Description -->
+          <p class="max-w-2xl mx-auto text-base sm:text-xl text-slate-200/95 font-normal leading-relaxed mb-10">
+            Join ambitious students building the next unicorn startups. Don't just dream it—launch it.
+          </p>
+
+          <!-- Balanced Society & Flagship Event CTAs -->
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-3.5 sm:gap-4 mb-14">
+            <button type="button" onclick="navigateTo('events')" class="w-full sm:w-auto px-7 py-4 rounded-xl bg-fess-crimson hover:bg-fess-crimsonBright text-white font-semibold text-sm sm:text-base shadow-crimson-glow border border-red-500/30 transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2 group">
+              <span>Explore Our Flagship Event</span>
+              <i data-lucide="flame" class="w-4 h-4 text-amber-300 group-hover:scale-110 transition-transform"></i>
+            </button>
+
+            <button type="button" onclick="navigateTo('teams')" class="w-full sm:w-auto px-7 py-4 rounded-xl bg-white hover:bg-fess-ivory text-fess-crimson font-bold text-sm sm:text-base shadow-xl transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2 group">
+              <span>Meet Our Teams</span>
+              <i data-lucide="users" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform"></i>
+            </button>
+
+            <button type="button" onclick="navigateTo('connect')" class="w-full sm:w-auto px-7 py-4 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-semibold text-sm sm:text-base border border-white/20 transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2">
+              <span>Connect With FESS</span>
+              <i data-lucide="arrow-up-right" class="w-4 h-4 text-amber-300"></i>
+            </button>
+          </div>
+
+          <!-- Society Pillars & Flagship Event Bridge Strip -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5 max-w-3xl mx-auto">
+            <div class="px-5 py-3.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 flex items-center justify-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-300">
+                <i data-lucide="rocket" class="w-5 h-5"></i>
+              </div>
+              <div class="text-left">
+                <div class="font-display font-bold text-base text-white leading-tight">Startup Culture</div>
+                <div class="text-xs text-slate-300">Student Ventures &amp; Founders</div>
+              </div>
+            </div>
+
+            <div class="px-5 py-3.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 flex items-center justify-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-red-500/25 flex items-center justify-center text-red-300">
+                <i data-lucide="award" class="w-5 h-5"></i>
+              </div>
+              <div class="text-left">
+                <div class="font-display font-bold text-base text-white leading-tight">Industry Panels</div>
+                <div class="text-xs text-slate-300">Direct Business Leader Feedback</div>
+              </div>
+            </div>
+
+            <div onclick="navigateTo('events')" class="cursor-pointer px-5 py-3.5 rounded-2xl bg-white/10 hover:bg-white/15 backdrop-blur-md border border-amber-400/30 flex items-center justify-center gap-3 transition-colors">
+              <div class="w-9 h-9 rounded-lg bg-amber-500/25 flex items-center justify-center text-amber-300">
+                <i data-lucide="calendar-days" class="w-5 h-5"></i>
+              </div>
+              <div class="text-left">
+                <div class="font-display font-bold text-base text-amber-200 leading-tight">Flagship 2-Day Event</div>
+                <div class="text-xs text-slate-300">3 Competitions • 2 Nights</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1B. INFINITE LIVE TICKER MARQUEE (Society Identity + Flagship Event) -->
+      <div class="bg-fess-crimson text-white py-3 overflow-hidden border-y border-red-950/30 marquee-wrapper">
+        <div class="marquee-track font-mono text-xs sm:text-sm font-semibold tracking-widest uppercase">
+          <div class="flex items-center gap-8 px-4">
+            <span>FAST ENTREPRENEURSHIP &amp; STARTUP SOCIETY</span>
+            <span class="text-amber-300">✦</span>
+            <span>#GAMECHANGERSONLY</span>
+            <span class="text-amber-300">✦</span>
+            <span>WHERE FUTURE LEADERS ARE BORN</span>
+            <span class="text-amber-300">✦</span>
+            <span>FLAGSHIP EVENT: ENTERPRISE EXPO • PITCH ARENA • SELL ME THIS PEN</span>
+            <span class="text-amber-300">✦</span>
+            <span>MOVIE NIGHT &amp; QAWALI NIGHT</span>
+            <span class="text-amber-300">✦</span>
+          </div>
+          <div class="flex items-center gap-8 px-4" aria-hidden="true">
+            <span>FAST ENTREPRENEURSHIP &amp; STARTUP SOCIETY</span>
+            <span class="text-amber-300">✦</span>
+            <span>#GAMECHANGERSONLY</span>
+            <span class="text-amber-300">✦</span>
+            <span>WHERE FUTURE LEADERS ARE BORN</span>
+            <span class="text-amber-300">✦</span>
+            <span>FLAGSHIP EVENT: ENTERPRISE EXPO • PITCH ARENA • SELL ME THIS PEN</span>
+            <span class="text-amber-300">✦</span>
+            <span>MOVIE NIGHT &amp; QAWALI NIGHT</span>
+            <span class="text-amber-300">✦</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1C. #GameChangersOnly SECTION (Core Society Pillars) -->
+      <div class="py-20 sm:py-24 bg-fess-ivory bg-arch-grid relative border-b border-red-900/10">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="text-center max-w-3xl mx-auto mb-16 reveal">
+            <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-red-900/5 border border-red-900/15 text-fess-crimson text-xs font-bold uppercase tracking-wider mb-4">
+              • Who We Are
+            </span>
+            <h2 class="font-display font-extrabold text-3xl sm:text-5xl text-fess-crimson tracking-tight mb-4">
+              #GameChangersOnly
+            </h2>
+            <div class="w-24 h-1 mx-auto rounded-full bg-gradient-to-r from-transparent via-fess-crimson to-transparent mb-6"></div>
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed">
+              While others talk about changing the world, we're building it. Join the most ambitious student entrepreneurs who refuse to settle for ordinary. Your breakthrough startup is one decision away.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-7 lg:gap-8">
+            <div class="tilt-card reveal delay-100 rounded-3xl bg-[#F7F1E7] border border-amber-900/10 p-8 sm:p-9 text-center shadow-card-elevated hover:shadow-card-hover fess-card-border group">
+              <div class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-amber-100/90 border border-amber-300/60 flex items-center justify-center text-amber-600 shadow-sm -rotate-3 group-hover:rotate-0 group-hover:scale-110 transition-all duration-300">
+                <i data-lucide="lightbulb" class="w-8 h-8"></i>
+              </div>
+              <h3 class="font-display font-extrabold text-2xl text-fess-crimson mb-3">
+                Breakthrough<br />Ideas
+              </h3>
+              <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+                Turn your wildest concepts into game-changing ventures
+              </p>
+            </div>
+
+            <div class="tilt-card reveal delay-200 rounded-3xl bg-white border border-slate-200/80 p-8 sm:p-9 text-center shadow-card-elevated hover:shadow-card-hover fess-card-border group">
+              <div class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-blue-50 border border-blue-200/70 flex items-center justify-center text-blue-600 shadow-sm group-hover:scale-110 transition-all duration-300">
+                <i data-lucide="users-round" class="w-8 h-8"></i>
+              </div>
+              <h3 class="font-display font-extrabold text-2xl text-slate-900 group-hover:text-fess-crimson transition-colors mb-3">
+                Elite Network
+              </h3>
+              <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+                Connect with top founders, business leaders, and game-changers
+              </p>
+            </div>
+
+            <div class="tilt-card reveal delay-300 rounded-3xl bg-white border border-slate-200/80 p-8 sm:p-9 text-center shadow-card-elevated hover:shadow-card-hover fess-card-border group">
+              <div class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-emerald-50 border border-emerald-200/70 flex items-center justify-center text-emerald-600 shadow-sm rotate-3 group-hover:rotate-0 group-hover:scale-110 transition-all duration-300">
+                <i data-lucide="rocket" class="w-8 h-8"></i>
+              </div>
+              <h3 class="font-display font-extrabold text-2xl text-slate-900 group-hover:text-fess-crimson transition-colors mb-3">
+                Rapid Launch
+              </h3>
+              <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+                Go from idea to market faster than your competition
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1D. FLAGSHIP EVENT SPOTLIGHT (Showcased as FESS's Major Upcoming Event) -->
+      <div class="py-20 bg-white border-b border-red-900/10">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4 reveal">
+            <div>
+              <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-red-50 border border-red-900/15 text-fess-crimson text-xs font-bold uppercase tracking-wider mb-3">
+                <span class="w-2 h-2 rounded-full bg-fess-crimson animate-pulse"></span>
+                <span>Upcoming Flagship Event</span>
+              </span>
+              <h2 class="font-display font-extrabold text-3xl sm:text-4xl text-slate-900">
+                Two Days. Three Competitions. <span class="text-fess-crimson">Two Evening Nights.</span>
+              </h2>
+              <p class="text-slate-600 text-sm sm:text-base max-w-2xl mt-2">
+                Over two days we are hosting an Enterprise Expo, a startup Pitch Arena, and a Sell Me This Pen challenge, with a Movie Night and a Qawali Night to close each day.
+              </p>
+            </div>
+            <button type="button" onclick="navigateTo('events')" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-fess-ivory border border-red-900/15 text-fess-crimson font-semibold text-sm hover:bg-fess-crimson hover:text-white transition-all shadow-sm shrink-0">
+              <span>Full Timeline &amp; Rules</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- 3 PDF Competitions Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- 1. Enterprise Expo -->
+            <div class="reveal delay-100 rounded-3xl bg-fess-ivory/60 p-7 border border-slate-200/80 shadow-card-elevated hover:shadow-card-hover transition-all flex flex-col justify-between fess-card-border">
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <span class="px-3 py-1 rounded-full bg-amber-100/80 text-amber-900 font-mono text-xs font-bold">DAY 1 &amp; 2</span>
+                  <span class="font-mono text-xs font-bold text-fess-crimson">PKR 8,000 / stall</span>
+                </div>
+                <h3 class="font-display font-extrabold text-2xl text-slate-900 mb-2">Enterprise Expo</h3>
+                <p class="text-sm text-slate-600 leading-relaxed mb-4">
+                  Student entrepreneurs who already run a business (jewellery, food, candles and more) register for a stall and showcase their products across both days (10:30 AM – 10:00 PM).
+                </p>
+                <div class="p-3 rounded-xl bg-white text-xs text-slate-700 mb-6 border border-slate-200/60">
+                  <span class="font-bold text-fess-crimson">Awards:</span> Audience Favourite &amp; Most Unique Stall awards
+                </div>
+              </div>
+              <button type="button" onclick="openRegModal('Enterprise Expo')" class="w-full py-3 rounded-xl bg-slate-900 hover:bg-fess-crimson text-white font-semibold text-sm transition-colors">
+                Register Stall (PKR 8,000)
+              </button>
+            </div>
+
+            <!-- 2. Pitch Arena -->
+            <div class="reveal delay-200 rounded-3xl bg-fess-ivory/60 p-7 border border-slate-200/80 shadow-card-elevated hover:shadow-card-hover transition-all flex flex-col justify-between fess-card-border">
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <span class="px-3 py-1 rounded-full bg-red-100/80 text-fess-crimson font-mono text-xs font-bold">DAY 1 • 2:00 PM</span>
+                  <span class="font-mono text-xs font-bold text-fess-crimson">PKR 3,000</span>
+                </div>
+                <h3 class="font-display font-extrabold text-2xl text-slate-900 mb-2">Pitch Arena</h3>
+                <p class="text-sm text-slate-600 leading-relaxed mb-4">
+                  Individuals or groups (max 3 members, max 10 mins) present a startup idea or prototype before a panel of well-known businessmen.
+                </p>
+                <div class="p-3 rounded-xl bg-white text-xs text-slate-700 mb-6 space-y-1 border border-slate-200/60">
+                  <div><span class="font-bold text-fess-crimson">Winner:</span> PKR 15,000 + shield + certificate</div>
+                  <div><span class="font-bold text-slate-800">Runner-up:</span> Shield + certificate</div>
+                </div>
+              </div>
+              <button type="button" onclick="openRegModal('Pitch Arena')" class="w-full py-3 rounded-xl bg-fess-crimson hover:bg-fess-crimsonDark text-white font-semibold text-sm transition-colors">
+                Register Team (PKR 3,000)
+              </button>
+            </div>
+
+            <!-- 3. Sell Me This Pen -->
+            <div class="reveal delay-300 rounded-3xl bg-fess-ivory/60 p-7 border border-slate-200/80 shadow-card-elevated hover:shadow-card-hover transition-all flex flex-col justify-between fess-card-border">
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <span class="px-3 py-1 rounded-full bg-red-100/80 text-fess-crimson font-mono text-xs font-bold">DAY 2 • 3:00 PM</span>
+                  <span class="font-mono text-xs font-bold text-fess-crimson">PKR 2,500</span>
+                </div>
+                <h3 class="font-display font-extrabold text-2xl text-slate-900 mb-2">Sell Me This Pen</h3>
+                <p class="text-sm text-slate-600 leading-relaxed mb-4">
+                  Individual challenge: receive a deliberately boring product or idea and take 10 minutes to prepare a creative pitch that sells it to the panel.
+                </p>
+                <div class="p-3 rounded-xl bg-white text-xs text-slate-700 mb-6 border border-slate-200/60">
+                  <span class="font-bold text-fess-crimson">Winner:</span> PKR 15,000 + shield + certificate
+                </div>
+              </div>
+              <button type="button" onclick="openRegModal('Sell Me This Pen')" class="w-full py-3 rounded-xl bg-fess-crimson hover:bg-fess-crimsonDark text-white font-semibold text-sm transition-colors">
+                Register Individual (PKR 2,500)
+              </button>
+            </div>
+          </div>
+
+          <!-- 2 Evening Entertainment Nights Banner (Movie Night & Qawali Night) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 reveal">
+            <div class="rounded-3xl bg-gradient-to-r from-slate-900 to-fess-midnight p-6 sm:p-7 text-white flex items-center justify-between gap-4 shadow-lg">
+              <div>
+                <span class="font-mono text-xs uppercase tracking-wider text-amber-300">DAY 1 • 7:00 PM – 10:00 PM</span>
+                <h3 class="font-display font-extrabold text-2xl mt-1">Movie Night</h3>
+                <p class="text-xs sm:text-sm text-slate-300 mt-1">Evening entertainment closing Day 1.</p>
+              </div>
+              <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center shrink-0">
+                <i data-lucide="film" class="w-6 h-6 text-amber-300"></i>
+              </div>
+            </div>
+
+            <div class="rounded-3xl bg-gradient-to-r from-red-950 via-red-900 to-fess-midnight p-6 sm:p-7 text-white flex items-center justify-between gap-4 shadow-lg">
+              <div>
+                <span class="font-mono text-xs uppercase tracking-wider text-amber-300">DAY 2 • 7:00 PM – 10:00 PM</span>
+                <h3 class="font-display font-extrabold text-2xl mt-1">Qawali Night</h3>
+                <p class="text-xs sm:text-sm text-slate-200 mt-1">Evening entertainment closing Day 2.</p>
+              </div>
+              <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center shrink-0">
+                <i data-lucide="music" class="w-6 h-6 text-amber-300"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1E. "THE FUTURE IS OURS" & "READY TO DOMINATE?" SPLIT SECTION -->
+      <div class="py-20 sm:py-24 bg-fess-ivoryDark/60 border-t border-red-900/10">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="text-center mb-14 reveal">
+            <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-900/5 border border-red-900/20 text-fess-crimson font-semibold text-xs sm:text-sm">
+              <i data-lucide="sparkles" class="w-4 h-4"></i>
+              <span>Your Journey Starts Here</span>
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-start">
+            <!-- Left Column: The Future is Ours -->
+            <div class="lg:col-span-6 reveal reveal-left">
+              <div class="border-l-4 border-fess-crimson pl-5 mb-10">
+                <h2 class="font-display font-extrabold text-4xl sm:text-5xl text-fess-crimson leading-[1.1] tracking-tight">
+                  The Future is<br />Ours
+                </h2>
+              </div>
+
+              <div class="relative bg-white rounded-3xl p-8 sm:p-10 shadow-card-elevated border border-slate-100 mt-6">
+                <div class="absolute -top-5 -left-3 w-12 h-12 rounded-2xl bg-fess-crimson text-white flex items-center justify-center shadow-crimson-glow -rotate-6">
+                  <span class="font-serif text-3xl font-bold leading-none mt-2">"</span>
+                </div>
+
+                <blockquote class="font-serif italic text-lg sm:text-xl text-slate-700 leading-relaxed mb-6">
+                  We're not just building startups—we're creating the next generation of industry leaders. Every student here has the potential to become the next game-changer, the next innovator. The question is: will you join us or watch from the sidelines?
+                </blockquote>
+
+                <div class="flex items-center justify-between pt-4 border-t border-red-900/10">
+                  <div class="text-xs font-mono uppercase tracking-wider text-slate-400">
+                    FESS EXECUTIVE MANIFESTO • 2026
+                  </div>
+                  <i data-lucide="sparkles" class="w-5 h-5 text-fess-crimson"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Ready to Dominate? -->
+            <div class="lg:col-span-6 reveal reveal-right">
+              <h2 class="font-display font-extrabold text-4xl sm:text-5xl text-fess-crimson leading-[1.1] tracking-tight mb-4">
+                Ready to<br />Dominate?
+              </h2>
+              <p class="text-slate-600 text-base sm:text-lg mb-8">
+                Stop dreaming. Start building. Your empire awaits.
+              </p>
+
+              <div class="space-y-4">
+                <div onclick="navigateTo('connect')" class="cursor-pointer bg-white rounded-2xl p-6 shadow-card-elevated hover:shadow-card-hover fess-card-border transition-all duration-200 hover:-translate-y-1 flex items-start gap-5 group">
+                  <div class="w-12 h-12 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center text-fess-crimson shrink-0 group-hover:bg-fess-crimson group-hover:text-white transition-colors">
+                    <i data-lucide="mail" class="w-5 h-5"></i>
+                  </div>
+                  <div class="flex-1">
+                    <h3 class="font-display font-bold text-lg text-slate-900 mb-1">Let's Talk Business</h3>
+                    <p class="text-sm text-slate-600 mb-3">Ready to turn your idea into reality or connect with FESS? Let's make it happen.</p>
+                    <span class="inline-flex items-center gap-1.5 text-sm font-bold text-fess-crimson group-hover:gap-2.5 transition-all">
+                      <span>Contact us</span>
+                      <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </span>
+                  </div>
+                </div>
+
+                <div onclick="navigateTo('teams')" class="cursor-pointer bg-white rounded-2xl p-6 shadow-card-elevated hover:shadow-card-hover fess-card-border transition-all duration-200 hover:-translate-y-1 flex items-start gap-5 group">
+                  <div class="w-12 h-12 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center text-fess-crimson shrink-0 group-hover:bg-fess-crimson group-hover:text-white transition-colors">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                  </div>
+                  <div class="flex-1">
+                    <h3 class="font-display font-bold text-lg text-slate-900 mb-1">Meet the Powerhouse</h3>
+                    <p class="text-sm text-slate-600 mb-3">Explore our Executive Council and Tech Team driving FESS forward.</p>
+                    <span class="inline-flex items-center gap-1.5 text-sm font-bold text-fess-crimson group-hover:gap-2.5 transition-all">
+                      <span>Meet Our Teams</span>
+                      <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- PAGE 2: FLAGSHIP EVENT (100% Exact PDF Outline, Fees & Rules)       -->
+    <!-- =================================================================== -->
+    <section id="page-events" class="page-section hidden">
+      <!-- Sub-page Hero -->
+      <div class="bg-fess-midnight text-white py-16 sm:py-20 relative overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(153,27,27,0.35),transparent_60%)]"></div>
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 border border-white/15 text-amber-300 font-mono text-xs uppercase tracking-wider mb-4">
+            • FESS FLAGSHIP EVENT • TWO DAYS • THREE COMPETITIONS • TWO EVENING NIGHTS
+          </span>
+          <h1 class="font-display font-extrabold text-4xl sm:text-6xl tracking-tight mb-4">
+            Flagship Event <span class="text-red-400">Outline &amp; Timeline</span>
+          </h1>
+          <p class="text-slate-300 text-base sm:text-xl max-w-3xl leading-relaxed">
+            Over two days we are hosting an Enterprise Expo, a startup Pitch Arena, and a Sell Me This Pen challenge, with a Movie Night and a Qawali Night to close each day.
+          </p>
+        </div>
+      </div>
+
+      <div class="py-16 sm:py-20 bg-fess-ivory">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20">
+
+          <!-- SECTION A: INTERACTIVE DAY 1 & DAY 2 TIMELINE -->
+          <div class="bg-white rounded-3xl p-6 sm:p-10 shadow-card-elevated border border-slate-200/80">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100 mb-8">
+              <div>
+                <span class="text-xs font-mono font-bold uppercase tracking-wider text-fess-crimson">SCHEDULE</span>
+                <h2 class="font-display font-extrabold text-2xl sm:text-3xl text-slate-900 mt-1">Event Timeline</h2>
+              </div>
+              <div class="flex gap-2 bg-fess-ivory p-1.5 rounded-xl border border-red-900/10">
+                <button type="button" onclick="switchScheduleDay('all')" id="day-tab-all" class="px-4 py-2 rounded-lg text-xs sm:text-sm font-bold bg-fess-crimson text-white transition-all">Both Days</button>
+                <button type="button" onclick="switchScheduleDay('1')" id="day-tab-1" class="px-4 py-2 rounded-lg text-xs sm:text-sm font-bold text-slate-600 hover:text-fess-crimson transition-all">Day 1</button>
+                <button type="button" onclick="switchScheduleDay('2')" id="day-tab-2" class="px-4 py-2 rounded-lg text-xs sm:text-sm font-bold text-slate-600 hover:text-fess-crimson transition-all">Day 2</button>
+              </div>
+            </div>
+
+            <div id="schedule-list" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <!-- Populated dynamically via JS with exact PDF Day 1 & Day 2 timings -->
+            </div>
+          </div>
+
+          <!-- SECTION B: REGISTRATION FEES AT A GLANCE TABLE (Exact PDF Table) -->
+          <div>
+            <div class="mb-6">
+              <span class="text-xs font-mono font-bold uppercase tracking-wider text-fess-crimson">SUMMARY</span>
+              <h2 class="font-display font-extrabold text-3xl text-slate-900 mt-1">Registration Fees at a Glance</h2>
+            </div>
+
+            <div class="bg-white rounded-3xl shadow-card-elevated border border-slate-200/80 overflow-hidden">
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr class="bg-gradient-to-r from-red-900 to-fess-midnight text-white text-xs font-mono uppercase tracking-wider">
+                      <th class="py-4 px-6">Event</th>
+                      <th class="py-4 px-6">Participants</th>
+                      <th class="py-4 px-6">Fee (PKR)</th>
+                      <th class="py-4 px-6">Prize / Awards</th>
+                      <th class="py-4 px-6 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100 text-sm">
+                    <tr class="hover:bg-fess-ivory/50 transition-colors">
+                      <td class="py-5 px-6 font-display font-extrabold text-slate-900">Enterprise Expo</td>
+                      <td class="py-5 px-6 text-slate-600">Student business owners</td>
+                      <td class="py-5 px-6 font-mono font-bold text-fess-crimson">8,000 per stall</td>
+                      <td class="py-5 px-6 text-slate-700">Audience Favourite &amp; Most Unique Stall awards</td>
+                      <td class="py-5 px-6 text-right">
+                        <button type="button" onclick="openRegModal('Enterprise Expo')" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-fess-crimson text-white text-xs font-semibold transition-colors">Register</button>
+                      </td>
+                    </tr>
+                    <tr class="hover:bg-fess-ivory/50 transition-colors">
+                      <td class="py-5 px-6 font-display font-extrabold text-slate-900">Pitch Arena</td>
+                      <td class="py-5 px-6 text-slate-600">Individuals or groups (max 3)</td>
+                      <td class="py-5 px-6 font-mono font-bold text-fess-crimson">3,000</td>
+                      <td class="py-5 px-6 text-slate-700">
+                        <div><span class="font-bold">Winner:</span> 15,000 + shield + certificate</div>
+                        <div><span class="font-bold">Runner-up:</span> Shield + certificate</div>
+                      </td>
+                      <td class="py-5 px-6 text-right">
+                        <button type="button" onclick="openRegModal('Pitch Arena')" class="px-4 py-2 rounded-xl bg-fess-crimson hover:bg-fess-crimsonDark text-white text-xs font-semibold transition-colors">Register</button>
+                      </td>
+                    </tr>
+                    <tr class="hover:bg-fess-ivory/50 transition-colors">
+                      <td class="py-5 px-6 font-display font-extrabold text-slate-900">Sell Me This Pen</td>
+                      <td class="py-5 px-6 text-slate-600">Individuals</td>
+                      <td class="py-5 px-6 font-mono font-bold text-fess-crimson">2,500</td>
+                      <td class="py-5 px-6 text-slate-700"><span class="font-bold">Winner:</span> 15,000 + shield + certificate</td>
+                      <td class="py-5 px-6 text-right">
+                        <button type="button" onclick="openRegModal('Sell Me This Pen')" class="px-4 py-2 rounded-xl bg-fess-crimson hover:bg-fess-crimsonDark text-white text-xs font-semibold transition-colors">Register</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION C: COMPLETE EVENT DETAILS (Page 2 of PDF) -->
+          <div>
+            <div class="mb-8">
+              <span class="text-xs font-mono font-bold uppercase tracking-wider text-fess-crimson">RULES &amp; FORMATS</span>
+              <h2 class="font-display font-extrabold text-3xl text-slate-900 mt-1">Detailed Competition Breakdown</h2>
+            </div>
+
+            <div class="space-y-8">
+              <!-- Detail 1: Enterprise Expo -->
+              <div class="bg-white rounded-3xl overflow-hidden shadow-card-elevated border border-slate-200/80">
+                <div class="bg-gradient-to-r from-red-900 to-red-800 px-7 py-5 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <span class="font-mono text-xs uppercase tracking-widest text-amber-300">COMPETITION 01</span>
+                    <h3 class="font-display font-extrabold text-2xl">1. Enterprise Expo</h3>
+                  </div>
+                  <span class="px-3.5 py-1.5 rounded-full bg-white/15 font-mono text-xs font-bold self-start sm:self-center">PKR 8,000 per stall</span>
+                </div>
+                <div class="p-7 sm:p-8">
+                  <p class="text-slate-700 text-base leading-relaxed mb-6">
+                    Student entrepreneurs who already run a business (jewellery, food, candles and more) register for a stall and showcase their products to visitors across both days of the event. At the end of the event, two awards are announced: <strong class="text-slate-900">Audience Favourite</strong> and <strong class="text-slate-900">Most Unique Stall</strong>.
+                  </p>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="p-4 rounded-2xl bg-fess-ivory border border-red-900/10">
+                      <div class="text-[11px] font-mono uppercase text-slate-500 mb-1">Format</div>
+                      <div class="font-display font-bold text-sm text-slate-900">Stall-based exhibition for 2 days</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-fess-ivory border border-red-900/10">
+                      <div class="text-[11px] font-mono uppercase text-slate-500 mb-1">Timing</div>
+                      <div class="font-display font-bold text-sm text-slate-900">10:30 AM – 10:00 PM</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-fess-ivory border border-red-900/10">
+                      <div class="text-[11px] font-mono uppercase text-slate-500 mb-1">Registration Fee</div>
+                      <div class="font-display font-bold text-sm text-fess-crimson">PKR 8,000 per stall</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-fess-ivory border border-red-900/10">
+                      <div class="text-[11px] font-mono uppercase text-slate-500 mb-1">Awards</div>
+                      <div class="font-display font-bold text-sm text-slate-900">Audience Favourite; Most Unique Stall</div>
+                    </div>
+                  </div>
+                  <button type="button" onclick="openRegModal('Enterprise Expo')" class="px-6 py-3 rounded-xl bg-slate-900 hover:bg-fess-crimson text-white font-semibold text-sm transition-colors">
+                    Register Stall for Enterprise Expo
+                  </button>
+                </div>
+              </div>
+
+              <!-- Detail 2: Pitch Arena -->
+              <div class="bg-white rounded-3xl overflow-hidden shadow-card-elevated border border-slate-200/80">
+                <div class="bg-gradient-to-r from-red-900 to-fess-midnight px-7 py-5 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <span class="font-mono text-xs uppercase tracking-widest text-amber-300">COMPETITION 02</span>
+                    <h3 class="font-display font-extrabold text-2xl">2. Pitch Arena</h3>
+                  </div>
+                  <span class="px-3.5 py-1.5 rounded-full bg-white/15 font-mono text-xs font-bold self-start sm:self-center">PKR 3,000</span>
+                </div>
+                <div class="p-7 sm:p-8">
+                  <p class="text-slate-700 text-base leading-relaxed mb-6">
+                    Individuals or teams with a startup idea or prototype present it to a panel of well-known businessmen. Winners are chosen on how <strong class="text-slate-900">useful, creative and rational</strong> the idea is.
+                  </p>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                    <div class="p-4 rounded-2xl bg-fess-ivory border border-red-900/10">
+                      <div class="text-[11px] font-mono uppercase text-slate-500 mb-1">Day &amp; Time</div>
+                      <div class="font-display font-bold text-sm text-slate-900">Day 1 | 2:00 PM – 4:00 PM</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-fess-ivory border border-red-900/10">
+                      <div class="text-[11px] font-mono uppercase text-slate-500 mb-1">Registration Fee</div>
+                      <div class="font-display font-bold text-sm text-fess-crimson">PKR 3,000</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-fess-ivory border border-red-900/10">
+                      <div class="text-[11px] font-mono uppercase text-slate-500 mb-1">Rules</div>
+                      <div class="font-display font-bold text-sm text-slate-900">Groups of max 3 members. Max 10 mins per group.</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-fess-ivory border border-red-900/10">
+                      <div class="text-[11px] font-mono uppercase text-slate-500 mb-1">Judging</div>
+                      <div class="font-display font-bold text-sm text-slate-900">Panel of well-known businessmen</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-fess-ivory border border-red-900/10">
+                      <div class="text-[11px] font-mono uppercase text-slate-500 mb-1">Winner</div>
+                      <div class="font-display font-bold text-sm text-fess-crimson">PKR 15,000 cash prize + shield + certificate</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-fess-ivory border border-red-900/10">
+                      <div class="text-[11px] font-mono uppercase text-slate-500 mb-1">Runner-up</div>
+                      <div class="font-display font-bold text-sm text-slate-900">Shield + certificate</div>
+                    </div>
+                  </div>
+                  <button type="button" onclick="openRegModal('Pitch Arena')" class="px-6 py-3 rounded-xl bg-fess-crimson hover:bg-fess-crimsonDark text-white font-semibold text-sm transition-colors">
+                    Register for Pitch Arena
+                  </button>
+                </div>
+              </div>
+
+              <!-- Detail 3: Sell Me This Pen -->
+              <div class="bg-white rounded-3xl overflow-hidden shadow-card-elevated border border-slate-200/80">
+                <div class="bg-gradient-to-r from-red-900 to-red-800 px-7 py-5 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <span class="font-mono text-xs uppercase tracking-widest text-amber-300">COMPETITION 03</span>
+                    <h3 class="font-display font-extrabold text-2xl">3. Sell Me This Pen</h3>
+                  </div>
+                  <span class="px-3.5 py-1.5 rounded-full bg-white/15 font-mono text-xs font-bold self-start sm:self-center">PKR 2,500</span>
+                </div>
+                <div class="p-7 sm:p-8">
+                  <p class="text-slate-700 text-base leading-relaxed mb-6">
+                    An individual challenge. Each participant receives a deliberately boring product or idea and has <strong class="text-slate-900">10 minutes</strong> to prepare a creative pitch that sells it to the panel.
+                  </p>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                    <div class="p-4 rounded-2xl bg-fess-ivory border border-red-900/10">
+                      <div class="text-[11px] font-mono uppercase text-slate-500 mb-1">Day &amp; Time</div>
+                      <div class="font-display font-bold text-sm text-slate-900">Day 2 | 3:00 PM – 5:00 PM</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-fess-ivory border border-red-900/10">
+                      <div class="text-[11px] font-mono uppercase text-slate-500 mb-1">Registration Fee</div>
+                      <div class="font-display font-bold text-sm text-fess-crimson">PKR 2,500</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-fess-ivory border border-red-900/10">
+                      <div class="text-[11px] font-mono uppercase text-slate-500 mb-1">Participation</div>
+                      <div class="font-display font-bold text-sm text-slate-900">Individual</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-fess-ivory border border-red-900/10 sm:col-span-2">
+                      <div class="text-[11px] font-mono uppercase text-slate-500 mb-1">Scoring Criteria</div>
+                      <div class="font-display font-bold text-sm text-slate-900">Persuasion, confidence, handling objections, creativity and time management</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-fess-ivory border border-red-900/10">
+                      <div class="text-[11px] font-mono uppercase text-slate-500 mb-1">Winner</div>
+                      <div class="font-display font-bold text-sm text-fess-crimson">PKR 15,000 cash prize + shield + certificate</div>
+                    </div>
+                  </div>
+                  <button type="button" onclick="openRegModal('Sell Me This Pen')" class="px-6 py-3 rounded-xl bg-fess-crimson hover:bg-fess-crimsonDark text-white font-semibold text-sm transition-colors">
+                    Register for Sell Me This Pen
+                  </button>
+                </div>
+              </div>
+
+              <!-- Evening Entertainment Section (Movie Night & Qawali Night) -->
+              <div class="bg-fess-midnight rounded-3xl p-7 sm:p-10 text-white shadow-xl">
+                <div class="mb-6">
+                  <span class="font-mono text-xs uppercase tracking-widest text-amber-300">CLOSING EACH DAY</span>
+                  <h3 class="font-display font-extrabold text-2xl sm:text-3xl mt-1">Evening Entertainment</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="p-6 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+                    <div>
+                      <div class="text-xs font-mono text-amber-300 uppercase mb-1">DAY 1</div>
+                      <div class="font-display font-extrabold text-xl">Movie Night</div>
+                      <div class="text-sm text-slate-300 mt-1">7:00 PM – 10:00 PM</div>
+                    </div>
+                    <i data-lucide="film" class="w-8 h-8 text-amber-300"></i>
+                  </div>
+                  <div class="p-6 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+                    <div>
+                      <div class="text-xs font-mono text-amber-300 uppercase mb-1">DAY 2</div>
+                      <div class="font-display font-extrabold text-xl">Qawali Night</div>
+                      <div class="text-sm text-slate-300 mt-1">7:00 PM – 10:00 PM</div>
+                    </div>
+                    <i data-lucide="music" class="w-8 h-8 text-amber-300"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- PAGE 3: OUR TEAMS (Preserved from Original Screenshots 4 & 5)       -->
+    <!-- =================================================================== -->
+    <section id="page-teams" class="page-section hidden">
+      <div class="py-16 sm:py-24 bg-fess-ivory bg-arch-grid min-h-[85vh]">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div class="text-center mb-12">
+            <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-900/5 border border-red-900/20 text-fess-crimson font-semibold text-xs sm:text-sm mb-5">
+              <span class="w-2 h-2 rounded-full bg-fess-crimson"></span>
+              <span>The Powerhouse Behind FESS</span>
+            </span>
+
+            <h1 class="font-display font-extrabold text-4xl sm:text-6xl text-fess-crimson tracking-tight mb-4">
+              Meet Our Teams
+            </h1>
+            <p class="text-slate-600 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+              The passionate innovators, visionaries, and builders making the impossible possible
+            </p>
+          </div>
+
+          <!-- Signature Team Cards Grid (Executive Council & Tech Team from Old Site) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10 mb-16 max-w-5xl mx-auto">
+            
+            <!-- CARD 1: EXECUTIVE COUNCIL -->
+            <div onclick="openTeamModal('executive')" class="cursor-pointer rounded-3xl bg-white shadow-card-elevated hover:shadow-card-hover border border-slate-200/70 overflow-hidden transition-all duration-300 hover:-translate-y-1.5 group">
+              <div class="bg-gradient-to-r from-red-900 via-red-800 to-red-900 px-7 py-6 text-white flex items-start justify-between">
+                <div>
+                  <h3 class="font-display font-extrabold text-2xl tracking-tight mb-1">Executive Council</h3>
+                  <p class="text-red-100 text-xs sm:text-sm">Leading the vision and strategy of FESS</p>
+                </div>
+                <span class="w-2.5 h-2.5 rounded-full bg-white mt-2 group-hover:scale-125 transition-transform"></span>
+              </div>
+
+              <div class="p-7 sm:p-8">
+                <div class="corner-brackets">
+                  <div class="relative h-60 sm:h-64 rounded-2xl overflow-hidden bg-gradient-to-b from-[#1A0D0E] via-[#261113] to-[#12090A] flex flex-col items-center justify-between p-5 border border-red-950/40">
+                    <div class="text-center z-10 pt-1">
+                      <div class="font-display font-extrabold text-2xl sm:text-3xl tracking-wider uppercase">
+                        <span class="text-white drop-shadow">TASK</span>
+                        <span class="text-red-600 drop-shadow ml-1.5">FORCE 26 - 27</span>
+                      </div>
+                      <div class="text-[10px] font-mono tracking-[0.25em] text-slate-300 uppercase mt-0.5">FESS EXECUTIVE BOARD</div>
+                    </div>
+
+                    <div class="relative z-10 flex items-end justify-center gap-2 sm:gap-3 mt-auto pt-4">
+                      <div class="w-12 h-20 rounded-t-2xl bg-gradient-to-t from-slate-900 to-slate-700 border border-white/15 flex flex-col items-center justify-start pt-2.5 shadow-lg">
+                        <div class="w-6 h-6 rounded-full bg-amber-100/90 mb-1"></div>
+                        <span class="text-[8px] font-mono text-slate-300">VP OPS</span>
+                      </div>
+                      <div class="w-14 h-24 rounded-t-2xl bg-gradient-to-t from-red-950 to-red-800 border border-amber-400/30 flex flex-col items-center justify-start pt-3 shadow-xl">
+                        <div class="w-7 h-7 rounded-full bg-white mb-1"></div>
+                        <span class="text-[8px] font-mono text-amber-300 font-bold">GEN SEC</span>
+                      </div>
+                      <div class="w-16 h-28 rounded-t-2xl bg-gradient-to-t from-slate-950 via-red-950 to-red-700 border-2 border-amber-400/50 flex flex-col items-center justify-start pt-3 shadow-2xl">
+                        <div class="w-8 h-8 rounded-full bg-amber-50 mb-1.5 ring-2 ring-amber-400/50"></div>
+                        <span class="text-[9px] font-mono text-white font-bold">PRESIDENT</span>
+                      </div>
+                      <div class="w-14 h-24 rounded-t-2xl bg-gradient-to-t from-red-950 to-red-800 border border-amber-400/30 flex flex-col items-center justify-start pt-3 shadow-xl">
+                        <div class="w-7 h-7 rounded-full bg-white mb-1"></div>
+                        <span class="text-[8px] font-mono text-amber-300 font-bold">VP TECH</span>
+                      </div>
+                      <div class="w-12 h-20 rounded-t-2xl bg-gradient-to-t from-slate-900 to-slate-700 border border-white/15 flex flex-col items-center justify-start pt-2.5 shadow-lg">
+                        <div class="w-6 h-6 rounded-full bg-amber-100/90 mb-1"></div>
+                        <span class="text-[8px] font-mono text-slate-300">TREAS</span>
+                      </div>
+                    </div>
+
+                    <div class="absolute inset-0 bg-gradient-to-t from-red-950/90 via-red-950/30 to-transparent opacity-85 group-hover:opacity-95 transition-opacity flex items-end justify-center pb-4 z-20">
+                      <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-white font-semibold text-xs sm:text-sm group-hover:scale-105 transition-transform">
+                        <i data-lucide="maximize-2" class="w-3.5 h-3.5 text-amber-300"></i>
+                        <span>Click to view full roster</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- CARD 2: TECH TEAM -->
+            <div onclick="openTeamModal('tech')" class="cursor-pointer rounded-3xl bg-white shadow-card-elevated hover:shadow-card-hover border border-slate-200/70 overflow-hidden transition-all duration-300 hover:-translate-y-1.5 group">
+              <div class="bg-gradient-to-r from-red-900 via-red-800 to-red-900 px-7 py-6 text-white flex items-start justify-between">
+                <div>
+                  <h3 class="font-display font-extrabold text-2xl tracking-tight mb-1">Tech Team</h3>
+                  <p class="text-red-100 text-xs sm:text-sm">Building the digital infrastructure of FESS</p>
+                </div>
+                <span class="w-2.5 h-2.5 rounded-full bg-white mt-2 group-hover:scale-125 transition-transform"></span>
+              </div>
+
+              <div class="p-7 sm:p-8">
+                <div class="corner-brackets">
+                  <div class="relative h-60 sm:h-64 rounded-2xl overflow-hidden bg-gradient-to-b from-slate-200 via-stone-200 to-slate-300 flex flex-col items-center justify-between p-5 border border-slate-300/80">
+                    <div class="absolute inset-0 bg-arch-grid opacity-80"></div>
+
+                    <div class="relative z-10 text-center pt-1">
+                      <div class="font-display font-black text-4xl sm:text-5xl tracking-[0.22em] text-fess-crimson drop-shadow-sm">
+                        TECH
+                      </div>
+                      <div class="text-[10px] font-mono tracking-[0.2em] text-slate-600 uppercase font-bold">DIGITAL INFRASTRUCTURE</div>
+                    </div>
+
+                    <div class="relative z-10 flex items-end justify-center gap-2 sm:gap-3 mt-auto pt-4">
+                      <div class="w-12 h-20 rounded-t-2xl bg-slate-900 border border-slate-700 flex flex-col items-center justify-start pt-2.5 shadow-md">
+                        <div class="w-6 h-6 rounded-full bg-slate-200 mb-1"></div>
+                        <span class="text-[8px] font-mono text-slate-300">UI/UX</span>
+                      </div>
+                      <div class="w-14 h-24 rounded-t-2xl bg-slate-800 border border-slate-600 flex flex-col items-center justify-start pt-3 shadow-lg">
+                        <div class="w-7 h-7 rounded-full bg-white mb-1"></div>
+                        <span class="text-[8px] font-mono text-amber-300">FULLSTACK</span>
+                      </div>
+                      <div class="w-16 h-28 rounded-t-2xl bg-fess-midnight border-2 border-fess-crimson flex flex-col items-center justify-start pt-3 shadow-xl">
+                        <div class="w-8 h-8 rounded-full bg-white mb-1.5 ring-2 ring-red-700"></div>
+                        <span class="text-[9px] font-mono text-white font-bold">TECH LEAD</span>
+                      </div>
+                      <div class="w-14 h-24 rounded-t-2xl bg-slate-800 border border-slate-600 flex flex-col items-center justify-start pt-3 shadow-lg">
+                        <div class="w-7 h-7 rounded-full bg-white mb-1"></div>
+                        <span class="text-[8px] font-mono text-amber-300">SYSTEMS</span>
+                      </div>
+                      <div class="w-12 h-20 rounded-t-2xl bg-slate-900 border border-slate-700 flex flex-col items-center justify-start pt-2.5 shadow-md">
+                        <div class="w-6 h-6 rounded-full bg-slate-200 mb-1"></div>
+                        <span class="text-[8px] font-mono text-slate-300">DEVOPS</span>
+                      </div>
+                    </div>
+
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-900/20 to-transparent opacity-80 group-hover:opacity-95 transition-opacity flex items-end justify-center pb-4 z-20">
+                      <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/90 text-fess-crimson font-bold text-xs sm:text-sm shadow-md group-hover:scale-105 transition-transform">
+                        <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+                        <span>Click to view full roster</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="flex items-center justify-center gap-4 text-slate-500 text-xs sm:text-sm font-medium">
+            <span class="w-12 sm:w-20 h-px bg-red-900/20"></span>
+            <span>Driving Excellence Together</span>
+            <span class="w-12 sm:w-20 h-px bg-red-900/20"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- PAGE 4: CONNECT (Inquiry & Event FAQ — No Sponsor Section)          -->
+    <!-- =================================================================== -->
+    <section id="page-connect" class="page-section hidden">
+      <div class="bg-fess-midnight text-white py-16 sm:py-20 relative overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(153,27,27,0.35),transparent_60%)]"></div>
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 border border-white/15 text-amber-300 font-mono text-xs uppercase tracking-wider mb-4">
+            • LET'S TALK BUSINESS
+          </span>
+          <h1 class="font-display font-extrabold text-4xl sm:text-6xl tracking-tight mb-4">
+            Connect With <span class="text-red-400">FESS</span>
+          </h1>
+          <p class="text-slate-300 text-base sm:text-xl max-w-2xl">
+            Have questions about Enterprise Expo stalls, Pitch Arena rules, or Sell Me This Pen? Send a direct message to the FESS team.
+          </p>
+        </div>
+      </div>
+
+      <div class="py-16 bg-fess-ivory">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
+            
+            <!-- Left: Contact Form -->
+            <div class="lg:col-span-7 bg-white rounded-3xl p-7 sm:p-9 shadow-card-elevated border border-slate-200/80">
+              <span class="text-xs font-mono font-bold uppercase tracking-wider text-fess-crimson">DIRECT DESK</span>
+              <h2 class="font-display font-extrabold text-2xl sm:text-3xl text-slate-900 mt-1 mb-6">Send Us a Message</h2>
+
+              <form onsubmit="handleConnectSubmit(event)" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1.5">Your Name</label>
+                    <input id="contact-name" required type="text" placeholder="Enter your full name" class="w-full px-4 py-3 rounded-xl bg-fess-ivory/70 border border-slate-200 focus:border-fess-crimson outline-none text-sm" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1.5">Email Address</label>
+                    <input id="contact-email" required type="email" placeholder="you@example.com" class="w-full px-4 py-3 rounded-xl bg-fess-ivory/70 border border-slate-200 focus:border-fess-crimson outline-none text-sm" />
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold uppercase text-slate-600 mb-1.5">Topic</label>
+                  <select id="contact-topic" class="w-full px-4 py-3 rounded-xl bg-fess-ivory/70 border border-slate-200 focus:border-fess-crimson outline-none text-sm font-medium">
+                    <option value="General Society Inquiry">General FESS Society Inquiry</option>
+                    <option value="Enterprise Expo Stall Inquiry">Enterprise Expo Stall Inquiry (PKR 8,000)</option>
+                    <option value="Pitch Arena Inquiry">Pitch Arena Inquiry (PKR 3,000)</option>
+                    <option value="Sell Me This Pen Inquiry">Sell Me This Pen Inquiry (PKR 2,500)</option>
+                    <option value="Movie Night & Qawali Night">Movie Night &amp; Qawali Night</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold uppercase text-slate-600 mb-1.5">Message</label>
+                  <textarea id="contact-msg" required rows="4" placeholder="Write your message or question here..." class="w-full px-4 py-3 rounded-xl bg-fess-ivory/70 border border-slate-200 focus:border-fess-crimson outline-none text-sm"></textarea>
+                </div>
+
+                <button type="submit" class="w-full py-4 rounded-xl bg-fess-crimson hover:bg-fess-crimsonDark text-white font-bold text-sm shadow-crimson-glow transition-all flex items-center justify-center gap-2">
+                  <i data-lucide="send" class="w-4 h-4"></i>
+                  <span>Send Message to FESS</span>
+                </button>
+              </form>
+            </div>
+
+            <!-- Right: Quick FAQ Accordion (Based strictly on PDF Rules) -->
+            <div class="lg:col-span-5 space-y-4">
+              <div class="bg-white rounded-3xl p-7 shadow-card-elevated border border-slate-200/80">
+                <h3 class="font-display font-extrabold text-xl text-slate-900 mb-4">Competition FAQs</h3>
+                <div class="space-y-3">
+                  <div class="rounded-2xl bg-fess-ivory/70 border border-slate-200/80 overflow-hidden">
+                    <button type="button" onclick="toggleFaq(0)" class="w-full px-5 py-3.5 text-left flex items-center justify-between font-display font-bold text-sm text-slate-900">
+                      <span>Who can book a stall at Enterprise Expo?</span>
+                      <i data-lucide="chevron-down" id="faq-icon-0" class="w-4 h-4 text-fess-crimson transition-transform shrink-0"></i>
+                    </button>
+                    <div id="faq-body-0" class="hidden px-5 pb-4 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                      Student entrepreneurs who already run a business (jewellery, food, candles and more) can register for a stall at PKR 8,000 across both days (10:30 AM – 10:00 PM).
+                    </div>
+                  </div>
+
+                  <div class="rounded-2xl bg-fess-ivory/70 border border-slate-200/80 overflow-hidden">
+                    <button type="button" onclick="toggleFaq(1)" class="w-full px-5 py-3.5 text-left flex items-center justify-between font-display font-bold text-sm text-slate-900">
+                      <span>What is the team limit for Pitch Arena?</span>
+                      <i data-lucide="chevron-down" id="faq-icon-1" class="w-4 h-4 text-fess-crimson transition-transform shrink-0"></i>
+                    </button>
+                    <div id="faq-body-1" class="hidden px-5 pb-4 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                      Individuals or groups of no more than 3 members can participate (PKR 3,000 fee). Each group gets a maximum of 10 minutes to pitch before the panel of business leaders on Day 1 (2:00 PM – 4:00 PM).
+                    </div>
+                  </div>
+
+                  <div class="rounded-2xl bg-fess-ivory/70 border border-slate-200/80 overflow-hidden">
+                    <button type="button" onclick="toggleFaq(2)" class="w-full px-5 py-3.5 text-left flex items-center justify-between font-display font-bold text-sm text-slate-900">
+                      <span>How does Sell Me This Pen work?</span>
+                      <i data-lucide="chevron-down" id="faq-icon-2" class="w-4 h-4 text-fess-crimson transition-transform shrink-0"></i>
+                    </button>
+                    <div id="faq-body-2" class="hidden px-5 pb-4 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                      It is an individual challenge on Day 2 (3:00 PM – 5:00 PM, PKR 2,500 fee). You receive a deliberately boring product or idea and have 10 minutes to prepare a creative pitch for the panel.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Social Links Box -->
+              <div class="bg-fess-midnight rounded-3xl p-7 text-white shadow-xl">
+                <h3 class="font-display font-bold text-lg mb-2">Official Channels</h3>
+                <p class="text-xs text-slate-400 mb-4">Follow updates for Movie Night, Qawali Night, and competition announcements.</p>
+                <div class="flex flex-wrap gap-3">
+                  <button type="button" onclick="showToast('Opening @fess_fast on Instagram')" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold flex items-center gap-2 transition-colors">
+                    <i data-lucide="instagram" class="w-4 h-4 text-red-400"></i>
+                    <span>@fess_fast</span>
+                  </button>
+                  <button type="button" onclick="showToast('Opening FESS on LinkedIn')" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold flex items-center gap-2 transition-colors">
+                    <i data-lucide="linkedin" class="w-4 h-4 text-red-400"></i>
+                    <span>LinkedIn</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- SIGNATURE DARK MIDNIGHT SLATE FOOTER                                  -->
+  <!-- ===================================================================== -->
+  <footer class="bg-[#181E29] text-white pt-16 pb-10 border-t border-slate-800">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 pb-12 border-b border-white/10">
+        <div>
+          <h2 class="font-display font-extrabold text-2xl sm:text-3xl tracking-tight text-white mb-2">
+            FAST Entrepreneurship and Startup<br class="hidden sm:inline" /> Society
+          </h2>
+          <p class="text-slate-400 text-sm sm:text-base mb-4">
+            Where Future Leaders Are Born
+          </p>
+          <div class="w-24 h-1 rounded-full bg-gradient-to-r from-fess-crimson to-red-600"></div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-4">
+          <a href="#instagram" onclick="event.preventDefault(); showToast('Opening @fess_fast on Instagram!')" class="flex items-center gap-3.5 px-5 py-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-red-500/40 transition-all group">
+            <div class="w-10 h-10 rounded-xl bg-red-950/80 border border-red-800/50 flex items-center justify-center text-red-400 group-hover:scale-105 transition-transform">
+              <i data-lucide="instagram" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="font-display font-bold text-sm text-white">Follow Us</div>
+              <div class="text-xs text-slate-400">@fess_fast</div>
+            </div>
+          </a>
+
+          <a href="#linkedin" onclick="event.preventDefault(); showToast('Opening FESS Official LinkedIn Page!')" class="flex items-center gap-3.5 px-5 py-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-red-500/40 transition-all group">
+            <div class="w-10 h-10 rounded-xl bg-red-950/80 border border-red-800/50 flex items-center justify-center text-red-400 group-hover:scale-105 transition-transform">
+              <i data-lucide="linkedin" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="font-display font-bold text-sm text-white">Connect</div>
+              <div class="text-xs text-slate-400">LinkedIn</div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <div class="pt-8 flex flex-col items-center text-center gap-4">
+        <div class="flex flex-wrap justify-center gap-6 text-xs font-medium text-slate-400">
+          <button type="button" onclick="navigateTo('home')" class="hover:text-white transition-colors">Home</button>
+          <button type="button" onclick="navigateTo('events')" class="hover:text-white transition-colors">Flagship Event</button>
+          <button type="button" onclick="navigateTo('teams')" class="hover:text-white transition-colors">Our Teams</button>
+          <button type="button" onclick="navigateTo('connect')" class="hover:text-white transition-colors">Connect</button>
+        </div>
+
+        <div class="text-xs sm:text-sm text-slate-400">
+          © 2026 FESS. Building the next generation of entrepreneurs.
+        </div>
+        <div class="text-xs text-slate-500 flex items-center gap-1.5">
+          <span>Made with</span>
+          <span class="text-red-500">♥</span>
+          <span>by FESS Tech Team</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 1: EVENT REGISTRATION MODAL (Exact PDF Events & Fees Only)      -->
+  <!-- ===================================================================== -->
+  <div id="reg-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md">
+    <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200">
+      <div class="bg-gradient-to-r from-red-900 to-fess-midnight px-6 py-5 text-white flex items-center justify-between">
+        <div>
+          <span class="text-[10px] font-mono uppercase tracking-widest text-amber-300 block">EVENT REGISTRATION</span>
+          <h3 class="font-display font-extrabold text-lg">Register for FESS Event</h3>
+        </div>
+        <button type="button" onclick="closeRegModal()" class="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="p-6 sm:p-7">
+        <form onsubmit="submitEventRegistration(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold uppercase text-slate-600 mb-1.5">Select Event</label>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button type="button" onclick="selectRegEvent('Enterprise Expo')" data-reg-event="Enterprise Expo" class="reg-event-pill py-2.5 px-2 rounded-xl text-xs font-bold border border-slate-200 text-slate-600">
+                Enterprise Expo
+              </button>
+              <button type="button" onclick="selectRegEvent('Pitch Arena')" data-reg-event="Pitch Arena" class="reg-event-pill py-2.5 px-2 rounded-xl text-xs font-bold border-2 border-fess-crimson bg-red-50 text-fess-crimson">
+                Pitch Arena
+              </button>
+              <button type="button" onclick="selectRegEvent('Sell Me This Pen')" data-reg-event="Sell Me This Pen" class="reg-event-pill py-2.5 px-2 rounded-xl text-xs font-bold border border-slate-200 text-slate-600">
+                Sell Me This Pen
+              </button>
+            </div>
+          </div>
+
+          <!-- Dynamic Event Fee & Rule Summary Box from PDF -->
+          <div id="reg-event-summary" class="p-4 rounded-2xl bg-fess-ivory border border-red-900/10 text-xs space-y-1">
+            <!-- Populated by JS -->
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase text-slate-600 mb-1.5">Participant / Team Lead Name</label>
+            <input id="reg-fullname" required type="text" placeholder="Enter your full name" class="w-full px-4 py-3 rounded-xl bg-fess-ivory/70 border border-slate-200 focus:border-fess-crimson outline-none text-sm font-medium" />
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold uppercase text-slate-600 mb-1.5">Contact Number</label>
+              <input id="reg-phone" required type="tel" placeholder="03XX-XXXXXXX" class="w-full px-4 py-3 rounded-xl bg-fess-ivory/70 border border-slate-200 focus:border-fess-crimson outline-none text-sm font-medium" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase text-slate-600 mb-1.5">Business / Team Name</label>
+              <input id="reg-entity" type="text" placeholder="Optional for individual" class="w-full px-4 py-3 rounded-xl bg-fess-ivory/70 border border-slate-200 focus:border-fess-crimson outline-none text-sm font-medium" />
+            </div>
+          </div>
+
+          <button type="submit" class="w-full py-3.5 rounded-xl bg-fess-crimson hover:bg-fess-crimsonDark text-white font-bold text-sm shadow-crimson-glow transition-all flex items-center justify-center gap-2">
+            <span>Confirm Registration</span>
+            <i data-lucide="check" class="w-4 h-4"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 2: TEAM FULL ROSTER LIGHTBOX                                    -->
+  <!-- ===================================================================== -->
+  <div id="team-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+    <div class="bg-white rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl border border-slate-200">
+      <div class="bg-gradient-to-r from-red-900 via-red-800 to-fess-midnight px-6 py-5 text-white flex items-center justify-between">
+        <div>
+          <span id="team-modal-tag" class="text-[10px] font-mono uppercase tracking-widest text-amber-300 block">TASK FORCE 26–27</span>
+          <h3 id="team-modal-title" class="font-display font-extrabold text-xl">Executive Council Roster</h3>
+        </div>
+        <button type="button" onclick="closeTeamModal()" class="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 sm:p-8 max-h-[75vh] overflow-y-auto">
+        <p id="team-modal-desc" class="text-sm text-slate-600 mb-6"></p>
+        <div id="team-modal-members" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Floating Toast Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- ===================================================================== -->
+  <!-- JAVASCRIPT LOGIC                                                      -->
+  <!-- ===================================================================== -->
+  <script>
+    function refreshIcons() {
+      if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        try {
+          window.lucide.createIcons();
+        } catch (err) {
+          console.warn('Icon init skipped:', err);
+        }
+      }
+    }
+
+    /* 1. MULTI-PAGE SPA NAVIGATION */
+    let currentPage = 'home';
+    const pageNames = {
+      'home': 'FESS Home',
+      'events': 'Flagship Event',
+      'teams': 'Meet Our Teams',
+      'connect': 'Connect With FESS'
+    };
+
+    function navigateTo(pageId) {
+      if (pageId === currentPage) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+
+      const curtain = document.getElementById('page-curtain');
+      const label = document.getElementById('curtain-label');
+      label.textContent = pageNames[pageId] || 'FESS';
+
+      curtain.classList.remove('exit');
+      curtain.classList.add('active');
+
+      setTimeout(() => {
+        document.querySelectorAll('.page-section').forEach(sec => {
+          sec.classList.add('hidden');
+          sec.classList.remove('block');
+        });
+
+        const target = document.getElementById(`page-${pageId}`);
+        if (target) {
+          target.classList.remove('hidden');
+          target.classList.add('block');
+        }
+
+        document.querySelectorAll('.nav-pill').forEach(btn => {
+          const isMatch = btn.getAttribute('data-nav') === pageId;
+          if (isMatch) {
+            btn.classList.add('bg-fess-crimson', 'text-white', 'shadow-sm');
+            btn.classList.remove('text-slate-700');
+          } else {
+            btn.classList.remove('bg-fess-crimson', 'text-white', 'shadow-sm');
+            btn.classList.add('text-slate-700');
+          }
+        });
+
+        currentPage = pageId;
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        triggerScrollReveals();
+
+        curtain.classList.remove('active');
+        curtain.classList.add('exit');
+      }, 420);
+    }
+
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobile-menu');
+      menu.classList.toggle('hidden');
+    }
+
+    /* 2. SCROLL PROGRESS & REVEALS */
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      const bar = document.getElementById('scroll-progress');
+      if (bar) bar.style.width = `${progress}%`;
+    });
+
+    function triggerScrollReveals() {
+      const reveals = document.querySelectorAll('.reveal');
+      if (!('IntersectionObserver' in window)) {
+        reveals.forEach(el => el.classList.add('visible'));
+        return;
+      }
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.12 });
+
+      reveals.forEach(el => observer.observe(el));
+    }
+
+    /* 3. 3D PERSPECTIVE TILT */
+    function initTiltCards() {
+      document.querySelectorAll('.tilt-card').forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
+          const rotateX = ((y - centerY) / centerY) * -5;
+          const rotateY = ((x - centerX) / centerX) * 5;
+
+          card.style.setProperty('--mouse-x', `${x}px`);
+          card.style.setProperty('--mouse-y', `${y}px`);
+          card.style.transform = `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-4px)`;
+        });
+
+        card.addEventListener('mouseleave', () => {
+          card.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) translateY(0px)';
+        });
+      });
+    }
+
+    /* 4. HERO SUBTLE PARTICLE NETWORK CANVAS */
+    function initHeroCanvas() {
+      const canvas = document.getElementById('hero-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let width, height, particles;
+
+      function resize() {
+        width = canvas.width = canvas.parentElement.offsetWidth;
+        height = canvas.height = canvas.parentElement.offsetHeight;
+      }
+
+      function createParticles() {
+        const count = Math.min(48, Math.floor(width / 28));
+        particles = Array.from({ length: count }, () => ({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          vx: (Math.random() - 0.5) * 0.45,
+          vy: (Math.random() - 0.5) * 0.45,
+          r: Math.random() * 2 + 1.2,
+          gold: Math.random() > 0.72
+        }));
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, width, height);
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if (p.x < 0 || p.x > width) p.vx *= -1;
+          if (p.y < 0 || p.y > height) p.vy *= -1;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = p.gold ? 'rgba(251, 191, 36, 0.75)' : 'rgba(248, 113, 113, 0.65)';
+          ctx.fill();
+
+          for (let j = i + 1; j < particles.length; j++) {
+            const p2 = particles[j];
+            const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+            if (dist < 130) {
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.strokeStyle = `rgba(255, 255, 255, ${(1 - dist / 130) * 0.14})`;
+              ctx.lineWidth = 0.8;
+              ctx.stroke();
+            }
+          }
+        }
+        requestAnimationFrame(animate);
+      }
+
+      resize();
+      createParticles();
+      animate();
+      window.addEventListener('resize', () => {
+        resize();
+        createParticles();
+      });
+    }
+
+    /* 5. EXACT PDF TIMELINE RENDERER (DAY 1 & DAY 2) */
+    const pdfTimeline = {
+      day1: [
+        { time: '10:30 AM – 10:00 PM', title: 'Enterprise Expo', desc: 'Student stalls open to visitors' },
+        { time: '2:00 PM – 4:00 PM', title: 'Pitch Arena', desc: 'Startup pitches before a panel of business leaders' },
+        { time: '7:00 PM – 10:00 PM', title: 'Movie Night', desc: 'Evening entertainment' }
+      ],
+      day2: [
+        { time: '10:30 AM – 10:00 PM', title: 'Enterprise Expo', desc: 'Stalls continue; winners announced at the end' },
+        { time: '3:00 PM – 5:00 PM', title: 'Sell Me This Pen', desc: 'Individual sales challenge before the panel' },
+        { time: '7:00 PM – 10:00 PM', title: 'Qawali Night', desc: 'Evening entertainment' }
+      ]
+    };
+
+    function switchScheduleDay(mode) {
+      ['all', '1', '2'].forEach(tabId => {
+        const btn = document.getElementById(`day-tab-${tabId}`);
+        if (!btn) return;
+        btn.className = (tabId === mode)
+          ? 'px-4 py-2 rounded-lg text-xs sm:text-sm font-bold bg-fess-crimson text-white transition-all'
+          : 'px-4 py-2 rounded-lg text-xs sm:text-sm font-bold text-slate-600 hover:text-fess-crimson transition-all';
+      });
+
+      const container = document.getElementById('schedule-list');
+      if (!container) return;
+
+      const renderDayCard = (dayLabel, items) => `
+        <div class="rounded-2xl bg-fess-ivory/80 border border-red-900/10 p-6">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fess-crimson text-white font-mono text-xs font-bold mb-5">
+            <span>${dayLabel}</span>
+          </div>
+          <div class="space-y-4">
+            ${items.map(item => `
+              <div class="p-4 rounded-xl bg-white border border-slate-200/80 shadow-sm">
+                <div class="font-mono text-xs font-bold text-fess-crimson mb-1">${item.time}</div>
+                <div class="font-display font-extrabold text-lg text-slate-900">${item.title}</div>
+                <div class="text-sm text-slate-600 mt-0.5">${item.desc}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      if (mode === 'all') {
+        container.className = 'grid grid-cols-1 lg:grid-cols-2 gap-8';
+        container.innerHTML = renderDayCard('DAY 1', pdfTimeline.day1) + renderDayCard('DAY 2', pdfTimeline.day2);
+      } else if (mode === '1') {
+        container.className = 'grid grid-cols-1 gap-8';
+        container.innerHTML = renderDayCard('DAY 1', pdfTimeline.day1);
+      } else {
+        container.className = 'grid grid-cols-1 gap-8';
+        container.innerHTML = renderDayCard('DAY 2', pdfTimeline.day2);
+      }
+    }
+
+    /* 6. EVENT REGISTRATION MODAL (PDF Events & Fees Only) */
+    const pdfEventInfo = {
+      'Enterprise Expo': {
+        fee: 'PKR 8,000 per stall',
+        timing: 'Day 1 & Day 2 | 10:30 AM – 10:00 PM',
+        detail: 'For student business owners (jewellery, food, candles and more). Awards: Audience Favourite & Most Unique Stall.'
+      },
+      'Pitch Arena': {
+        fee: 'PKR 3,000',
+        timing: 'Day 1 | 2:00 PM – 4:00 PM',
+        detail: 'Individuals or groups (max 3 members, max 10 mins). Winner: PKR 15,000 + shield + certificate; Runner-up: shield + certificate.'
+      },
+      'Sell Me This Pen': {
+        fee: 'PKR 2,500',
+        timing: 'Day 2 | 3:00 PM – 5:00 PM',
+        detail: 'Individual challenge (10 mins prep). Winner: PKR 15,000 cash prize + shield + certificate.'
+      }
+    };
+
+    let activeRegEvent = 'Pitch Arena';
+
+    function openRegModal(eventName = 'Pitch Arena') {
+      selectRegEvent(eventName);
+      const modal = document.getElementById('reg-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeRegModal() {
+      const modal = document.getElementById('reg-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function selectRegEvent(eventName) {
+      activeRegEvent = pdfEventInfo[eventName] ? eventName : 'Pitch Arena';
+      document.querySelectorAll('.reg-event-pill').forEach(btn => {
+        const isMatch = btn.getAttribute('data-reg-event') === activeRegEvent;
+        btn.className = isMatch
+          ? 'reg-event-pill py-2.5 px-2 rounded-xl text-xs font-bold border-2 border-fess-crimson bg-red-50 text-fess-crimson'
+          : 'reg-event-pill py-2.5 px-2 rounded-xl text-xs font-bold border border-slate-200 text-slate-600';
+      });
+
+      const info = pdfEventInfo[activeRegEvent];
+      const box = document.getElementById('reg-event-summary');
+      if (box && info) {
+        box.innerHTML = `
+          <div class="flex items-center justify-between font-bold text-slate-900">
+            <span>${activeRegEvent}</span>
+            <span class="font-mono text-fess-crimson">${info.fee}</span>
+          </div>
+          <div class="font-mono text-[11px] text-slate-500">${info.timing}</div>
+          <div class="text-slate-600 pt-1">${info.detail}</div>
+        `;
+      }
+    }
+
+    function submitEventRegistration(e) {
+      e.preventDefault();
+      const name = document.getElementById('reg-fullname').value.trim();
+      closeRegModal();
+      e.target.reset();
+      showToast(`Registration received for ${name} — ${activeRegEvent}!`);
+    }
+
+    /* 7. OUR TEAMS ROSTER MODAL */
+    const teamRosters = {
+      executive: {
+        tag: 'TASK FORCE 26–27',
+        title: 'Executive Council Roster',
+        desc: 'Leading the vision and strategy of FAST Entrepreneurship and Startup Society.',
+        members: [
+          { name: 'Hamza Tariq', role: 'President FESS', dept: 'Executive Council' },
+          { name: 'Ayesha Siddiqui', role: 'General Secretary', dept: 'Executive Council' },
+          { name: 'Bilal Ahmed', role: 'Vice President Operations', dept: 'Executive Council' },
+          { name: 'Mahnoor Raza', role: 'Vice President Strategy', dept: 'Executive Council' }
+        ]
+      },
+      tech: {
+        tag: 'DIGITAL INFRASTRUCTURE',
+        title: 'FESS Tech Team Roster',
+        desc: 'Building the digital infrastructure of FESS.',
+        members: [
+          { name: 'Zaim Abbasi', role: 'Head of Tech Team', dept: 'Digital Infrastructure' },
+          { name: 'Usman Khalid', role: 'Frontend & UI Lead', dept: 'Digital Infrastructure' },
+          { name: 'Sara Javed', role: 'Backend & Systems Lead', dept: 'Digital Infrastructure' },
+          { name: 'Daniyal Mir', role: 'Web Operations Lead', dept: 'Digital Infrastructure' }
+        ]
+      }
+    };
+
+    function openTeamModal(key) {
+      const data = teamRosters[key];
+      if (!data) return;
+      document.getElementById('team-modal-tag').textContent = data.tag;
+      document.getElementById('team-modal-title').textContent = data.title;
+      document.getElementById('team-modal-desc').textContent = data.desc;
+
+      document.getElementById('team-modal-members').innerHTML = data.members.map(m => `
+        <div class="p-4 rounded-2xl bg-fess-ivory border border-red-900/10 flex items-center gap-3.5">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-red-800 to-fess-midnight text-white font-display font-bold flex items-center justify-center shrink-0">
+            ${m.name.split(' ').map(n => n[0]).join('')}
+          </div>
+          <div>
+            <div class="font-display font-bold text-sm text-slate-900">${m.name}</div>
+            <div class="text-xs font-semibold text-fess-crimson">${m.role}</div>
+            <div class="text-[11px] text-slate-500 mt-0.5">${m.dept}</div>
+          </div>
+        </div>
+      `).join('');
+
+      const modal = document.getElementById('team-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeTeamModal() {
+      const modal = document.getElementById('team-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    /* 8. CONNECT FORM & FAQ */
+    function handleConnectSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('contact-name').value;
+      showToast(`Thank you, ${name}! Your message has been sent to FESS.`);
+      e.target.reset();
+    }
+
+    function toggleFaq(idx) {
+      const body = document.getElementById(`faq-body-${idx}`);
+      const icon = document.getElementById(`faq-icon-${idx}`);
+      if (body) body.classList.toggle('hidden');
+      if (icon) icon.classList.toggle('rotate-180');
+    }
+
+    /* 9. TOAST NOTIFICATIONS */
+    function showToast(message) {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      toast.className = 'pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl bg-fess-midnight text-white text-xs sm:text-sm font-medium shadow-2xl border border-red-800/60 transition-all duration-300';
+      toast.innerHTML = `
+        <span class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span>
+        <span>${message}</span>
+      `;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3200);
+    }
+
+    /* Expose all inline handlers globally */
+    Object.assign(window, {
+      navigateTo,
+      toggleMobileMenu,
+      switchScheduleDay,
+      openRegModal,
+      closeRegModal,
+      selectRegEvent,
+      submitEventRegistration,
+      openTeamModal,
+      closeTeamModal,
+      handleConnectSubmit,
+      toggleFaq,
+      showToast
+    });
+
+    function bootFessApp() {
+      refreshIcons();
+      initHeroCanvas();
+      initTiltCards();
+      triggerScrollReveals();
+      switchScheduleDay('all');
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bootFessApp);
+    } else {
+      bootFessApp();
+    }
+  </script>
+</body>
+</html>

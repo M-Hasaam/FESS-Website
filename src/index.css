@@ -1,0 +1,163 @@
+@import "tailwindcss";
+
+@theme {
+  --color-fess-crimson: #991B1B;
+  --color-fess-crimson-dark: #7F1D1D;
+  --color-fess-crimson-bright: #B91C1C;
+  --color-fess-ivory: #FAF6F0;
+  --color-fess-ivory-dark: #F2EAE0;
+  --color-fess-midnight: #141923;
+  --color-fess-slate-deep: #1E2430;
+  --color-fess-gold: #D97706;
+
+  --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    overflow-x: clip;
+  }
+
+  body {
+    background-color: #FAF6F0;
+    color: #1E2430;
+    font-family: var(--font-sans);
+    overflow-x: clip;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
+}
+
+/* Custom sleek scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #FAF6F0;
+}
+::-webkit-scrollbar-thumb {
+  background: #991B1B;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #7F1D1D;
+}
+
+/* Architectural grid texture */
+.bg-arch-grid {
+  background-image:
+    linear-gradient(to right, rgba(153, 27, 27, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(153, 27, 27, 0.045) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Signature crimson bottom accent on elevated cards */
+.fess-card-border {
+  border-bottom: 3px solid transparent;
+  background-image:
+    linear-gradient(#ffffff, #ffffff),
+    linear-gradient(90deg, transparent 8%, #991B1B 50%, transparent 92%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+.fess-card-border-warm {
+  border-bottom: 3px solid transparent;
+  background-image:
+    linear-gradient(#F7F1E7, #F7F1E7),
+    linear-gradient(90deg, transparent 8%, #991B1B 50%, transparent 92%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+/* Architectural corner brackets on team showcases */
+.corner-brackets {
+  position: relative;
+}
+.corner-brackets::before,
+.corner-brackets::after {
+  content: "";
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+}
+.corner-brackets::before {
+  top: -8px;
+  left: -8px;
+  border-top: 2px solid rgba(153, 27, 27, 0.45);
+  border-left: 2px solid rgba(153, 27, 27, 0.45);
+  border-top-left-radius: 10px;
+}
+.corner-brackets::after {
+  bottom: -8px;
+  right: -8px;
+  border-bottom: 2px solid rgba(153, 27, 27, 0.45);
+  border-right: 2px solid rgba(153, 27, 27, 0.45);
+  border-bottom-right-radius: 10px;
+}
+.group:hover .corner-brackets::before {
+  border-color: #991B1B;
+  transform: translate(-2px, -2px);
+}
+.group:hover .corner-brackets::after {
+  border-color: #991B1B;
+  transform: translate(2px, 2px);
+}
+
+/* Infinite marquee (GPU transform only) */
+@keyframes marqueeScroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 34s linear infinite;
+  will-change: transform;
+}
+
+.marquee-wrapper:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Ken Burns gentle architectural drift */
+@keyframes kenBurns {
+  0% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: scale(1.07) translate3d(-1%, -0.8%, 0);
+  }
+  100% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+}
+
+.animate-ken-burns {
+  animation: kenBurns 28s ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .marquee-track,
+  .animate-ken-burns {
+    animation: none !important;
+  }
+}

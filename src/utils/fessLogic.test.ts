@@ -9,6 +9,11 @@ import {
   validateConnectForm,
   validateRegistrationForm,
 } from './fessLogic';
+import {
+  escapeHtml,
+  sanitizeHeaderValue,
+  validateAndFormatContactEmail,
+} from './contactEmail';
 
 test('parsePageFromHash resolves valid routes and falls back to home', () => {
   assert.equal(parsePageFromHash('#events'), 'events');
@@ -95,3 +100,36 @@ test('validateConnectForm validates email, name, and message length', () => {
   });
   assert.equal(good.valid, true);
 });
+
+test('escapeHtml and sanitizeHeaderValue neutralize HTML and control characters', () => {
+  assert.equal(
+    escapeHtml('<script>alert("xss")</script> & \'test\''),
+    '&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt; &amp; &#39;test&#39;'
+  );
+  assert.equal(sanitizeHeaderValue("Ali\r\nBcc: attacker@evil.com"), 'Ali Bcc: attacker@evil.com');
+});
+
+test('validateAndFormatContactEmail escapes XSS, blocks header CRLF in email, and builds safe payload', () => {
+  const injectedEmail = validateAndFormatContactEmail({
+    name: 'Tester',
+    email: "user@fast.edu.pk\r\nBcc: evil@example.com",
+    topic: 'General',
+    message: 'Hello FESS team!',
+  });
+  assert.equal(injectedEmail.ok, false);
+
+  const safeResult = validateAndFormatContactEmail({
+    name: '<b>Salman</b>',
+    email: 'salman@fast.edu.pk',
+    topic: "Pitch Arena\nInquiry",
+    message: '<img src=x onerror=alert(1)> Looking forward to pitching!',
+  });
+  assert.equal(safeResult.ok, true);
+  if (safeResult.ok) {
+    assert.equal(safeResult.data.subject, '[FESS Connect] Pitch Arena Inquiry — <b>Salman</b>');
+    assert.ok(!safeResult.data.html.includes('<img src=x'));
+    assert.ok(safeResult.data.html.includes('&lt;img src=x onerror=alert(1)&gt;'));
+    assert.ok(safeResult.data.html.includes('&lt;b&gt;Salman&lt;/b&gt;'));
+  }
+});
+

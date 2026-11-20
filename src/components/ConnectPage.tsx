@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { CheckCircle2, ChevronDown, Instagram, Linkedin, Send } from 'lucide-react';
+import {
+  AlertCircle,
+  CheckCircle2,
+  ChevronDown,
+  Instagram,
+  Linkedin,
+  Loader2,
+  Send,
+} from 'lucide-react';
 import { CONNECT_FAQS, CONNECT_TOPICS } from '../data/fessData';
 import { validateConnectForm } from '../utils/fessLogic';
 import { FESS_EASE, Reveal } from './MotionPrimitives';
@@ -14,6 +22,7 @@ interface SentMessage {
   email: string;
   topic: string;
   message: string;
+  emailId?: string | null;
 }
 
 export function ConnectPage({ onShowToast }: ConnectPageProps) {
@@ -22,29 +31,72 @@ export function ConnectPage({ onShowToast }: ConnectPageProps) {
   const [topic, setTopic] = useState(CONNECT_TOPICS[0]);
   const [message, setMessage] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [sentMessage, setSentMessage] = useState<SentMessage | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     const validation = validateConnectForm({ name, email, topic, message });
     if (!validation.valid) {
       setErrors(validation.errors);
+      setSubmitError(null);
       return;
     }
 
     setErrors({});
-    const submitted: SentMessage = {
+    setSubmitError(null);
+    setIsSubmitting(true);
+
+    const payload = {
       name: name.trim(),
       email: email.trim(),
       topic,
       message: message.trim(),
     };
-    setSentMessage(submitted);
-    onShowToast(`Thank you, ${submitted.name}! Your message has been sent to FESS.`);
-    setName('');
-    setEmail('');
-    setMessage('');
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const result = (await response.json().catch(() => ({}))) as {
+        ok?: boolean;
+        id?: string | null;
+        error?: string;
+        errors?: Record<string, string>;
+      };
+
+      if (!response.ok || !result.ok) {
+        if (result.errors) {
+          setErrors(result.errors);
+        }
+        setSubmitError(
+          result.error || 'Could not send your message via Resend. Please try again.'
+        );
+        return;
+      }
+
+      setSentMessage({
+        ...payload,
+        emailId: result.id ?? null,
+      });
+      onShowToast(`Thank you, ${payload.name}! Your email has been sent to FESS.`);
+      setName('');
+      setEmail('');
+      setMessage('');
+    } catch {
+      setSubmitError(
+        'Network error while reaching the FESS contact server. Please check your connection and try again.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -95,12 +147,19 @@ export function ConnectPage({ onShowToast }: ConnectPageProps) {
                         </h3>
                         <p className="text-sm text-slate-600 mt-1">
                           Thank you, <strong className="text-slate-900">{sentMessage.name}</strong>.
-                          Our team will follow up at{' '}
+                          Your inquiry regarding{' '}
+                          <strong className="text-[#991B1B]">{sentMessage.topic}</strong> has been
+                          dispatched. Our team will reply to{' '}
                           <span className="font-mono text-xs text-slate-800">
                             {sentMessage.email}
-                          </span>{' '}
-                          regarding <strong className="text-[#991B1B]">{sentMessage.topic}</strong>.
+                          </span>
+                          .
                         </p>
+                        {sentMessage.emailId && (
+                          <p className="text-[11px] font-mono text-slate-500 mt-2">
+                            Ref: {sentMessage.emailId}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <button
@@ -113,6 +172,16 @@ export function ConnectPage({ onShowToast }: ConnectPageProps) {
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} noValidate className="space-y-4">
+                    {submitError && (
+                      <div
+                        role="alert"
+                        className="p-4 rounded-xl bg-red-50 border border-red-200 text-[#7F1D1D] text-xs sm:text-sm flex items-start gap-2.5"
+                      >
+                        <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#991B1B]" />
+                        <span>{submitError}</span>
+                      </div>
+                    )}
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label
@@ -125,10 +194,11 @@ export function ConnectPage({ onShowToast }: ConnectPageProps) {
                           id="contact-name"
                           required
                           type="text"
+                          disabled={isSubmitting}
                           value={name}
                           onChange={(e) => setName(e.target.value)}
                           placeholder="Enter your full name"
-                          className="w-full px-4 py-3 rounded-xl bg-[#FAF6F0]/80 border border-slate-200 focus:border-[#991B1B] outline-none text-sm"
+                          className="w-full px-4 py-3 rounded-xl bg-[#FAF6F0]/80 border border-slate-200 focus:border-[#991B1B] outline-none text-sm disabled:opacity-60"
                         />
                         {errors.name && (
                           <p className="text-xs text-[#991B1B] mt-1 font-medium">
@@ -148,10 +218,11 @@ export function ConnectPage({ onShowToast }: ConnectPageProps) {
                           id="contact-email"
                           required
                           type="email"
+                          disabled={isSubmitting}
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           placeholder="you@example.com"
-                          className="w-full px-4 py-3 rounded-xl bg-[#FAF6F0]/80 border border-slate-200 focus:border-[#991B1B] outline-none text-sm"
+                          className="w-full px-4 py-3 rounded-xl bg-[#FAF6F0]/80 border border-slate-200 focus:border-[#991B1B] outline-none text-sm disabled:opacity-60"
                         />
                         {errors.email && (
                           <p className="text-xs text-[#991B1B] mt-1 font-medium">
@@ -170,9 +241,10 @@ export function ConnectPage({ onShowToast }: ConnectPageProps) {
                       </label>
                       <select
                         id="contact-topic"
+                        disabled={isSubmitting}
                         value={topic}
                         onChange={(e) => setTopic(e.target.value)}
-                        className="w-full px-4 py-3 rounded-xl bg-[#FAF6F0]/80 border border-slate-200 focus:border-[#991B1B] outline-none text-sm font-medium"
+                        className="w-full px-4 py-3 rounded-xl bg-[#FAF6F0]/80 border border-slate-200 focus:border-[#991B1B] outline-none text-sm font-medium disabled:opacity-60"
                       >
                         {CONNECT_TOPICS.map((t) => (
                           <option key={t} value={t}>
@@ -193,10 +265,11 @@ export function ConnectPage({ onShowToast }: ConnectPageProps) {
                         id="contact-msg"
                         required
                         rows={4}
+                        disabled={isSubmitting}
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         placeholder="Write your message or question here..."
-                        className="w-full px-4 py-3 rounded-xl bg-[#FAF6F0]/80 border border-slate-200 focus:border-[#991B1B] outline-none text-sm"
+                        className="w-full px-4 py-3 rounded-xl bg-[#FAF6F0]/80 border border-slate-200 focus:border-[#991B1B] outline-none text-sm disabled:opacity-60"
                       />
                       {errors.message && (
                         <p className="text-xs text-[#991B1B] mt-1 font-medium">
@@ -207,10 +280,20 @@ export function ConnectPage({ onShowToast }: ConnectPageProps) {
 
                     <button
                       type="submit"
-                      className="w-full py-4 rounded-xl bg-[#991B1B] hover:bg-[#7F1D1D] text-white font-bold text-sm shadow-[0_10px_28px_-6px_rgba(153,27,27,0.3)] transition-colors flex items-center justify-center gap-2"
+                      disabled={isSubmitting}
+                      className="w-full py-4 rounded-xl bg-[#991B1B] hover:bg-[#7F1D1D] disabled:opacity-70 disabled:cursor-not-allowed text-white font-bold text-sm shadow-[0_10px_28px_-6px_rgba(153,27,27,0.3)] transition-colors flex items-center justify-center gap-2"
                     >
-                      <Send className="w-4 h-4" />
-                      <span>Send Message to FESS</span>
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Sending Message...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4" />
+                          <span>Send Message to FESS</span>
+                        </>
+                      )}
                     </button>
                   </form>
                 )}

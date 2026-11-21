@@ -26,6 +26,7 @@ import {
 } from '../data/fessData';
 import { Scene3DCanvas } from './Scene3DCanvas';
 import { PastEventsLibrary } from './PastEventsLibrary';
+import { ShatterType } from './ui/shatter-type';
 import {
   FESS_EASE,
   ImageWithFallback,
@@ -113,19 +114,8 @@ export function HomePage({ onNavigate, onOpenRegister }: HomePageProps) {
             FAST Entrepreneurship and Startup Society
           </motion.p>
 
-          <div className="overflow-hidden mb-4 sm:mb-6">
-            <motion.h1
-              initial={shouldReduce ? false : { opacity: 0, y: 36, rotateX: 22 }}
-              animate={{ opacity: 1, y: 0, rotateX: 0 }}
-              transition={{ duration: 0.7, delay: 0.08, ease: FESS_EASE }}
-              className="font-extrabold tracking-tight leading-[1.06] text-white"
-              style={{ fontSize: 'clamp(2.45rem, 5.4vw, 4.75rem)' }}
-            >
-              Your Startup{' '}
-              <span className="block bg-gradient-to-r from-white via-amber-100 to-red-200 bg-clip-text text-transparent">
-                Starts Here.
-              </span>
-            </motion.h1>
+          <div className="mb-4 sm:mb-6">
+            <ShatterType />
           </div>
 
           <motion.p

@@ -20,6 +20,7 @@ import {
 } from '../data/fessData';
 import { FESS_EASE, Reveal } from './MotionPrimitives';
 import { Team3DCanvas } from './Team3DCanvas';
+import { NeonReveal } from './ui/neon-reveal';
 
 interface TeamDetailPageProps {
   teamId: TeamId;
@@ -88,37 +89,34 @@ export function TeamDetailPage({ teamId, onNavigate }: TeamDetailPageProps) {
           </div>
 
           <div className="max-w-3xl">
-            <motion.p
-              initial={shouldReduce ? undefined : { opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, ease: FESS_EASE }}
-              className="font-mono text-xs uppercase tracking-[0.2em] text-amber-300 mb-3"
+            <NeonReveal
+              colors={['#EF4444', '#FBBF24']}
+              direction="down"
+              expandFrom="left"
+              revealDuration={1400}
+              thickness={3}
+              glow={1.15}
+              spill={1.1}
+              className="mb-6 bg-white/4 border border-white/10 backdrop-blur-sm"
             >
-              {team.tag === team.badgeText
-                ? `${team.tag} · FESS Division`
-                : `${team.tag} · ${team.badgeText}`}
-            </motion.p>
+              <div className="px-6 py-6 sm:px-8 sm:py-7 text-left">
+                <p className="font-mono text-xs uppercase tracking-[0.2em] text-amber-300 mb-3">
+                  {team.tag === team.badgeText
+                    ? `${team.tag} · FESS Division`
+                    : `${team.tag} · ${team.badgeText}`}
+                </p>
 
-            <motion.h1
-              initial={shouldReduce ? undefined : { opacity: 0, y: 18, rotateX: 16 }}
-              animate={{ opacity: 1, y: 0, rotateX: 0 }}
-              transition={{ duration: 0.55, delay: 0.05, ease: FESS_EASE }}
-              style={shouldReduce ? undefined : { transformPerspective: 900 }}
-              className="font-extrabold tracking-tight mb-4"
-            >
-              <span style={{ fontSize: 'clamp(2.35rem, 5vw, 4rem)' }} className="block">
-                {team.title}
-              </span>
-            </motion.h1>
+                <h1 className="font-extrabold tracking-tight mb-4 text-white">
+                  <span style={{ fontSize: 'clamp(2.35rem, 5vw, 4rem)' }} className="block">
+                    {team.title}
+                  </span>
+                </h1>
 
-            <motion.p
-              initial={shouldReduce ? undefined : { opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.12, ease: FESS_EASE }}
-              className="text-slate-300 text-base sm:text-lg leading-relaxed mb-8"
-            >
-              {team.heroVision}
-            </motion.p>
+                <p className="text-slate-300 text-base sm:text-lg leading-relaxed">
+                  {team.heroVision}
+                </p>
+              </div>
+            </NeonReveal>
 
             {/* 3D Floating KPI Depth Chips */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">

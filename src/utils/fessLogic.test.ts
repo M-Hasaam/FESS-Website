@@ -22,6 +22,15 @@ import {
   validateRegistrationPayload,
 } from './backendSecurity';
 import { SlidingWindowRateLimiter } from './rateLimiter';
+import {
+  computeCursorCrackDisplacement,
+  computeShardScatter,
+} from './shatterPhysics';
+import {
+  getNeonOrigin,
+  getSpillGradientDirection,
+  resolveNeonCubicBezier,
+} from './neonRevealConfig';
 
 test('parsePageFromHash resolves valid routes including team detail pages and falls back to home', () => {
   assert.equal(parsePageFromHash('#events'), 'events');
@@ -211,4 +220,33 @@ test('filterPastEventsByCategory and stepCarouselIndex handle archive filtering 
   assert.equal(stepCarouselIndex(4, 1, 5), 0);
   assert.equal(stepCarouselIndex(2, 1, 5), 3);
   assert.equal(stepCarouselIndex(1, 1, 0), 0);
+});
+
+test('shatterPhysics computes deterministic shard scatter and inverse-distance cursor crack vectors', () => {
+  const s0 = computeShardScatter(3, 0, 20);
+  const s1 = computeShardScatter(3, 1, 20);
+  assert.equal(s0.delay >= 0, true);
+  assert.notEqual(s0.burstX, s1.burstX);
+  assert.equal(Math.sign(s0.enterRotate), -1);
+  assert.equal(Math.sign(s1.enterRotate), 1);
+
+  const far = computeCursorCrackDisplacement(200, 0, 120, 0);
+  assert.equal(far.intensity, 0);
+  assert.equal(far.offsetX, 0);
+
+  const near0 = computeCursorCrackDisplacement(10, 0, 120, 0);
+  const near1 = computeCursorCrackDisplacement(10, 0, 120, 1);
+  assert.ok(near0.intensity > 0.8);
+  assert.ok(near0.rotateDeg < 0);
+  assert.ok(near1.rotateDeg > 0);
+});
+
+test('neonRevealConfig resolves curves, transform origins, and gradient directions', () => {
+  assert.deepEqual(resolveNeonCubicBezier('linear'), [0, 0, 1, 1]);
+  assert.deepEqual(resolveNeonCubicBezier('out'), [0.16, 1, 0.3, 1]);
+  assert.equal(getNeonOrigin('center', 'down'), '50% 50%');
+  assert.equal(getNeonOrigin('left', 'down'), '0% 50%');
+  assert.equal(getNeonOrigin('right', 'left'), '50% 100%');
+  assert.equal(getSpillGradientDirection('down'), '180deg');
+  assert.equal(getSpillGradientDirection('right'), '90deg');
 });

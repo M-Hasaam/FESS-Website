@@ -3,6 +3,7 @@ import { motion, useMotionValue, useReducedMotion, useSpring } from 'motion/reac
 import { ArrowUpRight } from 'lucide-react';
 import { TEAMS, type TeamGroup } from '../data/fessData';
 import { Reveal } from './MotionPrimitives';
+import { NeonReveal } from './ui/neon-reveal';
 
 interface TeamsPageProps {
   onSelectTeam: (teamId: 'executive' | 'tech') => void;
@@ -12,21 +13,9 @@ export function TeamsPage({ onSelectTeam }: TeamsPageProps) {
   return (
     <section className="py-16 sm:py-24 bg-[#FAF6F0] bg-arch-grid min-h-[85vh]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Reveal className="text-center mb-14">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#991B1B] mb-3">
-            The Powerhouse Behind FESS
-          </p>
-          <h1
-            className="font-extrabold text-[#991B1B] tracking-tight mb-4"
-            style={{ fontSize: 'clamp(2.4rem, 5vw, 3.85rem)' }}
-          >
-            Meet Our Teams
-          </h1>
-          <p className="text-slate-600 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-            The passionate innovators, visionaries, and builders making the impossible
-            possible
-          </p>
-        </Reveal>
+        <div className="mb-12 sm:mb-14">
+          <NeonReveal />
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10 mb-16 max-w-5xl mx-auto">
           <TeamShowcaseCard

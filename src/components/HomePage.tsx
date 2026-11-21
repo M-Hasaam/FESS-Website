@@ -25,6 +25,7 @@ import {
   type PageId,
 } from '../data/fessData';
 import { Scene3DCanvas } from './Scene3DCanvas';
+import { PastEventsLibrary } from './PastEventsLibrary';
 import {
   FESS_EASE,
   ImageWithFallback,
@@ -476,7 +477,13 @@ export function HomePage({ onNavigate, onOpenRegister }: HomePageProps) {
         </div>
       </section>
 
-      {/* 1E. "THE FUTURE IS OURS" & "READY TO DOMINATE?" SPLIT SECTION */}
+      {/* 1E. PAST EVENTS ARCHIVE LIBRARY (SKEWED CAROUSEL) */}
+      <PastEventsLibrary
+        onExploreUpcoming={() => onNavigate('events')}
+        onOpenRegister={(event) => onOpenRegister(event)}
+      />
+
+      {/* 1F. "THE FUTURE IS OURS" & "READY TO DOMINATE?" SPLIT SECTION */}
       <section className="py-20 sm:py-24 bg-[#F2EAE0]/70">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <Reveal className="text-center mb-14">

@@ -1,12 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { SCHEDULE_ITEMS } from '../data/fessData';
+import { PAST_EVENTS, SCHEDULE_ITEMS } from '../data/fessData';
 import {
   createRegistrationRecord,
+  filterPastEventsByCategory,
   filterScheduleByDay,
   formatCurrencyPKR,
   getTeamIdFromPage,
   parsePageFromHash,
+  stepCarouselIndex,
   validateConnectForm,
   validateRegistrationForm,
 } from './fessLogic';
@@ -197,4 +199,16 @@ test('resolveAllowedUpstreamUrl blocks unknown services, traversal, and origin e
   }
 });
 
+test('filterPastEventsByCategory and stepCarouselIndex handle archive filtering and wraparound stepping', () => {
+  const all = filterPastEventsByCategory(PAST_EVENTS, 'All');
+  const expos = filterPastEventsByCategory(PAST_EVENTS, 'Expo');
 
+  assert.equal(all.length, PAST_EVENTS.length);
+  assert.equal(expos.length, 1);
+  assert.equal(expos[0].id, 'makers-expo-24');
+
+  assert.equal(stepCarouselIndex(0, -1, 5), 4);
+  assert.equal(stepCarouselIndex(4, 1, 5), 0);
+  assert.equal(stepCarouselIndex(2, 1, 5), 3);
+  assert.equal(stepCarouselIndex(1, 1, 0), 0);
+});

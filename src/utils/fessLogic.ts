@@ -149,3 +149,22 @@ export function validateConnectForm(input: ConnectFormInput): ValidationResult {
     errors,
   };
 }
+
+export function filterPastEventsByCategory<T extends { category: string }>(
+  events: T[],
+  category: string
+): T[] {
+  if (!category || category === 'All') {
+    return events;
+  }
+  return events.filter((event) => event.category === category);
+}
+
+export function stepCarouselIndex(
+  currentIndex: number,
+  delta: number,
+  totalItems: number
+): number {
+  if (totalItems <= 0) return 0;
+  return (((currentIndex + delta) % totalItems) + totalItems) % totalItems;
+}

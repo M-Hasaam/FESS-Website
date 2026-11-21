@@ -70,6 +70,29 @@ export interface FaqItem {
   answer: string;
 }
 
+export type PastEventCategory =
+  | 'All'
+  | 'Summit'
+  | 'Expo'
+  | 'Hackathon'
+  | 'Workshop'
+  | 'Cultural';
+
+export interface PastEventItem {
+  id: string;
+  title: string;
+  edition: string;
+  category: Exclude<PastEventCategory, 'All'>;
+  dateLabel: string;
+  venue: string;
+  attendanceLabel: string;
+  outcomeLabel: string;
+  summary: string;
+  highlights: string[];
+  image: string;
+  imageAlt: string;
+}
+
 export const HERO_MEDIA = {
   image: '/src/assets/images/hero_fess_architecture_1795208286661.jpg',
   alt: 'Modern glass university innovation towers illuminated at twilight',
@@ -445,3 +468,111 @@ export const CONNECT_TOPICS = [
   'Sell Me This Pen Inquiry (PKR 2,500)',
   'Movie Night & Qawali Night',
 ];
+
+export const PAST_EVENT_CATEGORIES: PastEventCategory[] = [
+  'All',
+  'Summit',
+  'Expo',
+  'Hackathon',
+  'Workshop',
+  'Cultural',
+];
+
+export const PAST_EVENTS: PastEventItem[] = [
+  {
+    id: 'startup-summit-25',
+    title: 'FESS Startup Summit ’25',
+    edition: 'Spring 2025',
+    category: 'Summit',
+    dateLabel: 'March 2025',
+    venue: 'Main Auditorium, FAST Campus',
+    attendanceLabel: '420+ Delegates',
+    outcomeLabel: '14 Finalist Ventures Pitched',
+    summary:
+      'Our largest student-led entrepreneurship conference featuring founder keynotes, live investor Q&A panels, and rapid product teardowns on the main auditorium stage.',
+    highlights: [
+      '420+ student founders, builders, and industry mentors in attendance',
+      '14 student teams pitched directly to Lahore & Islamabad angel operators',
+      '3 finalists fast-tracked into regional summer accelerator cohorts',
+    ],
+    image: '/src/assets/images/past_startup_summit_1795261831569.jpg',
+    imageAlt: 'Packed university auditorium watching a student founder keynote at FESS Startup Summit 2025',
+  },
+  {
+    id: 'makers-expo-24',
+    title: 'FAST Makers Expo ’24',
+    edition: 'Autumn 2024',
+    category: 'Expo',
+    dateLabel: 'November 2024',
+    venue: 'Central Courtyard Bazaar',
+    attendanceLabel: '34 Student Stalls',
+    outcomeLabel: 'PKR 1.1M+ Weekend GMV',
+    summary:
+      'A two-day open-air campus marketplace where student-owned lifestyle, specialty coffee, candle, and hardware brands launched new seasonal lines directly to campus visitors.',
+    highlights: [
+      '34 independent student-operated stalls across food, craft, apparel, and gadgets',
+      'Over PKR 1.1M in combined weekend student vendor sales across 2 days',
+      'Live crowd voting for Audience Favourite and Most Unique Stall honors',
+    ],
+    image: '/src/assets/images/past_makers_expo_1795261831691.jpg',
+    imageAlt: 'Vibrant daytime university courtyard marketplace filled with student entrepreneurship stalls',
+  },
+  {
+    id: 'prototype-sprint-24',
+    title: '24-Hour Prototype Sprint',
+    edition: 'Winter 2024',
+    category: 'Hackathon',
+    dateLabel: 'December 2024',
+    venue: 'Innovation Atrium, CS Block',
+    attendanceLabel: '28 Engineering Teams',
+    outcomeLabel: '22 Working MVPs Shipped',
+    summary:
+      'An overnight engineering and product sprint challenging multidisciplinary FAST teams to validate a campus or fintech bottleneck and ship an interactive prototype by sunrise.',
+    highlights: [
+      '28 engineering, UI/UX, and business teams competing overnight',
+      '22 live clickable & hardware-backed MVPs demoed at 8:00 AM judging',
+      'Dedicated design clinic and architecture mentors on floor all night',
+    ],
+    image: '/src/assets/images/past_prototype_sprint_1795261832112.jpg',
+    imageAlt: 'Student engineers collaborating on laptops and hardware prototypes at night inside a glass atrium',
+  },
+  {
+    id: 'founder-fireside-24',
+    title: 'Founder Fireside & Venture Clinic',
+    edition: 'Fall 2024',
+    category: 'Workshop',
+    dateLabel: 'October 2024',
+    venue: 'Executive Seminar Hall',
+    attendanceLabel: '18 Early Ventures',
+    outcomeLabel: '1:1 Pitch Deck Audits',
+    summary:
+      'Closed-door mentorship tables pairing early student teams with alumni founders and venture operators for candid feedback on pricing, go-to-market, and unit economics.',
+    highlights: [
+      '18 pre-seed student ventures matched with industry operators',
+      'Hands-on teardown of financial models, customer discovery scripts, and pitch decks',
+      '9 participating teams later placed top ranks in regional pitch arenas',
+    ],
+    image: '/src/assets/images/past_founder_fireside_1795261832743.jpg',
+    imageAlt: 'Seasoned tech founder mentoring university students around a seminar table with laptops',
+  },
+  {
+    id: 'qawali-alumni-gala-24',
+    title: 'Qawali & Alumni Founders Night',
+    edition: 'Spring 2024',
+    category: 'Cultural',
+    dateLabel: 'April 2024',
+    venue: 'Main Lawn Courtyard',
+    attendanceLabel: '600+ Community Guests',
+    outcomeLabel: 'Closing Cultural Tradition',
+    summary:
+      'A lantern-lit evening uniting alumni entrepreneurs, competition finalists, and the student body with acoustic Qawali performances and courtyard storytelling after demo day.',
+    highlights: [
+      '600+ students, judges, and alumni celebrating after flagship prize distribution',
+      'Open courtyard networking between graduating founders and incoming freshmen',
+      'Established the annual Movie Night & Qawali Night flagship closing tradition',
+    ],
+    image: '/src/assets/images/evening_qawali_cinema_1795208285128.jpg',
+    imageAlt: 'University courtyard illuminated by warm golden string lights for Qawali Night',
+  },
+];
+

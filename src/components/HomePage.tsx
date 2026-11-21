@@ -1,12 +1,8 @@
 import { useRef, useState } from 'react';
-import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react';
+import { useReducedMotion } from 'motion/react';
 import {
   ArrowRight,
-  ArrowUpRight,
-  Award,
-  CalendarDays,
   Film,
-  Flame,
   Lightbulb,
   Mail,
   Music,
@@ -19,18 +15,14 @@ import {
   COMPETITIONS,
   EVENING_MEDIA,
   EVENING_NIGHTS,
-  HERO_MEDIA,
   SOCIETY_PILLARS,
   type CompetitionName,
   type PageId,
 } from '../data/fessData';
-import { Scene3DCanvas } from './Scene3DCanvas';
 import { PastEventsLibrary } from './PastEventsLibrary';
-import { ShatterType } from './ui/shatter-type';
+import { Hero25 } from './blocks/hero-25';
 import {
-  FESS_EASE,
   ImageWithFallback,
-  MagneticButton,
   Reveal,
   SpotlightCard,
 } from './MotionPrimitives';
@@ -41,17 +33,10 @@ interface HomePageProps {
 }
 
 export function HomePage({ onNavigate, onOpenRegister }: HomePageProps) {
-  const heroRef = useRef<HTMLDivElement>(null);
   const compCarouselRef = useRef<HTMLDivElement>(null);
   const [activeCompSlide, setActiveCompSlide] = useState(0);
   const [selectedPillar, setSelectedPillar] = useState<string | null>(null);
   const shouldReduce = useReducedMotion();
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ['start start', 'end start'],
-  });
-  const bgY = useTransform(scrollYProgress, [0, 1], ['0%', '14%']);
-  const bgScale = useTransform(scrollYProgress, [0, 1], [1.02, 1.1]);
 
   const pillarIcons = {
     ideas: Lightbulb,
@@ -77,145 +62,8 @@ export function HomePage({ onNavigate, onOpenRegister }: HomePageProps) {
 
   return (
     <div>
-      {/* 1A. CINEMATIC SOCIETY HERO */}
-      <section
-        ref={heroRef}
-        className="relative min-h-[78vh] sm:min-h-[86vh] flex items-center justify-center overflow-hidden bg-[#141923] text-white"
-      >
-        {/* Parallax Architectural Skyscraper Backdrop */}
-        <motion.div
-          style={shouldReduce ? undefined : { y: bgY, scale: bgScale }}
-          className="absolute inset-0 z-0 overflow-hidden"
-        >
-          <ImageWithFallback
-            src={HERO_MEDIA.image}
-            alt={HERO_MEDIA.alt}
-            fallbackLabel="FESS Innovation Towers"
-            className="w-full h-full object-cover object-center opacity-45 animate-ken-burns"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0C1018]/80 via-[#141923]/65 to-[#141923]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(153,27,27,0.24)_0%,transparent_68%)]" />
-        </motion.div>
-
-        {/* Interactive 3D Polyhedron & Constellation Canvas */}
-        <Scene3DCanvas />
-
-        {/* Hero Foreground Content */}
-        <div
-          className="relative z-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-24 text-center"
-          style={shouldReduce ? undefined : { perspective: 1200 }}
-        >
-          <motion.p
-            initial={shouldReduce ? false : { opacity: 0, y: 12, rotateX: 25 }}
-            animate={{ opacity: 1, y: 0, rotateX: 0 }}
-            transition={{ duration: 0.5, ease: FESS_EASE }}
-            className="text-[11px] sm:text-sm font-semibold tracking-[0.16em] sm:tracking-[0.18em] uppercase text-amber-200/95 mb-4 sm:mb-5"
-          >
-            FAST Entrepreneurship and Startup Society
-          </motion.p>
-
-          <div className="mb-4 sm:mb-6">
-            <ShatterType />
-          </div>
-
-          <motion.p
-            initial={shouldReduce ? false : { opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, delay: 0.18, ease: FESS_EASE }}
-            className="max-w-2xl mx-auto text-sm sm:text-xl text-slate-200/95 leading-relaxed mb-7 sm:mb-10"
-          >
-            Join ambitious students building the next unicorn startups. Don&apos;t just
-            dream it—launch it.
-          </motion.p>
-
-          {/* Primary + Secondary CTAs */}
-          <motion.div
-            initial={shouldReduce ? false : { opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, delay: 0.26, ease: FESS_EASE }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-9 sm:mb-14"
-          >
-            <MagneticButton
-              onClick={() => onNavigate('events')}
-              className="w-full sm:w-auto min-h-[48px] px-7 py-3.5 sm:py-4 rounded-xl bg-[#991B1B] hover:bg-[#B91C1C] text-white font-semibold text-sm sm:text-base shadow-[0_14px_34px_-6px_rgba(153,27,27,0.5)] border border-red-400/25 transition-colors duration-150 flex items-center justify-center gap-2 group whitespace-nowrap shrink-0"
-            >
-              <span>Explore Our Flagship Event</span>
-              <Flame className="w-4 h-4 text-amber-300 group-hover:scale-110 transition-transform" />
-            </MagneticButton>
-
-            <MagneticButton
-              onClick={() => onNavigate('teams')}
-              className="w-full sm:w-auto min-h-[48px] px-7 py-3.5 sm:py-4 rounded-xl bg-white hover:bg-[#FAF6F0] text-[#991B1B] font-bold text-sm sm:text-base shadow-xl transition-colors duration-150 flex items-center justify-center gap-2 group whitespace-nowrap shrink-0"
-            >
-              <span>Meet Our Teams</span>
-              <Users className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-            </MagneticButton>
-
-            <MagneticButton
-              onClick={() => onNavigate('connect')}
-              className="w-full sm:w-auto min-h-[48px] px-7 py-3.5 sm:py-4 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-semibold text-sm sm:text-base border border-white/20 transition-colors duration-150 flex items-center justify-center gap-2 whitespace-nowrap shrink-0"
-            >
-              <span>Connect With FESS</span>
-              <ArrowUpRight className="w-4 h-4 text-amber-300" />
-            </MagneticButton>
-          </motion.div>
-
-          {/* Society Pillars & Flagship Event Bridge Strip */}
-          <motion.div
-            initial={shouldReduce ? false : { opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.34, ease: FESS_EASE }}
-            className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5 max-w-3xl mx-auto"
-          >
-            <div className="px-4 sm:px-5 py-3.5 sm:py-4 rounded-2xl bg-white/8 backdrop-blur-md border border-white/15 flex items-center gap-3.5 text-left">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-300 shrink-0">
-                <Rocket className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="font-bold text-sm sm:text-base text-white leading-tight">
-                  Startup Culture
-                </div>
-                <div className="text-xs text-slate-300 mt-0.5">
-                  Student Ventures &amp; Founders
-                </div>
-              </div>
-            </div>
-
-            <div className="px-4 sm:px-5 py-3.5 sm:py-4 rounded-2xl bg-white/8 backdrop-blur-md border border-white/15 flex items-center gap-3.5 text-left">
-              <div className="w-10 h-10 rounded-xl bg-red-500/25 flex items-center justify-center text-red-300 shrink-0">
-                <Award className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="font-bold text-sm sm:text-base text-white leading-tight">
-                  Industry Panels
-                </div>
-                <div className="text-xs text-slate-300 mt-0.5">
-                  Direct Business Leader Feedback
-                </div>
-              </div>
-            </div>
-
-            <motion.button
-              type="button"
-              whileTap={shouldReduce ? undefined : { scale: 0.97 }}
-              onClick={() => onNavigate('events')}
-              className="px-4 sm:px-5 py-3.5 sm:py-4 rounded-2xl bg-white/10 hover:bg-white/18 backdrop-blur-md border border-amber-400/35 flex items-center gap-3.5 text-left transition-colors duration-150 group"
-            >
-              <div className="w-10 h-10 rounded-xl bg-amber-500/25 flex items-center justify-center text-amber-300 shrink-0 group-hover:scale-105 transition-transform">
-                <CalendarDays className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="font-bold text-sm sm:text-base text-amber-200 leading-tight">
-                  Flagship 2-Day Event
-                </div>
-                <div className="text-xs text-slate-300 mt-0.5">
-                  3 Competitions · 2 Nights
-                </div>
-              </div>
-            </motion.button>
-          </motion.div>
-        </div>
-      </section>
+      {/* 1A. HERO 25: GIANT HEADLINE MIRRORED IN A ROLLING VOXEL SEA */}
+      <Hero25 onNavigate={onNavigate} />
 
       {/* 1B. INFINITE SOCIETY MARQUEE */}
       <div className="bg-[#991B1B] text-white py-3 overflow-hidden border-y border-red-950/30 marquee-wrapper">

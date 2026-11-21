@@ -11,6 +11,7 @@ import {
 } from '../data/fessData';
 import { filterScheduleByDay } from '../utils/fessLogic';
 import { FESS_EASE, ImageWithFallback, Reveal } from './MotionPrimitives';
+import ScrollStack, { ScrollStackItem } from './ui/scroll-stack';
 
 interface FlagshipEventPageProps {
   onOpenRegister: (event?: CompetitionName) => void;
@@ -24,6 +25,7 @@ const DAY_TABS: { id: DayFilter; label: string }[] = [
 
 export function FlagshipEventPage({ onOpenRegister }: FlagshipEventPageProps) {
   const [dayFilter, setDayFilter] = useState<DayFilter>('all');
+  const [activeStackIndex, setActiveStackIndex] = useState(0);
 
   const visibleSchedule = filterScheduleByDay(SCHEDULE_ITEMS, dayFilter);
   const day1Items = visibleSchedule.filter((item) => item.day === '1');
@@ -61,7 +63,7 @@ export function FlagshipEventPage({ onOpenRegister }: FlagshipEventPageProps) {
         </div>
       </section>
 
-      <div className="py-16 sm:py-20 bg-[#FAF6F0]">
+      <div className="py-16 sm:py-20 pb-24 bg-[#FAF6F0]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20">
           {/* SECTION A: INTERACTIVE DAY 1 & DAY 2 TIMELINE */}
           <Reveal>
@@ -272,63 +274,105 @@ export function FlagshipEventPage({ onOpenRegister }: FlagshipEventPageProps) {
             </div>
           </Reveal>
 
-          {/* SECTION C: DETAILED COMPETITION BREAKDOWN */}
-          <div>
-            <Reveal className="mb-6 sm:mb-8">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#991B1B]">
-                Rules &amp; Formats
-              </span>
-              <h2 className="font-extrabold text-2xl sm:text-3xl text-slate-900 mt-1">
-                Detailed Competition Breakdown
-              </h2>
-
-              {/* Mobile quick-jump strip */}
-              <div className="flex sm:hidden gap-2 overflow-x-auto no-scrollbar pt-4 pb-1">
-                {COMPETITIONS.map((comp) => (
-                  <button
-                    key={comp.id}
-                    type="button"
-                    onClick={() => {
-                      const el = document.getElementById(`comp-detail-${comp.number}`);
-                      el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }}
-                    className="shrink-0 min-h-[40px] px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-800 active:scale-95 transition-transform shadow-sm"
+          {/* SECTION C: FLAGSHIP EVENTS SHOWCASE (SCROLL STACK) */}
+          <section aria-labelledby="flagship-events-showcase-heading">
+            <Reveal className="mb-8 sm:mb-10">
+              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-5">
+                <div>
+                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#991B1B]">
+                    Flagship Events Showcase
+                  </span>
+                  <h2
+                    id="flagship-events-showcase-heading"
+                    className="font-extrabold text-2xl sm:text-3xl text-slate-900 mt-1"
                   >
-                    {Number(comp.number)}. {comp.id}
-                  </button>
-                ))}
+                    Detailed Competition &amp; Night Breakdown
+                  </h2>
+                  <p className="text-sm text-slate-600 mt-1.5 max-w-2xl">
+                    Scroll through the stacked event dossier below or jump straight to a
+                    competition track.
+                  </p>
+                </div>
+
+                <div className="font-mono text-xs font-bold text-[#991B1B] tabular-nums shrink-0">
+                  Card {String(activeStackIndex + 1).padStart(2, '0')} / 04
+                </div>
+              </div>
+
+              {/* Quick-jump stack navigator */}
+              <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                {[
+                  ...COMPETITIONS.map((c, idx) => ({
+                    idx,
+                    targetId: `comp-detail-${c.number}`,
+                    label: `${Number(c.number)}. ${c.id}`,
+                  })),
+                  {
+                    idx: 3,
+                    targetId: 'comp-detail-04',
+                    label: '4. Evening Nights',
+                  },
+                ].map((item) => {
+                  const isCurrent = activeStackIndex === item.idx;
+                  return (
+                    <button
+                      key={item.targetId}
+                      type="button"
+                      onClick={() => {
+                        const el = document.getElementById(item.targetId);
+                        el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }}
+                      className={`shrink-0 min-h-[40px] px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all active:scale-95 border ${
+                        isCurrent
+                          ? 'bg-[#991B1B] text-white border-[#991B1B] shadow-sm'
+                          : 'bg-white text-slate-800 border-slate-200 hover:border-[#991B1B]/40 hover:text-[#991B1B]'
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  );
+                })}
               </div>
             </Reveal>
 
-            <div className="space-y-6 sm:space-y-8">
+            <ScrollStack
+              useWindowScroll
+              variant="stack"
+              stackPosition="76px"
+              itemStackDistance={10}
+              itemDistance={48}
+              itemScale={0.035}
+              baseScale={0.89}
+              blurAmount={0.55}
+              dim={0.14}
+              peek={8}
+              onActiveIndexChange={setActiveStackIndex}
+            >
               {COMPETITIONS.map((comp, idx) => (
-                <Reveal key={comp.id} delay={idx * 0.06}>
-                  <article
-                    id={`comp-detail-${comp.number}`}
-                    className="scroll-mt-24 bg-white rounded-3xl overflow-hidden shadow-[0_18px_38px_-14px_rgba(20,25,35,0.08)] border border-slate-200/80"
-                  >
+                <ScrollStackItem key={comp.id} id={`comp-detail-${comp.number}`}>
+                  <article className="bg-white rounded-3xl overflow-hidden shadow-[0_22px_50px_-14px_rgba(20,25,35,0.14)] border border-slate-200/90">
                     <div
-                      className={`px-5 sm:px-7 py-5 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${
+                      className={`px-4 sm:px-7 py-3.5 sm:py-5 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 ${
                         idx === 1
                           ? 'bg-gradient-to-r from-[#7F1D1D] to-[#141923]'
                           : 'bg-gradient-to-r from-[#7F1D1D] to-[#991B1B]'
                       }`}
                     >
                       <div>
-                        <span className="font-mono text-xs uppercase tracking-widest text-amber-200">
+                        <span className="font-mono text-[10px] sm:text-xs uppercase tracking-widest text-amber-200">
                           Competition {comp.number}
                         </span>
-                        <h3 className="font-extrabold text-xl sm:text-2xl">
+                        <h3 className="font-extrabold text-lg sm:text-2xl">
                           {Number(comp.number)}. {comp.id}
                         </h3>
                       </div>
-                      <span className="font-mono text-sm font-bold text-amber-200 tabular-nums">
+                      <span className="font-mono text-xs sm:text-sm font-bold text-amber-200 tabular-nums">
                         {comp.feeLabel}
                       </span>
                     </div>
 
-                    <div className="p-5 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-7 items-stretch">
-                      <div className="lg:col-span-4 rounded-2xl overflow-hidden border border-slate-200/80 min-h-[190px] sm:min-h-[200px]">
+                    <div className="p-4 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-7 items-stretch">
+                      <div className="lg:col-span-4 rounded-2xl overflow-hidden border border-slate-200/80 h-36 sm:h-48 lg:h-auto lg:min-h-[200px]">
                         <ImageWithFallback
                           src={comp.image}
                           alt={comp.imageAlt}
@@ -339,23 +383,23 @@ export function FlagshipEventPage({ onOpenRegister }: FlagshipEventPageProps) {
 
                       <div className="lg:col-span-8 flex flex-col justify-between">
                         <div>
-                          <p className="text-slate-700 text-sm sm:text-base leading-relaxed mb-5 sm:mb-6">
+                          <p className="text-slate-700 text-xs sm:text-base leading-relaxed mb-3.5 sm:mb-6">
                             {comp.fullDesc}
                           </p>
 
-                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6">
+                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4 mb-4 sm:mb-6">
                             {comp.facts.map((fact) => (
                               <div
                                 key={fact.label}
-                                className={`p-3.5 sm:p-4 rounded-2xl bg-[#FAF6F0] border border-[#991B1B]/10 ${
-                                  fact.spanTwo ? 'sm:col-span-2' : ''
+                                className={`p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-[#FAF6F0] border border-[#991B1B]/10 ${
+                                  fact.spanTwo ? 'col-span-2' : ''
                                 }`}
                               >
-                                <div className="text-[11px] font-mono uppercase text-slate-500 mb-1">
+                                <div className="text-[10px] sm:text-[11px] font-mono uppercase text-slate-500 mb-0.5 sm:mb-1">
                                   {fact.label}
                                 </div>
                                 <div
-                                  className={`font-bold text-sm tabular-nums ${
+                                  className={`font-bold text-xs sm:text-sm tabular-nums ${
                                     fact.highlight ? 'text-[#991B1B]' : 'text-slate-900'
                                   }`}
                                 >
@@ -370,7 +414,7 @@ export function FlagshipEventPage({ onOpenRegister }: FlagshipEventPageProps) {
                           <button
                             type="button"
                             onClick={() => onOpenRegister(comp.id)}
-                            className={`w-full sm:w-auto min-h-[48px] px-6 py-3 rounded-xl text-white font-semibold text-sm active:scale-[0.98] transition-all whitespace-nowrap ${
+                            className={`w-full sm:w-auto min-h-[44px] sm:min-h-[48px] px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl text-white font-semibold text-xs sm:text-sm active:scale-[0.98] transition-all whitespace-nowrap ${
                               comp.id === 'Enterprise Expo'
                                 ? 'bg-slate-900 hover:bg-[#991B1B]'
                                 : 'bg-[#991B1B] hover:bg-[#7F1D1D]'
@@ -382,12 +426,12 @@ export function FlagshipEventPage({ onOpenRegister }: FlagshipEventPageProps) {
                       </div>
                     </div>
                   </article>
-                </Reveal>
+                </ScrollStackItem>
               ))}
 
-              {/* Evening Entertainment Section */}
-              <Reveal>
-                <div className="relative rounded-3xl overflow-hidden bg-[#141923] p-7 sm:p-10 text-white shadow-xl">
+              {/* Evening Entertainment Card */}
+              <ScrollStackItem key="evening-nights" id="comp-detail-04">
+                <article className="relative rounded-3xl overflow-hidden bg-[#141923] p-6 sm:p-10 text-white shadow-[0_22px_50px_-14px_rgba(20,25,35,0.28)] border border-slate-800">
                   <div className="absolute inset-0">
                     <ImageWithFallback
                       src={EVENING_MEDIA.image}
@@ -399,22 +443,27 @@ export function FlagshipEventPage({ onOpenRegister }: FlagshipEventPageProps) {
                   </div>
 
                   <div className="relative z-10">
-                    <div className="mb-6">
-                      <span className="font-mono text-xs uppercase tracking-widest text-amber-300">
-                        Closing Each Day
+                    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6">
+                      <div>
+                        <span className="font-mono text-xs uppercase tracking-widest text-amber-300">
+                          Track 04 · Closing Each Day
+                        </span>
+                        <h3 className="font-extrabold text-2xl sm:text-3xl mt-1">
+                          4. Evening Entertainment
+                        </h3>
+                      </div>
+                      <span className="font-mono text-xs uppercase tracking-wider text-amber-200 tabular-nums">
+                        7:00 PM – 10:00 PM Nightly
                       </span>
-                      <h3 className="font-extrabold text-2xl sm:text-3xl mt-1">
-                        Evening Entertainment
-                      </h3>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
                       {EVENING_NIGHTS.map((night) => {
                         const Icon = night.type === 'movie' ? Film : Music;
                         return (
                           <div
                             key={night.title}
-                            className="p-6 rounded-2xl bg-white/8 backdrop-blur-md border border-white/12 flex items-center justify-between"
+                            className="p-6 rounded-2xl bg-white/8 backdrop-blur-md border border-white/12 flex items-center justify-between gap-4"
                           >
                             <div>
                               <div className="text-xs font-mono text-amber-300 uppercase mb-1">
@@ -424,17 +473,18 @@ export function FlagshipEventPage({ onOpenRegister }: FlagshipEventPageProps) {
                               <div className="text-sm text-slate-200 mt-1 tabular-nums">
                                 {night.time}
                               </div>
+                              <div className="text-xs text-slate-300 mt-1">{night.desc}</div>
                             </div>
-                            <Icon className="w-8 h-8 text-amber-300" />
+                            <Icon className="w-8 h-8 text-amber-300 shrink-0" />
                           </div>
                         );
                       })}
                     </div>
                   </div>
-                </div>
-              </Reveal>
-            </div>
-          </div>
+                </article>
+              </ScrollStackItem>
+            </ScrollStack>
+          </section>
         </div>
       </div>
     </div>

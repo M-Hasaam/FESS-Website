@@ -31,6 +31,19 @@ import {
   getSpillGradientDirection,
   resolveNeonCubicBezier,
 } from './neonRevealConfig';
+import {
+  computeActiveStackIndex,
+  computeScrollStackCardMetrics,
+} from './scrollStackMath';
+import {
+  evaluateVoxelWaveHeight,
+  projectVoxelArcPoint,
+} from './voxelSeaMath';
+import {
+  buildEmailJsTemplateParams,
+  isConfiguredEmailJsValue,
+  resolveEmailJsConfig,
+} from './emailjsConfig';
 
 test('parsePageFromHash resolves valid routes including team detail pages and falls back to home', () => {
   assert.equal(parsePageFromHash('#events'), 'events');
@@ -249,4 +262,133 @@ test('neonRevealConfig resolves curves, transform origins, and gradient directio
   assert.equal(getNeonOrigin('right', 'left'), '50% 100%');
   assert.equal(getSpillGradientDirection('down'), '180deg');
   assert.equal(getSpillGradientDirection('right'), '90deg');
+});
+
+test('scrollStackMath computes active stack index, scale floor, peek offset, and variant transforms', () => {
+  assert.equal(computeActiveStackIndex(0, 4), 0);
+  assert.equal(computeActiveStackIndex(1.6, 4), 2);
+  assert.equal(computeActiveStackIndex(9, 4), 3);
+
+  const active = computeScrollStackCardMetrics({ index: 1, total: 4, progress: 1 });
+  assert.equal(active.depth, 0);
+  assert.equal(active.scale, 1);
+  assert.equal(active.blurPx, 0);
+  assert.equal(active.opacity, 1);
+
+  const buried = computeScrollStackCardMetrics({
+    index: 0,
+    total: 4,
+    progress: 2,
+    itemScale: 0.04,
+    baseScale: 0.88,
+    peek: 10,
+    blurAmount: 0.75,
+    variant: 'deck',
+  });
+  assert.equal(buried.depth, 2);
+  assert.equal(buried.scale, 0.92);
+  assert.equal(buried.yOffset, -20);
+  assert.equal(buried.blurPx, 1.5);
+  assert.equal(buried.opacity, 1);
+  assert.ok(buried.rotateZ < 0);
+
+  const faded = computeScrollStackCardMetrics({
+    index: 0,
+    total: 4,
+    progress: 2,
+    variant: 'fade',
+  });
+  assert.ok(faded.opacity < 0.4);
+});
+
+test('voxelSeaMath computes bounded wave crests, ripple boosts, and curved horizon projection', () => {
+  const calm = evaluateVoxelWaveHeight({
+    normX: 0,
+    depthZ: 0.5,
+    time: 1.2,
+    waveHeight: 1,
+    waveLength: 1,
+    turbulence: 0.4,
+  });
+  assert.ok(calm.crest >= 0 && calm.crest <= 1);
+
+  const zero = evaluateVoxelWaveHeight({
+    normX: 0.3,
+    depthZ: 0.4,
+    time: 0,
+    waveHeight: 0,
+    waveLength: 1,
+    turbulence: 0.5,
+  });
+  assert.equal(zero.elevation, 0);
+
+  const centerHorizon = projectVoxelArcPoint({
+    normX: 0,
+    depthZ: 1,
+    waveElevation: 0,
+    width: 1440,
+    height: 760,
+    horizon: 0.54,
+    curvature: 0.5,
+  });
+  const sideHorizon = projectVoxelArcPoint({
+    normX: 1,
+    depthZ: 1,
+    waveElevation: 0,
+    width: 1440,
+    height: 760,
+    horizon: 0.54,
+    curvature: 0.5,
+  });
+  assert.equal(centerHorizon.arcDrop, 0);
+  assert.ok(sideHorizon.arcDrop > 0);
+  assert.ok(sideHorizon.y > centerHorizon.y);
+});
+
+test('emailjsConfig rejects placeholder values, validates recipient email, and builds sanitized template params', () => {
+  assert.equal(isConfiguredEmailJsValue('your_service_id'), false);
+  assert.equal(isConfiguredEmailJsValue('MY_EMAILJS_PUBLIC_KEY'), false);
+  assert.equal(isConfiguredEmailJsValue(''), false);
+  assert.equal(isConfiguredEmailJsValue('service_fess123'), true);
+
+  const unconfigured = resolveEmailJsConfig({
+    VITE_EMAILJS_SERVICE_ID: 'your_service_id',
+    VITE_EMAILJS_TEMPLATE_ID: 'your_template_id',
+    VITE_EMAILJS_PUBLIC_KEY: 'your_public_key',
+    VITE_CONTACT_TO_EMAIL: 'not-an-email',
+  });
+  assert.equal(unconfigured.configured, false);
+  assert.deepEqual(unconfigured.missingFields, [
+    'VITE_EMAILJS_SERVICE_ID',
+    'VITE_EMAILJS_TEMPLATE_ID',
+    'VITE_EMAILJS_PUBLIC_KEY',
+    'VITE_CONTACT_TO_EMAIL',
+  ]);
+
+  const configured = resolveEmailJsConfig({
+    VITE_EMAILJS_SERVICE_ID: ' service_abc ',
+    VITE_EMAILJS_TEMPLATE_ID: ' template_xyz ',
+    VITE_EMAILJS_PUBLIC_KEY: ' pub_key_123 ',
+    VITE_CONTACT_TO_EMAIL: ' salmanahmed32121@gmail.com ',
+  });
+  assert.equal(configured.configured, true);
+  assert.deepEqual(configured.missingFields, []);
+  assert.equal(configured.serviceId, 'service_abc');
+  assert.equal(configured.toEmail, 'salmanahmed32121@gmail.com');
+
+  const validated = validateAndFormatContactEmail({
+    name: "Ali\r\nRaza",
+    email: 'ali@fast.edu.pk',
+    topic: 'Pitch Arena',
+    message: 'Interested in Pitch Arena registration.',
+  });
+  assert.equal(validated.ok, true);
+  if (validated.ok) {
+    const params = buildEmailJsTemplateParams(validated.data, configured.toEmail);
+    assert.equal(params.to_email, 'salmanahmed32121@gmail.com');
+    assert.equal(params.from_name, 'Ali Raza');
+    assert.equal(params.reply_to, 'ali@fast.edu.pk');
+    assert.equal(params.topic, 'Pitch Arena');
+    assert.equal(params.message, 'Interested in Pitch Arena registration.');
+  }
 });

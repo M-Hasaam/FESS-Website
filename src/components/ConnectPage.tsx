@@ -67,7 +67,7 @@ export function ConnectPage({ onShowToast }: ConnectPageProps) {
           setErrors(result.errors);
         }
         setSubmitError(
-          result.error || 'Could not send your message via Resend. Please try again.'
+          result.error || 'Could not send your message via EmailJS. Please try again.'
         );
         return;
       }
@@ -82,7 +82,7 @@ export function ConnectPage({ onShowToast }: ConnectPageProps) {
       setMessage('');
     } catch {
       setSubmitError(
-        'Network error while reaching the FESS contact server. Please check your connection and try again.'
+        'Network error while reaching EmailJS. Please check your connection and try again.'
       );
     } finally {
       setIsSubmitting(false);
@@ -265,7 +265,7 @@ export function ConnectPage({ onShowToast }: ConnectPageProps) {
                         disabled={isSubmitting}
                         value={topic}
                         onChange={(e) => setTopic(e.target.value)}
-                        className="sr-only sm:not-sr-only sm:block w-full min-h-[48px] px-4 py-3 rounded-xl bg-[#FAF6F0]/80 border border-slate-200 focus:border-[#991B1B] outline-none text-base sm:text-sm font-medium disabled:opacity-60"
+                        className="sr-only sm:not-sr-only sm:block sm:w-full min-h-[48px] px-4 py-3 rounded-xl bg-[#FAF6F0]/80 border border-slate-200 focus:border-[#991B1B] outline-none text-base sm:text-sm font-medium disabled:opacity-60"
                       >
                         {CONNECT_TOPICS.map((t) => (
                           <option key={t} value={t}>

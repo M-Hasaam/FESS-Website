@@ -1,4 +1,7 @@
+import emailjs from '@emailjs/browser';
 import type { CompetitionName } from '../data/fessData';
+import { validateAndFormatContactEmail } from './contactEmail';
+import { buildEmailJsTemplateParams, resolveEmailJsConfig } from './emailjsConfig';
 import type { RegistrationRecord } from './fessLogic';
 
 export interface ContactApiPayload {
@@ -34,20 +37,62 @@ export interface RegistrationApiResponse {
 export async function sendContactMessage(
   payload: ContactApiPayload
 ): Promise<ContactApiResponse> {
-  const response = await fetch('/api/contact', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+  const validation = validateAndFormatContactEmail(payload);
+  if (!validation.ok) {
+    return {
+      ok: false,
+      code: 'VALIDATION_ERROR',
+      error: validation.message,
+      errors: validation.errors,
+    };
+  }
+
+  const config = resolveEmailJsConfig({
+    VITE_EMAILJS_SERVICE_ID: import.meta.env.VITE_EMAILJS_SERVICE_ID,
+    VITE_EMAILJS_TEMPLATE_ID: import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+    VITE_EMAILJS_PUBLIC_KEY: import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
+    VITE_CONTACT_TO_EMAIL: import.meta.env.VITE_CONTACT_TO_EMAIL,
   });
 
-  const data = (await response.json().catch(() => ({}))) as Partial<ContactApiResponse>;
-  return {
-    ok: response.ok && Boolean(data.ok),
-    id: data.id ?? null,
-    error: data.error,
-    errors: data.errors,
-    code: data.code,
-  };
+  if (!config.configured) {
+    return {
+      ok: false,
+      code: 'EMAILJS_NOT_CONFIGURED',
+      error: `EmailJS contact service is not configured yet. Please set ${config.missingFields.join(', ')} in your environment settings.`,
+    };
+  }
+
+  const templateParams = buildEmailJsTemplateParams(validation.data, config.toEmail);
+
+  try {
+    const response = await emailjs.send(
+      config.serviceId,
+      config.templateId,
+      templateParams,
+      { publicKey: config.publicKey }
+    );
+
+    return {
+      ok: response.status >= 200 && response.status < 300,
+      id: `EMAILJS-${response.status}`,
+    };
+  } catch (err) {
+    const statusText =
+      typeof err === 'object' &&
+      err !== null &&
+      'text' in err &&
+      typeof (err as { text: unknown }).text === 'string'
+        ? (err as { text: string }).text
+        : null;
+
+    return {
+      ok: false,
+      code: 'EMAILJS_DELIVERY_FAILED',
+      error:
+        statusText ||
+        'Could not send your message via EmailJS. Please verify your EmailJS settings and try again.',
+    };
+  }
 }
 
 export async function fetchRegistrations(): Promise<RegistrationRecord[]> {

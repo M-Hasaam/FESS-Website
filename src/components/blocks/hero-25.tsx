@@ -82,7 +82,7 @@ export function Hero25({ onNavigate }: Hero25Props) {
           FAST Entrepreneurship and Startup Society
         </motion.p>
 
-        {/* Giant ShatterType Headline + Mirrored Voxel-Sea Reflection */}
+        {/* Giant ShatterType Headline */}
         <div className="relative mb-5 sm:mb-7">
           <ShatterType />
 
@@ -91,44 +91,6 @@ export function Hero25({ onNavigate }: Hero25Props) {
             aria-hidden="true"
             className="mx-auto mt-2.5 sm:mt-3 h-px w-[78%] max-w-2xl bg-gradient-to-r from-transparent via-amber-400/55 to-transparent"
           />
-
-          {/* Hero 25 Mirrored Reflection in the Rolling Voxel Sea */}
-          <div
-            data-testid="hero25-mirror"
-            aria-hidden="true"
-            className="pointer-events-none select-none overflow-hidden h-9 sm:h-14 flex items-start justify-center opacity-35"
-            style={{
-              WebkitMaskImage:
-                'linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.28) 52%, transparent 96%)',
-              maskImage:
-                'linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.28) 52%, transparent 96%)',
-            }}
-          >
-            <motion.div
-              animate={
-                shouldReduce
-                  ? undefined
-                  : {
-                      skewX: [-1.4, 1.4, -1.4],
-                      y: [0, 1.5, 0],
-                    }
-              }
-              transition={
-                shouldReduce
-                  ? undefined
-                  : { duration: 6.5, repeat: Infinity, ease: 'easeInOut' }
-              }
-              style={{ transform: 'scaleY(-1)' }}
-              className="font-extrabold tracking-tight leading-[1.02] blur-[1px] origin-center"
-            >
-              <span
-                className="block bg-gradient-to-r from-red-300 via-amber-200 to-red-300 bg-clip-text text-transparent"
-                style={{ fontSize: 'clamp(2.25rem, 5.1vw, 4.4rem)' }}
-              >
-                Starts Here.
-              </span>
-            </motion.div>
-          </div>
         </div>
 
         <motion.p

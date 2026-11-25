@@ -48,8 +48,8 @@ export function Navbar({
       className={`fixed top-0 inset-x-0 z-40 transition-all duration-200 ${
         dark
           ? scrolled
-            ? 'bg-[#141923]/92 backdrop-blur-xl border-b border-white/10 shadow-lg shadow-black/20'
-            : 'bg-[#141923] border-b border-white/[0.06]'
+            ? 'bg-[#0C0F16]/92 backdrop-blur-xl border-b border-white/10 shadow-lg shadow-black/20'
+            : 'bg-[#0C0F16] border-b border-white/[0.06]'
           : scrolled
             ? 'bg-[#FAF6F0]/92 backdrop-blur-xl border-b border-[#991B1B]/12 shadow-sm'
             : 'bg-[#FAF6F0]/85 backdrop-blur-lg border-b border-[#991B1B]/10'

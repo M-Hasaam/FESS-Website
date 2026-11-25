@@ -344,7 +344,7 @@ export function HomePage({ onNavigate, onOpenRegister }: HomePageProps) {
 
               <div className="relative bg-white rounded-3xl p-8 sm:p-10 shadow-[0_18px_40px_-15px_rgba(20,25,35,0.08)] border border-slate-200/80 flex-1 flex flex-col justify-between">
                 <div className="absolute -top-5 left-6 w-11 h-11 rounded-2xl bg-[#991B1B] text-white flex items-center justify-center shadow-md -rotate-6">
-                  <span className="font-serif text-3xl font-bold leading-none mt-2">
+                  <span className="font-serif text-3xl leading-none mt-2">
                     &ldquo;
                   </span>
                 </div>

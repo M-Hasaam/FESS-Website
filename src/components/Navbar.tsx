@@ -30,10 +30,19 @@ export function Navbar({
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 18);
+    // On home the bar stays transparent while the hero is in view so the artwork runs behind it
+    const onScroll = () => {
+      const threshold = currentPage === 'home' ? window.innerHeight * 0.7 : 18;
+      setScrolled(window.scrollY > threshold);
+    };
+    onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+    window.addEventListener('resize', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, [currentPage]);
 
   // Home sits on the dark hero, so the bar goes dark there to avoid a hard seam.
   const dark = currentPage === 'home';
@@ -49,7 +58,7 @@ export function Navbar({
         dark
           ? scrolled
             ? 'bg-[#0C0F16]/92 backdrop-blur-xl border-b border-white/10 shadow-lg shadow-black/20'
-            : 'bg-[#0C0F16] border-b border-white/[0.06]'
+            : 'bg-transparent border-b border-transparent'
           : scrolled
             ? 'bg-[#FAF6F0]/92 backdrop-blur-xl border-b border-[#991B1B]/12 shadow-sm'
             : 'bg-[#FAF6F0]/85 backdrop-blur-lg border-b border-[#991B1B]/10'
@@ -61,7 +70,7 @@ export function Navbar({
           <button
             type="button"
             onClick={() => handleNavClick('home')}
-            className="flex items-center gap-2.5 whitespace-nowrap shrink-0 group focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#991B1B] rounded-lg"
+            className="flex items-center gap-2.5 whitespace-nowrap shrink-0 group outline-none focus:outline-none focus-visible:outline-none rounded-lg"
             aria-label="FESS Home"
           >
             <img

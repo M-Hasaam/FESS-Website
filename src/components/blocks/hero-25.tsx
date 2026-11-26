@@ -2,12 +2,18 @@ import { motion, useReducedMotion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 import { COMPETITIONS, SCHEDULE_ITEMS, type PageId } from '../../data/fessData';
 import { FESS_EASE } from '../MotionPrimitives';
+import emblemMark from '../../assets/logo/fess-emblem-mark.png';
 
 export interface Hero25Props {
   onNavigate: (page: PageId) => void;
 }
 
 const DAYS = ['1', '2'] as const;
+const DAY_NAMES: Record<(typeof DAYS)[number], string> = { '1': 'one', '2': 'two' };
+const DAY_DATES: Record<(typeof DAYS)[number], string> = {
+  '1': '3 December',
+  '2': '4 December',
+};
 
 export function Hero25({ onNavigate }: Hero25Props) {
   const shouldReduce = Boolean(useReducedMotion());
@@ -21,8 +27,19 @@ export function Hero25({ onNavigate }: Hero25Props) {
   return (
     <section
       data-testid="hero-25"
-      className="relative overflow-hidden bg-[#0C0F16] text-white"
+      className="relative -mt-16 overflow-hidden bg-[#0C0F16] text-white sm:-mt-[72px]"
     >
+      {/* Emblem sitting behind the wordmark, pushed to the right and cropped by the edge */}
+      <motion.img
+        aria-hidden="true"
+        alt=""
+        src={emblemMark}
+        initial={shouldReduce ? false : { opacity: 0, scale: 0.94 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1.1, ease: FESS_EASE }}
+        className="pointer-events-none absolute right-[-28vw] top-[2%] w-[96vw] select-none lg:right-[-14vw] lg:top-[-18%] lg:w-[78vw]"
+      />
+
       {/* Giant wordmark, cropped by the bottom edge */}
       <motion.div
         aria-hidden="true"
@@ -38,7 +55,7 @@ export function Hero25({ onNavigate }: Hero25Props) {
         className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0C0F16]/60 to-transparent"
       />
 
-      <div className="relative mx-auto grid max-w-7xl items-start gap-12 px-4 pb-24 pt-14 sm:px-6 sm:pb-32 sm:pt-20 lg:grid-cols-[1.1fr_1fr] lg:gap-16 lg:px-8 lg:pb-64 lg:pt-24">
+      <div className="relative mx-auto grid max-w-7xl items-start gap-12 px-4 pb-24 pt-[7.5rem] sm:px-6 sm:pb-32 sm:pt-[9.5rem] lg:grid-cols-[1.1fr_1fr] lg:gap-16 lg:px-8 lg:pb-64 lg:pt-[10.5rem]">
         {/* Left: type does the work */}
         <div className="min-w-0">
           <motion.p
@@ -70,11 +87,17 @@ export function Hero25({ onNavigate }: Hero25Props) {
         <motion.aside
           {...rise(0.2)}
           aria-label="Flagship event programme"
-          className="relative min-w-0 rounded-sm bg-[#FAF6F0] text-[#141923] shadow-2xl shadow-black/60"
+          className="relative min-w-0 [filter:drop-shadow(0_24px_36px_rgba(0,0,0,0.55))]"
         >
-          {/* Ticket perforation notches */}
-          <span aria-hidden="true" className="absolute -left-2.5 top-[3.6rem] h-5 w-5 rounded-full bg-[#0C0F16]" />
-          <span aria-hidden="true" className="absolute -right-2.5 top-[3.6rem] h-5 w-5 rounded-full bg-[#0C0F16]" />
+          {/* Ticket body: semicircular notches are cut out of both edges at the dashed tear line */}
+          <div
+            className="overflow-hidden rounded-sm bg-[#FAF6F0] text-[#141923]"
+            style={{
+              WebkitMask:
+                'radial-gradient(circle 11px at 0 64px, #0000 98%, #000) left / 51% 100% no-repeat, radial-gradient(circle 11px at 100% 64px, #0000 98%, #000) right / 51% 100% no-repeat',
+              mask: 'radial-gradient(circle 11px at 0 64px, #0000 98%, #000) left / 51% 100% no-repeat, radial-gradient(circle 11px at 100% 64px, #0000 98%, #000) right / 51% 100% no-repeat',
+            }}
+          >
           <div className="flex items-center justify-between border-b border-dashed border-[#141923]/25 px-6 py-5">
             <h2 className="font-serif text-2xl font-normal leading-none">The Programme</h2>
             <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#991B1B]">
@@ -84,8 +107,13 @@ export function Hero25({ onNavigate }: Hero25Props) {
 
           {DAYS.map((day) => (
             <div key={day} className="border-b border-[#141923]/10 last:border-b-0">
-              <p className="px-6 pt-4 font-mono text-[11px] uppercase tracking-[0.18em] text-[#141923]/55">
-                Day {day}
+              <p className="flex items-center justify-between px-6 pt-4">
+                <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#141923]/55">
+                  Day {DAY_NAMES[day]}
+                </span>
+                <span className="font-serif text-lg italic leading-none text-[#991B1B]">
+                  {DAY_DATES[day]}
+                </span>
               </p>
               <ul className="px-6 pb-3 pt-1">
                 {SCHEDULE_ITEMS.filter((item) => item.day === day).map((item) => {
@@ -136,6 +164,7 @@ export function Hero25({ onNavigate }: Hero25Props) {
             Register for the flagship
             <ArrowRight className="h-4 w-4 text-amber-300 transition-transform group-hover:translate-x-0.5 group-hover:text-white" />
           </button>
+          </div>
         </motion.aside>
       </div>
     </section>

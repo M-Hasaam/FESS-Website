@@ -14,13 +14,15 @@ import { ImageWithFallback, Reveal } from './MotionPrimitives';
 interface HomePageProps {
   onNavigate: (page: PageId) => void;
   onOpenRegister: (event?: CompetitionName) => void;
+  /** Seconds to wait before the hero intro plays (so it starts as the page curtain lifts) */
+  introDelay?: number;
 }
 
-export function HomePage({ onNavigate, onOpenRegister }: HomePageProps) {
+export function HomePage({ onNavigate, onOpenRegister, introDelay = 0 }: HomePageProps) {
   return (
     <div>
       {/* 1A. HERO */}
-      <Hero25 onNavigate={onNavigate} />
+      <Hero25 onNavigate={onNavigate} introDelay={introDelay} />
 
       {/* 1B. INFINITE SOCIETY MARQUEE */}
       <div className="bg-[#991B1B] text-white py-3 overflow-hidden border-y border-red-950/30 marquee-wrapper">

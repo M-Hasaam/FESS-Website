@@ -1,8 +1,103 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import emblemMark from '../assets/logo/fess-emblem-mark.png';
 
 interface PageTransitionCurtainProps {
   isVisible: boolean;
   label: string;
+}
+
+const EXPO = [0.16, 1, 0.3, 1] as const;
+const SWELL = [0.65, 0, 0.35, 1] as const;
+
+type Bead = { x: number; y: number };
+
+// Wave 1: crimson, sweeps left to right
+const CRIMSON: Bead[] = [
+  { x: 4, y: 28 },
+  { x: 10, y: 82 },
+  { x: 22, y: 8 },
+  { x: 28, y: 58 },
+  { x: 40, y: 100 },
+  { x: 46, y: 24 },
+  { x: 56, y: 70 },
+  { x: 66, y: 4 },
+  { x: 72, y: 46 },
+  { x: 80, y: 96 },
+  { x: 90, y: 20 },
+  { x: 96, y: 68 },
+];
+
+// Wave 2: dark, sweeps right to left and closes over the crimson
+const DARK: Bead[] = [
+  { x: 96, y: 50 },
+  { x: 88, y: 92 },
+  { x: 82, y: 8 },
+  { x: 70, y: 66 },
+  { x: 62, y: 28 },
+  { x: 52, y: 96 },
+  { x: 44, y: 50 },
+  { x: 30, y: 12 },
+  { x: 20, y: 84 },
+  { x: 8, y: 40 },
+  { x: 0, y: 0 },
+  { x: 100, y: 100 },
+  { x: 100, y: 0 },
+  { x: 0, y: 100 },
+];
+
+const STAGGER = 0.016;
+const BEAD_TIME = 0.36;
+const SECOND_WAVE_DELAY = 0.22;
+
+function Wave({
+  beads,
+  size,
+  colors,
+  enterDelay,
+  exitDelay,
+}: {
+  beads: Bead[];
+  size: number; // vmax diameter at full scale
+  colors: [string, string];
+  enterDelay: number;
+  exitDelay: number;
+}) {
+  return (
+    <div
+      className="absolute inset-0"
+      // Own GPU layer so the full-screen filter doesn't repaint the page underneath
+      style={{ filter: 'url(#fess-goo)', transform: 'translateZ(0)', willChange: 'transform' }}
+    >
+      {beads.map((bead, i) => (
+        <motion.div
+          key={i}
+          className="absolute rounded-full"
+          style={{
+            left: `${bead.x}%`,
+            top: `${bead.y}%`,
+            width: `${size}vmax`,
+            height: `${size}vmax`,
+            marginLeft: `-${size / 2}vmax`,
+            marginTop: `-${size / 2}vmax`,
+            background: i % 3 === 0 ? colors[1] : colors[0],
+          }}
+          initial={{ scale: 0 }}
+          animate={{
+            scale: 1,
+            transition: { duration: BEAD_TIME, delay: enterDelay + i * STAGGER, ease: SWELL },
+          }}
+          exit={{
+            scale: 0,
+            transition: {
+              duration: BEAD_TIME,
+              delay: exitDelay + (beads.length - 1 - i) * STAGGER,
+              ease: SWELL,
+            },
+          }}
+        />
+      ))}
+    </div>
+  );
 }
 
 export function PageTransitionCurtain({
@@ -17,32 +112,97 @@ export function PageTransitionCurtain({
         <motion.div
           data-testid="page-curtain"
           aria-hidden="true"
-          initial={shouldReduce ? { opacity: 0 } : { y: '100%' }}
-          animate={shouldReduce ? { opacity: 1 } : { y: '0%' }}
-          exit={shouldReduce ? { opacity: 0 } : { y: '-100%' }}
-          transition={{
-            duration: shouldReduce ? 0.15 : 0.44,
-            ease: [0.77, 0, 0.175, 1],
-          }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-[#141923] via-[#450A0A] to-[#991B1B] pointer-events-auto"
+          className="pointer-events-auto fixed inset-0 z-50 overflow-hidden"
+          initial={{ y: 0 }}
+          animate={{ y: 0 }}
+          // Keeps the wrapper mounted while both waves drain away
+          exit={{ y: 0, transition: { duration: shouldReduce ? 0.15 : 0.95 } }}
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.94, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: -12 }}
-            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-            className="text-center text-white px-6"
-          >
-            <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-4">
-              <span className="w-2 h-2 rounded-full bg-amber-400" />
-              <span className="font-mono text-xs tracking-widest uppercase text-amber-200">
-                FAST Entrepreneurship &amp; Startup Society
-              </span>
+          {/* Goo filter: lets neighbouring beads fuse like the emblem's connected dots */}
+          <svg width="0" height="0" className="absolute">
+            <defs>
+              <filter id="fess-goo">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+                <feColorMatrix
+                  in="blur"
+                  mode="matrix"
+                  values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 24 -10"
+                />
+              </filter>
+            </defs>
+          </svg>
+
+          {shouldReduce ? (
+            <motion.div
+              className="absolute inset-0 bg-[#0C0F16]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+            />
+          ) : (
+            <>
+              <Wave
+                beads={CRIMSON}
+                size={46}
+                colors={['#A7020E', '#7A0711']}
+                enterDelay={0}
+                exitDelay={0.3}
+              />
+              <Wave
+                beads={DARK}
+                size={44}
+                colors={['#0C0F16', '#12161F']}
+                enterDelay={SECOND_WAVE_DELAY}
+                exitDelay={0}
+              />
+            </>
+          )}
+
+          {/* Content arrives on the dark layer */}
+          <div className="relative flex h-full flex-col justify-between px-6 py-8 sm:px-12 sm:py-12 lg:px-28">
+            <motion.img
+              src={emblemMark}
+              alt=""
+              className="pointer-events-none absolute -right-[18vw] top-1/2 w-[80vw] -translate-y-1/2 select-none lg:-right-[8vw] lg:w-[46vw]"
+              initial={shouldReduce ? false : { opacity: 0, rotate: -28, scale: 0.86 }}
+              animate={{
+                opacity: 1,
+                rotate: 0,
+                scale: 1,
+                transition: { duration: 0.8, delay: 0.42, ease: EXPO },
+              }}
+              exit={{ opacity: 0, transition: { duration: 0.15 } }}
+            />
+
+            <motion.p
+              className="relative font-mono text-[11px] uppercase tracking-[0.2em] text-amber-300 sm:text-xs"
+              initial={shouldReduce ? false : { opacity: 0, x: -12 }}
+              animate={{
+                opacity: 1,
+                x: 0,
+                transition: { duration: 0.4, delay: 0.45, ease: EXPO },
+              }}
+              exit={{ opacity: 0, transition: { duration: 0.15 } }}
+            >
+              FAST Entrepreneurship &amp; Startup Society
+            </motion.p>
+
+            <div className="relative overflow-hidden pb-[0.24em]">
+              <motion.div
+                className="font-[family-name:var(--font-headline)] text-[15vw] font-medium leading-[0.95] tracking-[-0.035em] text-[#FAF6F0] sm:text-[11vw]"
+                initial={shouldReduce ? false : { y: '105%' }}
+                animate={{
+                  y: 0,
+                  transition: { duration: 0.5, delay: 0.42, ease: EXPO },
+                }}
+                exit={{ opacity: 0, transition: { duration: 0.15 } }}
+              >
+                {label}
+                <span className="text-amber-300">.</span>
+              </motion.div>
             </div>
-            <div className="font-extrabold text-3xl sm:text-5xl tracking-tight text-white">
-              {label}
-            </div>
-          </motion.div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

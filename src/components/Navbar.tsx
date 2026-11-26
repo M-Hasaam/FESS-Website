@@ -26,6 +26,8 @@ const HERO_PAGES: Partial<Record<PageId, number>> = {
   events: 0.45,
   teams: 0.45,
   connect: 0.45,
+  'teams/executive': 0.45,
+  'teams/tech': 0.45,
 };
 
 export function Navbar({

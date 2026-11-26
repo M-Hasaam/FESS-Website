@@ -202,7 +202,7 @@ export default function App() {
                 />
               )}
               {activeTeamId && (
-                <TeamDetailPage teamId={activeTeamId} onNavigate={navigateTo} />
+                <TeamDetailPage teamId={activeTeamId} onNavigate={navigateTo} introDelay={introDelay} />
               )}
               {currentPage === 'connect' && <ConnectPage onShowToast={showToast} introDelay={introDelay} />}
             </motion.div>

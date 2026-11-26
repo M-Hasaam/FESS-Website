@@ -9,6 +9,7 @@ import {
 } from './utils/fessLogic';
 import { FESS_EASE, ScrollProgressBar } from './components/MotionPrimitives';
 import { PageTransitionCurtain } from './components/PageTransitionCurtain';
+import { getCurtainTiming } from './utils/curtainMode';
 import { Navbar } from './components/Navbar';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { HomePage } from './components/HomePage';
@@ -118,6 +119,7 @@ export default function App() {
       if (exitTimerRef.current) window.clearTimeout(exitTimerRef.current);
 
       hasNavigatedRef.current = true;
+      const timing = getCurtainTiming();
       setCurtainLabel(PAGE_LABELS[page] || 'FESS');
       setCurtainVisible(true);
 
@@ -131,8 +133,8 @@ export default function App() {
 
         exitTimerRef.current = window.setTimeout(() => {
           setCurtainVisible(false);
-        }, 450);
-      }, 850);
+        }, timing.hold);
+      }, timing.swap);
     },
     [currentPage]
   );
@@ -161,7 +163,7 @@ export default function App() {
   const activeTeamId = getTeamIdFromPage(currentPage);
 
   // After a page change, wait for the curtain to lift before the page's intro animation plays
-  const introDelay = hasNavigatedRef.current ? 0.55 : 0;
+  const introDelay = hasNavigatedRef.current ? getCurtainTiming().intro : 0;
 
   return (
     <MotionConfig reducedMotion="user">

@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import emblemMark from '../assets/logo/fess-emblem-mark.png';
+import { LIGHT_QUERY_STRING, isLightCurtain } from '../utils/curtainMode';
 
 interface PageTransitionCurtainProps {
   isVisible: boolean;
@@ -8,6 +10,7 @@ interface PageTransitionCurtainProps {
 
 const EXPO = [0.16, 1, 0.3, 1] as const;
 const SWELL = [0.65, 0, 0.35, 1] as const;
+const WIPE = [0.77, 0, 0.175, 1] as const;
 
 type Bead = { x: number; y: number };
 
@@ -100,11 +103,31 @@ function Wave({
   );
 }
 
+/** Phones and touch screens: no filter, only transforms and opacity (all GPU-composited). */
+function useLightMode() {
+  const [light, setLight] = useState(isLightCurtain);
+
+  useEffect(() => {
+    const mq = window.matchMedia(LIGHT_QUERY_STRING);
+    const onChange = () => setLight(mq.matches);
+    onChange();
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
+  return light;
+}
+
 export function PageTransitionCurtain({
   isVisible,
   label,
 }: PageTransitionCurtainProps) {
-  const shouldReduce = useReducedMotion();
+  const shouldReduce = Boolean(useReducedMotion());
+  const light = useLightMode();
+  const liquid = !light && !shouldReduce;
+
+  // Content cues arrive earlier on the shorter mobile timeline
+  const base = light ? 0.26 : 0.42;
 
   return (
     <AnimatePresence>
@@ -115,33 +138,24 @@ export function PageTransitionCurtain({
           className="pointer-events-auto fixed inset-0 z-50 overflow-hidden"
           initial={{ y: 0 }}
           animate={{ y: 0 }}
-          // Keeps the wrapper mounted while both waves drain away
-          exit={{ y: 0, transition: { duration: shouldReduce ? 0.15 : 0.95 } }}
+          // Keeps the wrapper mounted while the layers drain away
+          exit={{ y: 0, transition: { duration: shouldReduce ? 0.15 : light ? 0.6 : 0.95 } }}
         >
-          {/* Goo filter: lets neighbouring beads fuse like the emblem's connected dots */}
-          <svg width="0" height="0" className="absolute">
-            <defs>
-              <filter id="fess-goo">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
-                <feColorMatrix
-                  in="blur"
-                  mode="matrix"
-                  values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 24 -10"
-                />
-              </filter>
-            </defs>
-          </svg>
-
-          {shouldReduce ? (
-            <motion.div
-              className="absolute inset-0 bg-[#0C0F16]"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            />
-          ) : (
+          {liquid && (
             <>
+              {/* Goo filter: lets neighbouring beads fuse like the emblem's connected dots */}
+              <svg width="0" height="0" className="absolute">
+                <defs>
+                  <filter id="fess-goo">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+                    <feColorMatrix
+                      in="blur"
+                      mode="matrix"
+                      values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 24 -10"
+                    />
+                  </filter>
+                </defs>
+              </svg>
               <Wave
                 beads={CRIMSON}
                 size={46}
@@ -159,19 +173,61 @@ export function PageTransitionCurtain({
             </>
           )}
 
+          {light && !shouldReduce && (
+            <>
+              {/* Two curved panels sliding up: crimson leads, dark follows */}
+              <motion.div
+                className="absolute inset-x-0 bottom-0 h-[112%] bg-[#A7020E]"
+                style={{
+                  borderTopLeftRadius: '50% 7vh',
+                  borderTopRightRadius: '50% 7vh',
+                  willChange: 'transform',
+                }}
+                initial={{ y: '105%' }}
+                animate={{ y: '0%', transition: { duration: 0.38, ease: WIPE } }}
+                exit={{ y: '-112%', transition: { duration: 0.38, delay: 0.06, ease: WIPE } }}
+              />
+              <motion.div
+                className="absolute inset-x-0 bottom-0 h-[112%] bg-[#0C0F16]"
+                style={{
+                  borderTopLeftRadius: '50% 7vh',
+                  borderTopRightRadius: '50% 7vh',
+                  willChange: 'transform',
+                }}
+                initial={{ y: '105%' }}
+                animate={{ y: '0%', transition: { duration: 0.38, delay: 0.08, ease: WIPE } }}
+                exit={{ y: '-112%', transition: { duration: 0.38, ease: WIPE } }}
+              />
+            </>
+          )}
+
+          {shouldReduce && (
+            <motion.div
+              className="absolute inset-0 bg-[#0C0F16]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+            />
+          )}
+
           {/* Content arrives on the dark layer */}
           <div className="relative flex h-full flex-col justify-between px-6 py-8 sm:px-12 sm:py-12 lg:px-28">
             <motion.img
               src={emblemMark}
               alt=""
               className="pointer-events-none absolute -right-[18vw] top-1/2 w-[80vw] -translate-y-1/2 select-none lg:-right-[8vw] lg:w-[46vw]"
-              initial={shouldReduce ? false : { opacity: 0, rotate: -28, scale: 0.86 }}
-              animate={{
-                opacity: 1,
-                rotate: 0,
-                scale: 1,
-                transition: { duration: 0.8, delay: 0.42, ease: EXPO },
-              }}
+              initial={shouldReduce ? false : light ? { opacity: 0 } : { opacity: 0, rotate: -28, scale: 0.86 }}
+              animate={
+                light
+                  ? { opacity: 1, transition: { duration: 0.35, delay: base, ease: EXPO } }
+                  : {
+                      opacity: 1,
+                      rotate: 0,
+                      scale: 1,
+                      transition: { duration: 0.8, delay: base, ease: EXPO },
+                    }
+              }
               exit={{ opacity: 0, transition: { duration: 0.15 } }}
             />
 
@@ -181,7 +237,7 @@ export function PageTransitionCurtain({
               animate={{
                 opacity: 1,
                 x: 0,
-                transition: { duration: 0.4, delay: 0.45, ease: EXPO },
+                transition: { duration: 0.35, delay: base + 0.03, ease: EXPO },
               }}
               exit={{ opacity: 0, transition: { duration: 0.15 } }}
             >
@@ -194,7 +250,7 @@ export function PageTransitionCurtain({
                 initial={shouldReduce ? false : { y: '105%' }}
                 animate={{
                   y: 0,
-                  transition: { duration: 0.5, delay: 0.42, ease: EXPO },
+                  transition: { duration: light ? 0.42 : 0.5, delay: base, ease: EXPO },
                 }}
                 exit={{ opacity: 0, transition: { duration: 0.15 } }}
               >

@@ -53,6 +53,8 @@ export default function App() {
   const [curtainVisible, setCurtainVisible] = useState(false);
   const [curtainLabel, setCurtainLabel] = useState('FESS');
   const navTimerRef = useRef<number | null>(null);
+  // True once a page change has gone through the curtain (so the next page can wait for it to lift)
+  const hasNavigatedRef = useRef(false);
   const exitTimerRef = useRef<number | null>(null);
 
   const [regModalOpen, setRegModalOpen] = useState(false);
@@ -115,6 +117,7 @@ export default function App() {
       if (navTimerRef.current) window.clearTimeout(navTimerRef.current);
       if (exitTimerRef.current) window.clearTimeout(exitTimerRef.current);
 
+      hasNavigatedRef.current = true;
       setCurtainLabel(PAGE_LABELS[page] || 'FESS');
       setCurtainVisible(true);
 
@@ -128,8 +131,8 @@ export default function App() {
 
         exitTimerRef.current = window.setTimeout(() => {
           setCurtainVisible(false);
-        }, 140);
-      }, 380);
+        }, 450);
+      }, 850);
     },
     [currentPage]
   );
@@ -157,6 +160,9 @@ export default function App() {
 
   const activeTeamId = getTeamIdFromPage(currentPage);
 
+  // After a page change, wait for the curtain to lift before the page's intro animation plays
+  const introDelay = hasNavigatedRef.current ? 0.55 : 0;
+
   return (
     <MotionConfig reducedMotion="user">
       <div className="min-h-screen flex flex-col bg-[#FAF6F0] text-[#1E2430]">
@@ -183,20 +189,22 @@ export default function App() {
                 <HomePage
                   onNavigate={navigateTo}
                   onOpenRegister={handleOpenRegister}
+                  introDelay={introDelay}
                 />
               )}
               {currentPage === 'events' && (
-                <FlagshipEventPage onOpenRegister={handleOpenRegister} />
+                <FlagshipEventPage onOpenRegister={handleOpenRegister} introDelay={introDelay} />
               )}
               {currentPage === 'teams' && (
                 <TeamsPage
                   onSelectTeam={(team) => navigateTo(`teams/${team}`)}
+                  introDelay={introDelay}
                 />
               )}
               {activeTeamId && (
                 <TeamDetailPage teamId={activeTeamId} onNavigate={navigateTo} />
               )}
-              {currentPage === 'connect' && <ConnectPage onShowToast={showToast} />}
+              {currentPage === 'connect' && <ConnectPage onShowToast={showToast} introDelay={introDelay} />}
             </motion.div>
           </AnimatePresence>
         </main>

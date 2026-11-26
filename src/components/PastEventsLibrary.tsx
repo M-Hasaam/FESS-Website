@@ -37,23 +37,24 @@ export function PastEventsLibrary({
     <section
       id="past-events-library"
       aria-labelledby="past-events-heading"
-      className="py-14 sm:py-24 bg-[#FAF6F0] bg-arch-grid border-b border-[#991B1B]/10 overflow-x-clip"
+      className="py-20 sm:py-28 bg-[#FAF6F0] overflow-x-clip"
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Library Header + Functional Category Filters */}
         <Reveal className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8 sm:mb-12">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#991B1B] mb-2">
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-[#991B1B] mb-6">
               Past Events Library
             </p>
             <h2
               id="past-events-heading"
-              className="font-extrabold text-2xl sm:text-4xl text-slate-900 tracking-tight"
+              className="font-[family-name:var(--font-headline)] text-4xl sm:text-6xl font-medium leading-[1.02] tracking-[-0.03em] text-[#141923]"
             >
-              From the Archive.{' '}
+              From the Archive.
+              <br />
               <span className="text-[#991B1B]">Editions That Built FESS.</span>
             </h2>
-            <p className="text-slate-600 text-sm sm:text-base max-w-2xl mt-2 leading-relaxed">
+            <p className="text-slate-600 text-sm sm:text-base max-w-xl mt-6 leading-relaxed">
               Browse summits, student expos, overnight sprints, and founder nights from
               previous semesters. Drag, swipe, or select any skewed card to inspect edition
               outcomes.

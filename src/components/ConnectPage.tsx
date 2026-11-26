@@ -3,19 +3,22 @@ import { AnimatePresence, motion } from 'motion/react';
 import {
   AlertCircle,
   CheckCircle2,
-  ChevronDown,
+  ArrowUpRight,
   Instagram,
   Linkedin,
   Loader2,
+  Plus,
   Send,
 } from 'lucide-react';
 import { CONNECT_FAQS, CONNECT_TOPICS } from '../data/fessData';
 import { sendContactMessage } from '../utils/apiClient';
 import { validateConnectForm } from '../utils/fessLogic';
 import { FESS_EASE, Reveal } from './MotionPrimitives';
+import { PageHero } from './ui/page-hero';
 
 interface ConnectPageProps {
   onShowToast: (message: string) => void;
+  introDelay?: number;
 }
 
 interface SentMessage {
@@ -26,7 +29,7 @@ interface SentMessage {
   emailId?: string | null;
 }
 
-export function ConnectPage({ onShowToast }: ConnectPageProps) {
+export function ConnectPage({ onShowToast, introDelay = 0 }: ConnectPageProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [topic, setTopic] = useState(CONNECT_TOPICS[0]);
@@ -89,316 +92,282 @@ export function ConnectPage({ onShowToast }: ConnectPageProps) {
     }
   };
 
+  const fieldLabel =
+    'block font-mono text-[11px] uppercase tracking-[0.18em] text-[#141923]/60 mb-2';
+  const field =
+    'w-full min-h-[48px] bg-transparent border-0 border-b border-[#141923]/30 px-0 py-3 text-base text-[#141923] placeholder:text-[#141923]/35 outline-none transition-colors focus:border-[#991B1B] disabled:opacity-60 sm:text-[15px]';
+
   return (
     <div>
-      {/* Header Banner */}
-      <section className="bg-[#141923] text-white py-16 sm:py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(153,27,27,0.35),transparent_60%)]" />
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <p className="font-mono text-xs uppercase tracking-[0.18em] text-amber-300 mb-4">
-            Let&apos;s Talk Business
-          </p>
-          <h1
-            className="font-extrabold tracking-tight mb-4"
-            style={{ fontSize: 'clamp(2.25rem, 4.5vw, 3.75rem)' }}
-          >
-            Connect With <span className="text-red-300">FESS</span>
-          </h1>
-          <p className="text-slate-300 text-base sm:text-xl max-w-2xl leading-relaxed">
-            Have questions about Enterprise Expo stalls, Pitch Arena rules, or Sell Me
-            This Pen? Send a direct message to the FESS team.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Let's talk business"
+        title="Connect with"
+        accent="FESS."
+        subtitle="Have questions about Enterprise Expo stalls, Pitch Arena rules, or Sell Me This Pen? Send a direct message to the FESS team."
+        introDelay={introDelay}
+      />
 
-      <section className="py-10 sm:py-16 bg-[#FAF6F0]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
-            {/* Left: Contact Form */}
-            <Reveal className="lg:col-span-7">
-              <div className="bg-white rounded-3xl p-5 sm:p-9 shadow-[0_18px_38px_-14px_rgba(20,25,35,0.08)] border border-slate-200/80">
-                <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#991B1B]">
-                  Direct Desk
-                </span>
-                <h2 className="font-extrabold text-2xl sm:text-3xl text-slate-900 mt-1 mb-5 sm:mb-6">
-                  Send Us a Message
-                </h2>
+      <section className="bg-[#FAF6F0] py-20 sm:py-28">
+        <div className="mx-auto grid max-w-7xl gap-16 px-4 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:gap-24 lg:px-8">
+          {/* Left: contact form */}
+          <Reveal className="min-w-0">
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-[#991B1B]">Direct desk</p>
+            <h2 className="mt-6 font-[family-name:var(--font-headline)] text-4xl font-medium leading-[1.02] tracking-[-0.03em] text-[#141923] sm:text-5xl">
+              Send us a message.
+            </h2>
 
-                {sentMessage ? (
-                  <div
-                    role="status"
-                    className="p-5 sm:p-6 rounded-2xl bg-[#FAF6F0] border border-[#991B1B]/20 space-y-4"
-                  >
-                    <div className="flex items-start gap-3">
-                      <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0 mt-0.5" />
-                      <div>
-                        <h3 className="font-extrabold text-lg text-slate-900">
-                          Message Received
-                        </h3>
-                        <p className="text-sm text-slate-600 mt-1">
-                          Thank you, <strong className="text-slate-900">{sentMessage.name}</strong>.
-                          Your inquiry regarding{' '}
-                          <strong className="text-[#991B1B]">{sentMessage.topic}</strong> has been
-                          dispatched. Our team will reply to{' '}
-                          <span className="font-mono text-xs text-slate-800">
-                            {sentMessage.email}
-                          </span>
-                          .
-                        </p>
-                        {sentMessage.emailId && (
-                          <p className="text-[11px] font-mono text-slate-500 mt-2">
-                            Ref: {sentMessage.emailId}
-                          </p>
-                        )}
-                      </div>
-                    </div>
+            {sentMessage ? (
+              <div
+                role="status"
+                className="mt-10 border-y border-dashed border-[#141923]/30 py-8"
+              >
+                <div className="flex items-start gap-4">
+                  <CheckCircle2 className="mt-1 h-6 w-6 shrink-0 text-emerald-600" />
+                  <div>
+                    <h3 className="font-serif text-3xl leading-none text-[#141923]">
+                      Message received
+                    </h3>
+                    <p className="mt-4 text-sm leading-relaxed text-slate-600">
+                      Thank you, <strong className="text-[#141923]">{sentMessage.name}</strong>.
+                      Your inquiry regarding{' '}
+                      <strong className="text-[#991B1B]">{sentMessage.topic}</strong> has been
+                      dispatched. Our team will reply to{' '}
+                      <span className="font-mono text-xs text-[#141923]">{sentMessage.email}</span>.
+                    </p>
+                    {sentMessage.emailId && (
+                      <p className="mt-3 font-mono text-[11px] text-slate-500">
+                        Ref: {sentMessage.emailId}
+                      </p>
+                    )}
                     <button
                       type="button"
                       onClick={() => setSentMessage(null)}
-                      className="w-full sm:w-auto min-h-[44px] px-5 py-2.5 rounded-xl bg-[#991B1B] hover:bg-[#7F1D1D] active:scale-[0.98] text-white text-sm font-semibold transition-all"
+                      className="mt-6 text-sm font-semibold text-[#991B1B] underline decoration-[#991B1B]/30 underline-offset-[6px] transition-colors hover:decoration-[#991B1B]"
                     >
-                      Send Another Message
+                      Send another message
                     </button>
                   </div>
-                ) : (
-                  <form onSubmit={handleSubmit} noValidate className="space-y-4">
-                    {submitError && (
-                      <div
-                        role="alert"
-                        className="p-4 rounded-xl bg-red-50 border border-red-200 text-[#7F1D1D] text-xs sm:text-sm flex items-start gap-2.5"
-                      >
-                        <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#991B1B]" />
-                        <span>{submitError}</span>
-                      </div>
-                    )}
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label
-                          htmlFor="contact-name"
-                          className="block text-xs font-bold uppercase text-slate-600 mb-1.5"
-                        >
-                          Your Name
-                        </label>
-                        <input
-                          id="contact-name"
-                          required
-                          type="text"
-                          autoComplete="name"
-                          disabled={isSubmitting}
-                          value={name}
-                          onChange={(e) => setName(e.target.value)}
-                          placeholder="Enter your full name"
-                          className="w-full min-h-[48px] px-4 py-3 rounded-xl bg-[#FAF6F0]/80 border border-slate-200 focus:border-[#991B1B] outline-none text-base sm:text-sm disabled:opacity-60"
-                        />
-                        {errors.name && (
-                          <p className="text-xs text-[#991B1B] mt-1 font-medium">
-                            {errors.name}
-                          </p>
-                        )}
-                      </div>
-
-                      <div>
-                        <label
-                          htmlFor="contact-email"
-                          className="block text-xs font-bold uppercase text-slate-600 mb-1.5"
-                        >
-                          Email Address
-                        </label>
-                        <input
-                          id="contact-email"
-                          required
-                          type="email"
-                          autoComplete="email"
-                          inputMode="email"
-                          disabled={isSubmitting}
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          placeholder="you@example.com"
-                          className="w-full min-h-[48px] px-4 py-3 rounded-xl bg-[#FAF6F0]/80 border border-slate-200 focus:border-[#991B1B] outline-none text-base sm:text-sm disabled:opacity-60"
-                        />
-                        {errors.email && (
-                          <p className="text-xs text-[#991B1B] mt-1 font-medium">
-                            {errors.email}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor="contact-topic"
-                        className="block text-xs font-bold uppercase text-slate-600 mb-2"
-                      >
-                        Topic
-                      </label>
-                      {/* One-thumb quick topic chips for mobile */}
-                      <div
-                        role="radiogroup"
-                        aria-label="Topic"
-                        className="flex flex-wrap gap-2 sm:hidden"
-                      >
-                        {CONNECT_TOPICS.map((t) => {
-                          const active = topic === t;
-                          return (
-                            <motion.button
-                              key={t}
-                              type="button"
-                              role="radio"
-                              aria-checked={active}
-                              whileTap={{ scale: 0.96 }}
-                              disabled={isSubmitting}
-                              onClick={() => setTopic(t)}
-                              className={`min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-bold border transition-colors ${
-                                active
-                                  ? 'bg-[#991B1B] text-white border-[#991B1B] shadow-sm'
-                                  : 'bg-[#FAF6F0] text-slate-700 border-slate-200'
-                              }`}
-                            >
-                              {t}
-                            </motion.button>
-                          );
-                        })}
-                      </div>
-                      <select
-                        id="contact-topic"
-                        disabled={isSubmitting}
-                        value={topic}
-                        onChange={(e) => setTopic(e.target.value)}
-                        className="sr-only sm:not-sr-only sm:block sm:w-full min-h-[48px] px-4 py-3 rounded-xl bg-[#FAF6F0]/80 border border-slate-200 focus:border-[#991B1B] outline-none text-base sm:text-sm font-medium disabled:opacity-60"
-                      >
-                        {CONNECT_TOPICS.map((t) => (
-                          <option key={t} value={t}>
-                            {t}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor="contact-msg"
-                        className="block text-xs font-bold uppercase text-slate-600 mb-1.5"
-                      >
-                        Message
-                      </label>
-                      <textarea
-                        id="contact-msg"
-                        required
-                        rows={4}
-                        disabled={isSubmitting}
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        placeholder="Write your message or question here..."
-                        className="w-full px-4 py-3 rounded-xl bg-[#FAF6F0]/80 border border-slate-200 focus:border-[#991B1B] outline-none text-base sm:text-sm disabled:opacity-60"
-                      />
-                      {errors.message && (
-                        <p className="text-xs text-[#991B1B] mt-1 font-medium">
-                          {errors.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <motion.button
-                      type="submit"
-                      whileTap={{ scale: 0.985 }}
-                      disabled={isSubmitting}
-                      className="w-full min-h-[50px] py-3.5 rounded-xl bg-[#991B1B] hover:bg-[#7F1D1D] disabled:opacity-70 disabled:cursor-not-allowed text-white font-bold text-sm shadow-[0_10px_28px_-6px_rgba(153,27,27,0.3)] transition-colors flex items-center justify-center gap-2"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          <span>Sending Message...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Send className="w-4 h-4" />
-                          <span>Send Message to FESS</span>
-                        </>
-                      )}
-                    </motion.button>
-                  </form>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} noValidate className="mt-10 space-y-8">
+                {submitError && (
+                  <div
+                    role="alert"
+                    className="flex items-start gap-2.5 border-l-2 border-[#991B1B] bg-[#991B1B]/[0.06] px-4 py-3 text-xs text-[#7F1D1D] sm:text-sm"
+                  >
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#991B1B]" />
+                    <span>{submitError}</span>
+                  </div>
                 )}
-              </div>
-            </Reveal>
 
-            {/* Right: Competition FAQs & Official Channels */}
-            <Reveal delay={0.1} className="lg:col-span-5 space-y-5">
-              <div className="bg-white rounded-3xl p-5 sm:p-7 shadow-[0_18px_38px_-14px_rgba(20,25,35,0.08)] border border-slate-200/80">
-                <h2 className="font-extrabold text-xl text-slate-900 mb-4">
-                  Competition FAQs
-                </h2>
-                <div className="space-y-3">
-                  {CONNECT_FAQS.map((faq, idx) => {
-                    const isOpen = openFaq === idx;
-                    return (
-                      <div
-                        key={faq.question}
-                        className="rounded-2xl bg-[#FAF6F0]/80 border border-slate-200/80 overflow-hidden"
-                      >
-                        <button
+                <div className="grid gap-8 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="contact-name" className={fieldLabel}>
+                      Your name
+                    </label>
+                    <input
+                      id="contact-name"
+                      required
+                      type="text"
+                      autoComplete="name"
+                      disabled={isSubmitting}
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Enter your full name"
+                      className={field}
+                    />
+                    {errors.name && (
+                      <p className="mt-1.5 text-xs font-medium text-[#991B1B]">{errors.name}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label htmlFor="contact-email" className={fieldLabel}>
+                      Email address
+                    </label>
+                    <input
+                      id="contact-email"
+                      required
+                      type="email"
+                      autoComplete="email"
+                      inputMode="email"
+                      disabled={isSubmitting}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      className={field}
+                    />
+                    {errors.email && (
+                      <p className="mt-1.5 text-xs font-medium text-[#991B1B]">{errors.email}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="contact-topic" className={fieldLabel}>
+                    Topic
+                  </label>
+                  {/* One-thumb quick topic chips for mobile */}
+                  <div role="radiogroup" aria-label="Topic" className="flex flex-wrap gap-2 sm:hidden">
+                    {CONNECT_TOPICS.map((t) => {
+                      const active = topic === t;
+                      return (
+                        <motion.button
+                          key={t}
                           type="button"
-                          aria-expanded={isOpen}
-                          onClick={() => setOpenFaq(isOpen ? null : idx)}
-                          className="w-full min-h-[52px] px-4 sm:px-5 py-3.5 text-left flex items-center justify-between gap-3 font-bold text-sm text-slate-900 active:bg-slate-100/60 transition-colors"
+                          role="radio"
+                          aria-checked={active}
+                          whileTap={{ scale: 0.96 }}
+                          disabled={isSubmitting}
+                          onClick={() => setTopic(t)}
+                          className={`min-h-[40px] rounded-full border px-4 py-2 text-xs font-semibold transition-colors ${
+                            active
+                              ? 'border-[#141923] bg-[#141923] text-[#FAF6F0]'
+                              : 'border-[#141923]/30 text-[#141923]/75'
+                          }`}
                         >
-                          <span>{faq.question}</span>
-                          <ChevronDown
-                            className={`w-4 h-4 text-[#991B1B] transition-transform duration-200 shrink-0 ${
-                              isOpen ? 'rotate-180' : ''
-                            }`}
-                          />
-                        </button>
-                        <AnimatePresence initial={false}>
-                          {isOpen && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: 'auto', opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.22, ease: FESS_EASE }}
-                              className="overflow-hidden"
-                            >
-                              <div className="px-4 sm:px-5 pb-4 text-xs sm:text-sm text-slate-600 leading-relaxed">
-                                {faq.answer}
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    );
-                  })}
+                          {t}
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                  <select
+                    id="contact-topic"
+                    disabled={isSubmitting}
+                    value={topic}
+                    onChange={(e) => setTopic(e.target.value)}
+                    className={`${field} sr-only sm:not-sr-only sm:block`}
+                  >
+                    {CONNECT_TOPICS.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-              </div>
 
-              <div className="bg-[#141923] rounded-3xl p-6 sm:p-7 text-white shadow-xl">
-                <h3 className="font-bold text-lg mb-2">Official Channels</h3>
-                <p className="text-xs text-slate-300 mb-4 leading-relaxed">
-                  Follow updates for Movie Night, Qawali Night, and competition
-                  announcements.
-                </p>
-                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3">
-                  <motion.button
-                    type="button"
-                    whileTap={{ scale: 0.96 }}
-                    onClick={() => onShowToast('Opening @fess_fast on Instagram')}
-                    className="min-h-[46px] px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold flex items-center justify-center gap-2 transition-colors"
-                  >
-                    <Instagram className="w-4 h-4 text-red-300" />
-                    <span>@fess_fast</span>
-                  </motion.button>
-                  <motion.button
-                    type="button"
-                    whileTap={{ scale: 0.96 }}
-                    onClick={() => onShowToast('Opening FESS on LinkedIn')}
-                    className="min-h-[46px] px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold flex items-center justify-center gap-2 transition-colors"
-                  >
-                    <Linkedin className="w-4 h-4 text-red-300" />
-                    <span>LinkedIn</span>
-                  </motion.button>
+                <div>
+                  <label htmlFor="contact-msg" className={fieldLabel}>
+                    Message
+                  </label>
+                  <textarea
+                    id="contact-msg"
+                    required
+                    rows={4}
+                    disabled={isSubmitting}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Write your message or question here..."
+                    className={`${field} resize-none`}
+                  />
+                  {errors.message && (
+                    <p className="mt-1.5 text-xs font-medium text-[#991B1B]">{errors.message}</p>
+                  )}
                 </div>
+
+                <motion.button
+                  type="submit"
+                  whileTap={{ scale: 0.985 }}
+                  disabled={isSubmitting}
+                  className="group inline-flex min-h-[52px] w-full items-center justify-between gap-3 bg-[#141923] px-6 text-sm font-semibold text-[#FAF6F0] transition-colors hover:bg-[#991B1B] disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto sm:min-w-[18rem]"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <span>Sending message...</span>
+                      <Loader2 className="h-4 w-4 animate-spin text-amber-300" />
+                    </>
+                  ) : (
+                    <>
+                      <span>Send message to FESS</span>
+                      <Send className="h-4 w-4 text-amber-300 transition-transform group-hover:translate-x-0.5" />
+                    </>
+                  )}
+                </motion.button>
+              </form>
+            )}
+          </Reveal>
+
+          {/* Right: FAQs and official channels */}
+          <Reveal delay={0.1} className="min-w-0">
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-[#991B1B]">
+              Before you write
+            </p>
+            <h2 className="mt-6 font-serif text-4xl leading-none text-[#141923] sm:text-5xl">
+              Competition FAQs
+            </h2>
+
+            <div className="mt-8 border-t border-dashed border-[#141923]/30">
+              {CONNECT_FAQS.map((faq, idx) => {
+                const isOpen = openFaq === idx;
+                return (
+                  <div key={faq.question} className="border-b border-dashed border-[#141923]/30">
+                    <button
+                      type="button"
+                      aria-expanded={isOpen}
+                      onClick={() => setOpenFaq(isOpen ? null : idx)}
+                      className="flex min-h-[64px] w-full items-center justify-between gap-4 py-5 text-left transition-colors hover:text-[#991B1B]"
+                    >
+                      <span className="font-serif text-xl leading-snug text-inherit sm:text-2xl">
+                        {faq.question}
+                      </span>
+                      <Plus
+                        className={`h-5 w-5 shrink-0 text-[#991B1B] transition-transform duration-200 ${
+                          isOpen ? 'rotate-45' : ''
+                        }`}
+                      />
+                    </button>
+                    <AnimatePresence initial={false}>
+                      {isOpen && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.22, ease: FESS_EASE }}
+                          className="overflow-hidden"
+                        >
+                          <p className="max-w-md pb-6 text-sm leading-relaxed text-slate-600">
+                            {faq.answer}
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="mt-12 bg-[#141923] p-8 text-[#FAF6F0]">
+              <h3 className="font-serif text-3xl leading-none">Official channels</h3>
+              <p className="mt-3 text-sm leading-relaxed text-slate-400">
+                Follow updates for Movie Night, Qawali Night, and competition announcements.
+              </p>
+              <div className="mt-6 border-t border-dashed border-white/25">
+                <button
+                  type="button"
+                  onClick={() => onShowToast('Opening @fess_fast on Instagram')}
+                  className="group flex min-h-[56px] w-full items-center justify-between border-b border-dashed border-white/25 text-left text-sm font-semibold transition-colors hover:text-amber-300"
+                >
+                  <span className="flex items-center gap-3">
+                    <Instagram className="h-4 w-4 text-amber-300" />
+                    @fess_fast
+                  </span>
+                  <ArrowUpRight className="h-4 w-4 text-amber-300 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onShowToast('Opening FESS on LinkedIn')}
+                  className="group flex min-h-[56px] w-full items-center justify-between border-b border-dashed border-white/25 text-left text-sm font-semibold transition-colors hover:text-amber-300"
+                >
+                  <span className="flex items-center gap-3">
+                    <Linkedin className="h-4 w-4 text-amber-300" />
+                    LinkedIn
+                  </span>
+                  <ArrowUpRight className="h-4 w-4 text-amber-300 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                </button>
               </div>
-            </Reveal>
-          </div>
+            </div>
+          </Reveal>
         </div>
       </section>
     </div>

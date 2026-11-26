@@ -20,6 +20,14 @@ const NAV_ITEMS: { id: PageId; label: string }[] = [
   { id: 'connect', label: 'Connect' },
 ];
 
+// Pages that open with a dark hero: the bar is transparent over it, then turns to dark glass
+const HERO_PAGES: Partial<Record<PageId, number>> = {
+  home: 0.7,
+  events: 0.45,
+  teams: 0.45,
+  connect: 0.45,
+};
+
 export function Navbar({
   currentPage,
   onNavigate,
@@ -32,7 +40,8 @@ export function Navbar({
   useEffect(() => {
     // On home the bar stays transparent while the hero is in view so the artwork runs behind it
     const onScroll = () => {
-      const threshold = currentPage === 'home' ? window.innerHeight * 0.7 : 18;
+      const heroRatio = HERO_PAGES[currentPage];
+      const threshold = heroRatio ? window.innerHeight * heroRatio : 18;
       setScrolled(window.scrollY > threshold);
     };
     onScroll();
@@ -45,7 +54,7 @@ export function Navbar({
   }, [currentPage]);
 
   // Home sits on the dark hero, so the bar goes dark there to avoid a hard seam.
-  const dark = currentPage === 'home';
+  const dark = currentPage in HERO_PAGES;
 
   const handleNavClick = (page: PageId) => {
     setMobileOpen(false);

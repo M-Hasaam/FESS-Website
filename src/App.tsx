@@ -160,6 +160,9 @@ export default function App() {
 
   const activeTeamId = getTeamIdFromPage(currentPage);
 
+  // After a page change, wait for the curtain to lift before the page's intro animation plays
+  const introDelay = hasNavigatedRef.current ? 0.55 : 0;
+
   return (
     <MotionConfig reducedMotion="user">
       <div className="min-h-screen flex flex-col bg-[#FAF6F0] text-[#1E2430]">
@@ -186,21 +189,22 @@ export default function App() {
                 <HomePage
                   onNavigate={navigateTo}
                   onOpenRegister={handleOpenRegister}
-                  introDelay={hasNavigatedRef.current ? 0.55 : 0}
+                  introDelay={introDelay}
                 />
               )}
               {currentPage === 'events' && (
-                <FlagshipEventPage onOpenRegister={handleOpenRegister} />
+                <FlagshipEventPage onOpenRegister={handleOpenRegister} introDelay={introDelay} />
               )}
               {currentPage === 'teams' && (
                 <TeamsPage
                   onSelectTeam={(team) => navigateTo(`teams/${team}`)}
+                  introDelay={introDelay}
                 />
               )}
               {activeTeamId && (
                 <TeamDetailPage teamId={activeTeamId} onNavigate={navigateTo} />
               )}
-              {currentPage === 'connect' && <ConnectPage onShowToast={showToast} />}
+              {currentPage === 'connect' && <ConnectPage onShowToast={showToast} introDelay={introDelay} />}
             </motion.div>
           </AnimatePresence>
         </main>

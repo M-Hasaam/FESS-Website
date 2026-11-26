@@ -351,7 +351,7 @@ async function startServer() {
   }
 
   app.listen(port, '0.0.0.0', () => {
-    console.log(`FESS backend server listening on http://0.0.0.0:${port}`);
+    console.log(`FESS backend server listening on http://localhost:${port}`);
   });
 }
 

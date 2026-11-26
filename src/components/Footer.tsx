@@ -1,15 +1,14 @@
 import { Instagram, Linkedin } from 'lucide-react';
-import type { PageId } from '../data/fessData';
+import { SOCIAL_LINKS, type PageId } from '../data/fessData';
 
 interface FooterProps {
   onNavigate: (page: PageId) => void;
-  onSocialToast: (message: string) => void;
 }
 
-export function Footer({ onNavigate, onSocialToast }: FooterProps) {
+export function Footer({ onNavigate }: FooterProps) {
   return (
     <footer className="bg-[#141923] text-white pt-14 sm:pt-16 pb-28 md:pb-10 border-t border-slate-800/80">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 pb-12 border-b border-white/10">
           <div>
             <h2 className="font-extrabold text-2xl sm:text-3xl tracking-tight text-white mb-2">
@@ -22,9 +21,10 @@ export function Footer({ onNavigate, onSocialToast }: FooterProps) {
           </div>
 
           <div className="flex flex-wrap items-center gap-4">
-            <button
-              type="button"
-              onClick={() => onSocialToast('Follow @fess_fast on Instagram for live event updates.')}
+            <a
+              href={SOCIAL_LINKS.instagram.url}
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-3.5 px-5 py-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-red-400/40 transition-all duration-150 group text-left"
             >
               <span className="w-10 h-10 rounded-xl bg-red-950/90 border border-red-800/60 flex items-center justify-center text-red-300 group-hover:scale-105 transition-transform">
@@ -32,23 +32,26 @@ export function Footer({ onNavigate, onSocialToast }: FooterProps) {
               </span>
               <span>
                 <span className="font-bold text-sm text-white block">Follow Us</span>
-                <span className="text-xs text-slate-300 block">@fess_fast</span>
+                <span className="text-xs text-slate-300 block">{SOCIAL_LINKS.instagram.handle}</span>
               </span>
-            </button>
+            </a>
 
-            <button
-              type="button"
-              onClick={() => onSocialToast('Connect with FESS on LinkedIn for industry panels & updates.')}
-              className="flex items-center gap-3.5 px-5 py-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-red-400/40 transition-all duration-150 group text-left"
-            >
-              <span className="w-10 h-10 rounded-xl bg-red-950/90 border border-red-800/60 flex items-center justify-center text-red-300 group-hover:scale-105 transition-transform">
-                <Linkedin className="w-5 h-5" />
-              </span>
-              <span>
-                <span className="font-bold text-sm text-white block">Connect</span>
-                <span className="text-xs text-slate-300 block">LinkedIn</span>
-              </span>
-            </button>
+            {SOCIAL_LINKS.linkedin && (
+              <a
+                href={SOCIAL_LINKS.linkedin.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3.5 px-5 py-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-red-400/40 transition-all duration-150 group text-left"
+              >
+                <span className="w-10 h-10 rounded-xl bg-red-950/90 border border-red-800/60 flex items-center justify-center text-red-300 group-hover:scale-105 transition-transform">
+                  <Linkedin className="w-5 h-5" />
+                </span>
+                <span>
+                  <span className="font-bold text-sm text-white block">Connect</span>
+                  <span className="text-xs text-slate-300 block">{SOCIAL_LINKS.linkedin.label}</span>
+                </span>
+              </a>
+            )}
           </div>
         </div>
 

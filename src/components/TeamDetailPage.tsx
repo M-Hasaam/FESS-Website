@@ -1,39 +1,25 @@
-import React, { useRef, useState } from 'react';
-import { motion, useMotionValue, useReducedMotion, useSpring } from 'motion/react';
-import {
-  ArrowLeft,
-  ArrowRight,
-  Award,
-  CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
-  Layers,
-  Quote,
-  RotateCw,
-  Sparkles,
-} from 'lucide-react';
-import {
-  TEAMS,
-  type PageId,
-  type TeamId,
-  type TeamMember,
-} from '../data/fessData';
+import { useRef, useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react';
+import { TEAMS, type PageId, type TeamId } from '../data/fessData';
 import { FESS_EASE, Reveal } from './MotionPrimitives';
-import { Team3DCanvas } from './Team3DCanvas';
-import { NeonReveal } from './ui/neon-reveal';
+import { PageHero } from './ui/page-hero';
+import { MemberPortrait } from './ui/member-portrait';
 
 interface TeamDetailPageProps {
   teamId: TeamId;
   onNavigate: (page: PageId) => void;
+  introDelay?: number;
 }
 
-export function TeamDetailPage({ teamId, onNavigate }: TeamDetailPageProps) {
+const HEADLINE = 'font-[family-name:var(--font-headline)]';
+
+export function TeamDetailPage({ teamId, onNavigate, introDelay = 0 }: TeamDetailPageProps) {
   const team = TEAMS[teamId];
   const otherTeamId: TeamId = teamId === 'executive' ? 'tech' : 'executive';
   const otherTeam = TEAMS[otherTeamId];
 
   const [activeIndex, setActiveIndex] = useState(0);
-  const [flippedIds, setFlippedIds] = useState<Record<string, boolean>>({});
   const stageRef = useRef<HTMLElement>(null);
   const shouldReduce = useReducedMotion();
 
@@ -44,664 +30,271 @@ export function TeamDetailPage({ teamId, onNavigate }: TeamDetailPageProps) {
     setActiveIndex((prev) => (prev + delta + members.length) % members.length);
   };
 
-  const toggleFlip = (memberId: string) => {
-    setFlippedIds((prev) => ({ ...prev, [memberId]: !prev[memberId] }));
-  };
-
   const focusMemberOnStage = (index: number) => {
     setActiveIndex(index);
-    stageRef.current?.scrollIntoView({ behavior: shouldReduce ? 'auto' : 'smooth', block: 'start' });
+    stageRef.current?.scrollIntoView({
+      behavior: shouldReduce ? 'auto' : 'smooth',
+      block: 'start',
+    });
   };
+
+  // "Executive Council" -> title "Executive", accent "Council."
+  const words = team.title.split(' ');
+  const accent = `${words.pop()}.`;
+  const title = words.join(' ') || team.title;
+
+  const pad = (n: number) => String(n).padStart(2, '0');
 
   return (
     <div data-testid={`team-detail-page-${teamId}`} className="bg-[#FAF6F0]">
-      {/* 1. Dark 3D Architectural Banner */}
-      <section className="relative bg-[#141923] text-white py-14 sm:py-20 overflow-hidden">
-        <div
-          className={`absolute inset-0 ${
-            teamId === 'executive'
-              ? 'bg-[radial-gradient(circle_at_top_right,rgba(153,27,27,0.48),transparent_62%)]'
-              : 'bg-[radial-gradient(circle_at_top_right,rgba(185,28,28,0.38),transparent_62%)]'
-          }`}
-        />
-        <Team3DCanvas teamId={teamId} />
-
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
-          {/* Breadcrumb + Direct Team Switcher */}
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-10">
-            <button
-              type="button"
-              onClick={() => onNavigate('teams')}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/18 border border-white/15 text-xs sm:text-sm font-semibold text-white transition-colors backdrop-blur-md"
-            >
-              <ArrowLeft className="w-4 h-4 text-amber-300" />
-              <span>Back to Meet Our Teams</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => onNavigate(`teams/${otherTeamId}`)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#991B1B] hover:bg-[#7F1D1D] text-xs sm:text-sm font-semibold text-white shadow-lg transition-colors"
-            >
-              <span>Switch to {otherTeam.title}</span>
-              <ArrowRight className="w-4 h-4 text-amber-200" />
-            </button>
-          </div>
-
-          <div className="max-w-3xl">
-            <NeonReveal
-              colors={['#EF4444', '#FBBF24']}
-              direction="down"
-              expandFrom="left"
-              revealDuration={1400}
-              thickness={3}
-              glow={1.15}
-              spill={1.1}
-              className="mb-6 bg-white/4 border border-white/10 backdrop-blur-sm"
-            >
-              <div className="px-6 py-6 sm:px-8 sm:py-7 text-left">
-                <p className="font-mono text-xs uppercase tracking-[0.2em] text-amber-300 mb-3">
-                  {team.tag === team.badgeText
-                    ? `${team.tag} · FESS Division`
-                    : `${team.tag} · ${team.badgeText}`}
-                </p>
-
-                <h1 className="font-extrabold tracking-tight mb-4 text-white">
-                  <span style={{ fontSize: 'clamp(2.35rem, 5vw, 4rem)' }} className="block">
-                    {team.title}
-                  </span>
-                </h1>
-
-                <p className="text-slate-300 text-base sm:text-lg leading-relaxed">
-                  {team.heroVision}
-                </p>
-              </div>
-            </NeonReveal>
-
-            {/* 3D Floating KPI Depth Chips */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-              {team.stats.map((stat, idx) => (
-                <motion.div
-                  key={stat.label}
-                  initial={shouldReduce ? undefined : { opacity: 0, y: 16, rotateX: 14 }}
-                  animate={{ opacity: 1, y: 0, rotateX: 0 }}
-                  transition={{ duration: 0.45, delay: 0.16 + idx * 0.07, ease: FESS_EASE }}
-                  whileHover={shouldReduce ? undefined : { y: -4, rotateX: -4, rotateY: 4 }}
-                  style={
-                    shouldReduce
-                      ? undefined
-                      : { transformPerspective: 800, transformStyle: 'preserve-3d' }
-                  }
-                  className="rounded-2xl bg-white/8 backdrop-blur-md border border-white/12 px-4 py-3.5"
-                >
-                  <span className="block font-mono text-[10px] uppercase tracking-wider text-amber-300">
-                    {stat.label}
-                  </span>
-                  <span className="block font-bold text-sm sm:text-base text-white mt-0.5">
-                    {stat.value}
-                  </span>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 2. Interactive 3D Orbital Member Spotlight Stage */}
-      <section
-        ref={stageRef}
-        className="py-16 sm:py-20 bg-gradient-to-b from-[#141923] via-[#1B2130] to-[#FAF6F0] text-white relative overflow-hidden"
+      {/* 1. HEADER */}
+      <PageHero
+        eyebrow={
+          team.tag === team.badgeText
+            ? `${team.tag} · FESS Division`
+            : `${team.tag} · ${team.badgeText}`
+        }
+        title={title}
+        accent={words.length ? accent : undefined}
+        subtitle={team.heroVision}
+        introDelay={introDelay}
       >
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
-            <div>
-              <span className="font-mono text-xs uppercase tracking-[0.18em] text-amber-300">
-                Interactive 3D Spotlight
-              </span>
-              <h2 className="font-extrabold text-2xl sm:text-4xl text-white mt-1.5">
-                3D Leadership Carousel
-              </h2>
-            </div>
+        <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3 text-sm font-semibold">
+          <button
+            type="button"
+            onClick={() => onNavigate('teams')}
+            className="group inline-flex items-center gap-2 text-[#FAF6F0] underline decoration-white/30 underline-offset-[6px] transition-colors hover:decoration-amber-300"
+          >
+            <ArrowLeft className="h-4 w-4 text-amber-300 transition-transform group-hover:-translate-x-0.5" />
+            Back to all teams
+          </button>
+          <button
+            type="button"
+            onClick={() => onNavigate(`teams/${otherTeamId}`)}
+            className="group inline-flex items-center gap-2 text-[#FAF6F0] underline decoration-white/30 underline-offset-[6px] transition-colors hover:decoration-amber-300"
+          >
+            Switch to {otherTeam.title}
+            <ArrowRight className="h-4 w-4 text-amber-300 transition-transform group-hover:translate-x-0.5" />
+          </button>
+        </div>
 
-            <div className="flex items-center gap-3">
+        <dl className="mt-12 grid max-w-3xl border-t border-dashed border-white/30 sm:grid-cols-3 sm:gap-x-8">
+          {team.stats.map((stat) => (
+            <div
+              key={stat.label}
+              className="border-b border-dashed border-white/30 py-4 sm:border-b-0 sm:pb-0"
+            >
+              <dt className="font-mono text-[11px] uppercase tracking-[0.18em] text-slate-400">
+                {stat.label}
+              </dt>
+              <dd className="mt-2 font-serif text-2xl leading-none text-[#FAF6F0]">
+                {stat.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </PageHero>
+
+      {/* 2. SPOTLIGHT */}
+      <section ref={stageRef} className="scroll-mt-16 bg-[#0C0F16] pb-20 text-[#FAF6F0] sm:pb-28">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col justify-between gap-6 border-t border-dashed border-white/30 pt-8 sm:flex-row sm:items-center">
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-amber-300">
+              Leadership · {pad(activeIndex + 1)} / {pad(members.length)}
+            </p>
+            <div className="flex items-center gap-8 text-sm font-semibold">
               <button
                 type="button"
                 onClick={() => stepMember(-1)}
                 aria-label="Previous team member"
-                className="w-11 h-11 rounded-xl bg-white/10 hover:bg-[#991B1B] border border-white/15 flex items-center justify-center text-white transition-colors"
+                className="group inline-flex min-h-[44px] items-center gap-2 transition-colors hover:text-amber-300"
               >
-                <ChevronLeft className="w-5 h-5" />
+                <ArrowLeft className="h-4 w-4 text-amber-300 transition-transform group-hover:-translate-x-0.5" />
+                Previous
               </button>
-              <span className="font-mono text-xs px-3 py-2 rounded-xl bg-white/8 border border-white/10 text-amber-200">
-                0{activeIndex + 1} / 0{members.length}
-              </span>
               <button
                 type="button"
                 onClick={() => stepMember(1)}
                 aria-label="Next team member"
-                className="w-11 h-11 rounded-xl bg-white/10 hover:bg-[#991B1B] border border-white/15 flex items-center justify-center text-white transition-colors"
+                className="group inline-flex min-h-[44px] items-center gap-2 transition-colors hover:text-amber-300"
               >
-                <ChevronRight className="w-5 h-5" />
+                Next
+                <ArrowRight className="h-4 w-4 text-amber-300 transition-transform group-hover:translate-x-0.5" />
               </button>
             </div>
           </div>
 
-          {/* 3D Perspective Coverflow Carousel */}
-          <div
-            data-testid="team-3d-carousel"
-            className="relative min-h-[450px] sm:min-h-[420px] flex items-center justify-center mb-8"
-            style={
-              shouldReduce
-                ? undefined
-                : { perspective: '1500px', transformStyle: 'preserve-3d' }
-            }
-          >
-            {members.map((member, idx) => {
-              let offset = idx - activeIndex;
-              if (offset > members.length / 2) offset -= members.length;
-              if (offset < -members.length / 2) offset += members.length;
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeMember.id}
+              initial={shouldReduce ? false : { opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3, ease: FESS_EASE }}
+              className="mt-10 grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20"
+            >
+              <MemberPortrait
+                memberId={activeMember.id}
+                name={activeMember.name}
+                className="aspect-[4/5] w-full max-w-md rounded-xl lg:max-w-none"
+              />
 
-              const isActive = offset === 0;
-              const absOffset = Math.abs(offset);
-              const initials = member.name
-                .split(' ')
-                .map((n) => n[0])
-                .join('');
-
-              // Position each card on a 3D arc
-              const translateX = offset * 280;
-              const translateZ = isActive ? 40 : -150 * absOffset;
-              const rotateY = shouldReduce ? 0 : offset * -24;
-              const scale = isActive ? 1 : Math.max(0.76, 1 - absOffset * 0.14);
-              const opacity = absOffset > 1 ? 0.35 : isActive ? 1 : 0.72;
-
-              return (
-                <motion.div
-                  key={member.id}
-                  animate={
-                    shouldReduce
-                      ? { opacity: isActive ? 1 : 0 }
-                      : {
-                          x: translateX,
-                          z: translateZ,
-                          rotateY,
-                          scale,
-                          opacity,
-                        }
-                  }
-                  drag={isActive && !shouldReduce ? 'x' : false}
-                  dragConstraints={{ left: 0, right: 0 }}
-                  dragElastic={0.22}
-                  onDragEnd={
-                    isActive
-                      ? (_event, info) => {
-                          if (info.offset.x < -45 || info.velocity.x < -300) {
-                            stepMember(1);
-                          } else if (info.offset.x > 45 || info.velocity.x > 300) {
-                            stepMember(-1);
-                          }
-                        }
-                      : undefined
-                  }
-                  transition={{ duration: 0.55, ease: FESS_EASE }}
-                  style={{
-                    transformStyle: 'preserve-3d',
-                    zIndex: members.length - absOffset,
-                    pointerEvents: isActive || absOffset === 1 ? 'auto' : 'none',
-                  }}
-                  onClick={!isActive ? () => setActiveIndex(idx) : undefined}
-                  className={`w-full max-w-2xl rounded-3xl p-5 sm:p-8 border shadow-2xl ${
-                    isActive
-                      ? 'relative bg-gradient-to-br from-white via-[#FAF6F0] to-white text-slate-900 border-amber-400/50 shadow-[0_32px_70px_-15px_rgba(0,0,0,0.55)] cursor-grab active:cursor-grabbing'
-                      : 'hidden md:block absolute bg-[#1E2430]/95 text-white border-white/12 cursor-pointer hover:border-amber-300/40'
-                  }`}
+              <div className="min-w-0">
+                <p className="font-mono text-xs uppercase tracking-[0.18em] text-amber-300">
+                  {pad(activeIndex + 1)} · {activeMember.code}
+                </p>
+                <h2
+                  className={`${HEADLINE} mt-5 text-4xl font-medium leading-[1.02] tracking-[-0.03em] sm:text-6xl`}
                 >
-                  {isActive ? (
-                    <div
-                      className="space-y-4 sm:space-y-5"
-                      style={shouldReduce ? undefined : { transformStyle: 'preserve-3d' }}
-                    >
-                      <div className="flex items-center justify-between md:hidden text-[11px] font-mono text-slate-500 pb-1 border-b border-slate-200/70">
-                        <span>Swipe card to switch leader</span>
-                        <span className="text-[#991B1B] font-bold">
-                          0{activeIndex + 1} / 0{members.length}
-                        </span>
-                      </div>
+                  {activeMember.name}
+                </h2>
+                <p className="mt-4 font-serif text-2xl italic text-[#C4121F]">
+                  {activeMember.role}
+                </p>
+                <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.16em] text-slate-500">
+                  {activeMember.batch}
+                </p>
 
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5">
-                        <div
-                          style={
-                            shouldReduce
-                              ? undefined
-                              : { transform: 'translateZ(36px)' }
-                          }
-                          className="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-[#991B1B] via-[#7F1D1D] to-[#141923] text-white font-extrabold text-lg sm:text-2xl flex items-center justify-center shadow-[0_14px_30px_-8px_rgba(153,27,27,0.55)] border border-amber-300/30 shrink-0"
-                        >
-                          {initials}
-                        </div>
+                <p className="mt-8 max-w-xl text-base leading-relaxed text-slate-300">
+                  {activeMember.bio}
+                </p>
 
-                        <div className="flex-1">
-                          <div className="flex flex-wrap items-center gap-2 mb-1">
-                            <span className="px-2.5 py-0.5 rounded-md bg-[#991B1B] text-white font-mono text-[10px] font-bold uppercase tracking-wider">
-                              {member.code}
-                            </span>
-                            <span className="font-mono text-[11px] text-slate-500">
-                              {member.batch}
-                            </span>
-                          </div>
-                          <h3 className="font-extrabold text-xl sm:text-3xl text-slate-900">
-                            {member.name}
-                          </h3>
-                          <p className="text-sm font-bold text-[#991B1B]">{member.role}</p>
-                        </div>
-                      </div>
+                <dl className="mt-8 border-t border-dashed border-white/30">
+                  <div className="grid gap-1 border-b border-dashed border-white/30 py-4 sm:grid-cols-[9rem_1fr] sm:gap-6">
+                    <dt className="font-mono text-[11px] uppercase tracking-[0.16em] text-amber-300">
+                      Primary focus
+                    </dt>
+                    <dd className="text-sm text-[#FAF6F0]">{activeMember.focus}</dd>
+                  </div>
+                  <div className="grid gap-1 border-b border-dashed border-white/30 py-4 sm:grid-cols-[9rem_1fr] sm:gap-6">
+                    <dt className="font-mono text-[11px] uppercase tracking-[0.16em] text-amber-300">
+                      Key contributions
+                    </dt>
+                    <dd>
+                      <ul className="space-y-2.5">
+                        {activeMember.highlights.map((item) => (
+                          <li key={item} className="text-sm leading-relaxed text-slate-300">
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </dd>
+                  </div>
+                  <div className="grid gap-1 border-b border-dashed border-white/30 py-4 sm:grid-cols-[9rem_1fr] sm:gap-6">
+                    <dt className="font-mono text-[11px] uppercase tracking-[0.16em] text-amber-300">
+                      Skills
+                    </dt>
+                    <dd className="font-mono text-xs leading-relaxed text-slate-300">
+                      {activeMember.skills.join(' · ')}
+                    </dd>
+                  </div>
+                </dl>
 
-                      <p className="text-sm sm:text-base text-slate-700 leading-relaxed">
-                        {member.bio}
-                      </p>
+                <blockquote className="mt-8 max-w-xl font-serif text-xl italic leading-relaxed text-[#FAF6F0]/85">
+                  &ldquo;{activeMember.quote}&rdquo;
+                </blockquote>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </section>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-                        <div className="p-4 rounded-2xl bg-[#FAF6F0] border border-[#991B1B]/12">
-                          <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#991B1B] mb-2">
-                            Key Contributions
-                          </div>
-                          <ul className="space-y-2">
-                            {member.highlights.map((item) => (
-                              <li
-                                key={item}
-                                className="text-xs text-slate-700 flex items-start gap-2 leading-relaxed"
-                              >
-                                <CheckCircle2 className="w-3.5 h-3.5 text-[#991B1B] shrink-0 mt-0.5" />
-                                <span>{item}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
+      {/* 3. ROSTER */}
+      <section className="bg-[#FAF6F0] py-20 sm:py-28">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <Reveal>
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-[#991B1B]">
+              Complete team
+            </p>
+            <h2
+              className={`${HEADLINE} mt-6 max-w-3xl text-4xl font-medium leading-[1.02] tracking-[-0.03em] text-[#141923] sm:text-6xl`}
+            >
+              Every {team.title} <span className="text-[#991B1B]">member.</span>
+            </h2>
+          </Reveal>
 
-                        <div className="p-4 rounded-2xl bg-[#141923] text-white flex flex-col justify-between gap-3">
-                          <div>
-                            <Quote className="w-4 h-4 text-amber-300 mb-1.5" />
-                            <p className="font-serif italic text-xs sm:text-sm text-slate-200 leading-relaxed">
-                              &ldquo;{member.quote}&rdquo;
-                            </p>
-                          </div>
-                          <div className="flex flex-wrap gap-1.5 pt-1">
-                            {member.skills.map((skill) => (
-                              <span
-                                key={skill}
-                                className="px-2 py-0.5 rounded-md bg-white/10 text-[10px] font-mono text-amber-200"
-                              >
-                                {skill}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-center py-12 px-4">
-                      <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-[#991B1B] to-[#450A0A] text-white font-extrabold text-xl flex items-center justify-center mb-4">
-                        {initials}
-                      </div>
-                      <span className="font-mono text-[10px] uppercase tracking-widest text-amber-300 block mb-1">
-                        {member.code}
-                      </span>
-                      <div className="font-extrabold text-xl text-white">{member.name}</div>
-                      <div className="text-xs text-slate-300 mt-1">{member.role}</div>
-                      <span className="inline-block mt-4 text-[11px] font-mono text-amber-200">
-                        Click to rotate into focus
-                      </span>
-                    </div>
-                  )}
-                </motion.div>
-              );
-            })}
-          </div>
-
-          {/* 3D Carousel Member Selector Dock (horizontal swipe on mobile) */}
-          <div className="flex md:flex-wrap items-center md:justify-center gap-2.5 overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0 py-1">
+          <div className="mt-12 grid grid-cols-2 gap-x-5 gap-y-10 sm:mt-16 md:grid-cols-3 lg:grid-cols-4">
             {members.map((member, idx) => {
               const selected = idx === activeIndex;
               return (
-                <button
-                  key={member.id}
-                  type="button"
-                  onClick={() => setActiveIndex(idx)}
-                  className={`min-h-[44px] px-4 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 whitespace-nowrap shrink-0 ${
-                    selected
-                      ? 'bg-[#991B1B] text-white shadow-lg ring-2 ring-amber-300/60'
-                      : 'bg-white text-slate-700 border border-slate-200 hover:border-[#991B1B]/40'
-                  }`}
-                >
-                  <span className="font-mono text-[10px] opacity-80">0{idx + 1}</span>
-                  <span>{member.name}</span>
-                </button>
+                <Reveal key={member.id} delay={(idx % 4) * 0.06}>
+                  <button
+                    type="button"
+                    onClick={() => focusMemberOnStage(idx)}
+                    aria-label={`Open ${member.name}, ${member.role}`}
+                    className="group block w-full text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#991B1B]"
+                  >
+                    <div className="overflow-hidden rounded-lg">
+                      <MemberPortrait
+                        memberId={member.id}
+                        name={member.name}
+                        className="aspect-[4/5] w-full transition-transform duration-500 group-hover:scale-[1.03]"
+                      />
+                    </div>
+                    <div
+                      className={`mt-4 border-t border-dashed pt-4 transition-colors ${
+                        selected ? 'border-[#991B1B]' : 'border-[#141923]/30'
+                      }`}
+                    >
+                      <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#991B1B]">
+                        {pad(idx + 1)} · {member.code}
+                      </p>
+                      <h3 className="mt-2 font-serif text-2xl leading-tight text-[#141923] transition-colors group-hover:text-[#991B1B]">
+                        {member.name}
+                      </h3>
+                      <p className="mt-1 text-sm text-slate-600">{member.role}</p>
+                    </div>
+                  </button>
+                </Reveal>
               );
             })}
           </div>
         </div>
       </section>
 
-      {/* 3. Full Roster 3D Tilt & 180-Degree Flip Dossier Cards */}
-      <section className="py-16 sm:py-20 bg-[#FAF6F0] bg-arch-grid">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Reveal className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
-            <div>
-              <span className="font-mono text-xs font-bold uppercase tracking-[0.16em] text-[#991B1B]">
-                Complete Team Showcase
-              </span>
-              <h2 className="font-extrabold text-3xl sm:text-4xl text-slate-900 mt-1.5">
-                Every {team.title} Member in Detail
-              </h2>
-            </div>
-            <p className="text-xs sm:text-sm text-slate-600 max-w-md">
-              Move across any card for 3D depth tilt, or flip a dossier in 3D space to
-              inspect full deliverables and leadership focus.
+      {/* 4. NEXT DIVISION */}
+      <section className="bg-[#8B0A14] py-20 text-[#FAF6F0] sm:py-28">
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.2fr_1fr] lg:items-end lg:gap-24 lg:px-8">
+          <Reveal className="min-w-0">
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-amber-300">
+              Explore the next division
+            </p>
+            <h2
+              className={`${HEADLINE} mt-6 text-5xl font-medium leading-[0.98] tracking-[-0.035em] sm:text-7xl`}
+            >
+              Meet the
+              <br />
+              {otherTeam.title}.
+            </h2>
+            <p className="mt-6 max-w-lg text-base leading-relaxed text-[#FAF6F0]/75">
+              {otherTeam.heroVision}
             </p>
           </Reveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {members.map((member, idx) => (
-              <Member3DFlipCard
-                key={member.id}
-                member={member}
-                index={idx}
-                isFlipped={Boolean(flippedIds[member.id])}
-                isSpotlighted={activeMember.id === member.id}
-                onToggleFlip={() => toggleFlip(member.id)}
-                onFocusStage={() => focusMemberOnStage(idx)}
-              />
-            ))}
-          </div>
-
-          {/* Bottom Cross-Team Navigation Banner */}
-          <Reveal delay={0.1} className="mt-16">
-            <div className="rounded-3xl bg-[#141923] text-white p-7 sm:p-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-xl border border-[#991B1B]/30">
-              <div>
-                <span className="font-mono text-xs uppercase tracking-widest text-amber-300">
-                  Explore Next Division
+          <Reveal delay={0.1} className="min-w-0">
+            <div className="border-t border-dashed border-white/30">
+              <button
+                type="button"
+                onClick={() => onNavigate(`teams/${otherTeamId}`)}
+                className="group flex w-full items-center justify-between gap-6 border-b border-dashed border-white/30 py-7 text-left transition-colors hover:bg-white/[0.04] sm:px-3"
+              >
+                <span className="font-serif text-3xl leading-none sm:text-4xl">
+                  View {otherTeam.title}
                 </span>
-                <h3 className="font-extrabold text-2xl sm:text-3xl mt-1">
-                  Meet the {otherTeam.title}
-                </h3>
-                <p className="text-sm text-slate-300 mt-1 max-w-xl">
-                  {otherTeam.heroVision}
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-3 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => onNavigate(`teams/${otherTeamId}`)}
-                  className="px-6 py-3.5 rounded-xl bg-[#991B1B] hover:bg-[#7F1D1D] text-white font-bold text-sm inline-flex items-center gap-2 transition-colors"
-                >
-                  <span>View {otherTeam.title}</span>
-                  <ArrowRight className="w-4 h-4 text-amber-200" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onNavigate('connect')}
-                  className="px-5 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm transition-colors"
-                >
-                  Connect With Us
-                </button>
-              </div>
+                <ArrowUpRight className="h-6 w-6 shrink-0 text-amber-300 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
+              </button>
+              <button
+                type="button"
+                onClick={() => onNavigate('connect')}
+                className="group flex w-full items-center justify-between gap-6 border-b border-dashed border-white/30 py-7 text-left transition-colors hover:bg-white/[0.04] sm:px-3"
+              >
+                <span className="font-serif text-3xl leading-none sm:text-4xl">Connect with us</span>
+                <ArrowUpRight className="h-6 w-6 shrink-0 text-amber-300 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
+              </button>
             </div>
           </Reveal>
         </div>
       </section>
     </div>
-  );
-}
-
-interface Member3DFlipCardProps {
-  member: TeamMember;
-  index: number;
-  isFlipped: boolean;
-  isSpotlighted: boolean;
-  onToggleFlip: () => void;
-  onFocusStage: () => void;
-}
-
-function Member3DFlipCard({
-  member,
-  index,
-  isFlipped,
-  isSpotlighted,
-  onToggleFlip,
-  onFocusStage,
-}: Member3DFlipCardProps) {
-  const shouldReduce = useReducedMotion();
-  const tiltX = useSpring(useMotionValue(0), { stiffness: 220, damping: 22 });
-  const tiltY = useSpring(useMotionValue(0), { stiffness: 220, damping: 22 });
-
-  const initials = member.name
-    .split(' ')
-    .map((n) => n[0])
-    .join('');
-
-  const updateTilt = (clientX: number, clientY: number, el: HTMLDivElement) => {
-    if (shouldReduce) return;
-    const rect = el.getBoundingClientRect();
-    const x = clientX - rect.left;
-    const y = clientY - rect.top;
-    tiltX.set(((y - rect.height / 2) / (rect.height / 2)) * -7);
-    tiltY.set(((x - rect.width / 2) / (rect.width / 2)) * 7);
-  };
-
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    updateTilt(e.clientX, e.clientY, e.currentTarget);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    const touch = e.touches[0];
-    if (touch) updateTilt(touch.clientX, touch.clientY, e.currentTarget);
-  };
-
-  const handleResetTilt = () => {
-    tiltX.set(0);
-    tiltY.set(0);
-  };
-
-  return (
-    <Reveal delay={index * 0.08}>
-      <div
-        onPointerMove={handlePointerMove}
-        onTouchMove={handleTouchMove}
-        onPointerLeave={handleResetTilt}
-        onTouchEnd={handleResetTilt}
-        style={
-          shouldReduce
-            ? undefined
-            : { perspective: '1300px' }
-        }
-        className="h-full"
-      >
-        <motion.div
-          whileTap={shouldReduce ? undefined : { scale: 0.99 }}
-          style={
-            shouldReduce
-              ? undefined
-              : {
-                  transformStyle: 'preserve-3d',
-                  rotateX: tiltX,
-                  rotateY: tiltY,
-                }
-          }
-          className="h-full"
-        >
-          <motion.div
-            animate={
-              shouldReduce
-                ? undefined
-                : { rotateY: isFlipped ? 180 : 0 }
-            }
-            transition={{ duration: 0.68, ease: FESS_EASE }}
-            style={
-              shouldReduce
-                ? undefined
-                : { transformStyle: 'preserve-3d' }
-            }
-            className="relative min-h-[460px] sm:min-h-[480px] h-full rounded-3xl"
-          >
-            {/* FRONT FACE */}
-            <div
-              aria-hidden={isFlipped}
-              style={
-                shouldReduce
-                  ? { display: isFlipped ? 'none' : 'flex' }
-                  : {
-                      backfaceVisibility: 'hidden',
-                      WebkitBackfaceVisibility: 'hidden',
-                      pointerEvents: isFlipped ? 'none' : 'auto',
-                    }
-              }
-              className={`h-full rounded-3xl bg-white p-5 sm:p-8 shadow-[0_18px_40px_-14px_rgba(20,25,35,0.09)] border flex flex-col justify-between ${
-                isSpotlighted ? 'border-[#991B1B]/45' : 'border-slate-200/80'
-              }`}
-            >
-              <div>
-                <div className="flex items-start justify-between gap-4 mb-5 sm:mb-6">
-                  <div className="flex items-center gap-3.5 sm:gap-4">
-                    <div
-                      style={
-                        shouldReduce
-                          ? undefined
-                          : { transform: 'translateZ(28px)' }
-                      }
-                      className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-[#991B1B] via-[#7F1D1D] to-[#141923] text-white font-extrabold text-lg sm:text-xl flex items-center justify-center shadow-lg shrink-0"
-                    >
-                      {initials}
-                    </div>
-                    <div>
-                      <span className="inline-block px-2.5 py-0.5 rounded-md bg-[#FAF6F0] border border-[#991B1B]/20 text-[10px] font-mono font-bold uppercase tracking-wider text-[#991B1B] mb-1">
-                        0{index + 1} · {member.code}
-                      </span>
-                      <h3 className="font-extrabold text-xl sm:text-2xl text-slate-900 leading-tight">
-                        {member.name}
-                      </h3>
-                      <p className="text-sm font-bold text-[#991B1B]">{member.role}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-xs font-mono text-slate-500 mb-3">
-                  {member.batch}
-                </div>
-
-                <p className="text-sm text-slate-700 leading-relaxed mb-5">
-                  {member.bio}
-                </p>
-
-                <div className="p-3.5 rounded-2xl bg-[#FAF6F0] border border-slate-200/80 mb-5">
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-[#991B1B] font-bold mb-1">
-                    Primary Focus
-                  </div>
-                  <div className="text-xs sm:text-sm font-semibold text-slate-800">
-                    {member.focus}
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-1.5 mb-6">
-                  {member.skills.map((skill) => (
-                    <span
-                      key={skill}
-                      className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-[11px] font-mono font-medium"
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 pt-4 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={onToggleFlip}
-                  tabIndex={isFlipped ? -1 : 0}
-                  className="flex-1 min-w-[150px] min-h-[44px] py-3 px-4 rounded-xl bg-[#991B1B] hover:bg-[#7F1D1D] active:scale-[0.98] text-white font-bold text-xs sm:text-sm inline-flex items-center justify-center gap-2 transition-all"
-                >
-                  <RotateCw className="w-4 h-4" />
-                  <span>Flip 3D Dossier</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={onFocusStage}
-                  tabIndex={isFlipped ? -1 : 0}
-                  className="min-h-[44px] py-3 px-4 rounded-xl bg-[#FAF6F0] hover:bg-slate-200/70 active:scale-[0.98] border border-slate-200 text-slate-800 font-semibold text-xs sm:text-sm inline-flex items-center justify-center gap-1.5 transition-all"
-                >
-                  <Sparkles className="w-4 h-4 text-[#991B1B]" />
-                  <span>3D Stage</span>
-                </button>
-              </div>
-            </div>
-
-            {/* BACK FACE (180-deg rotated in 3D) */}
-            <div
-              aria-hidden={!isFlipped}
-              style={
-                shouldReduce
-                  ? { display: isFlipped ? 'flex' : 'none' }
-                  : {
-                      backfaceVisibility: 'hidden',
-                      WebkitBackfaceVisibility: 'hidden',
-                      transform: 'rotateY(180deg)',
-                      pointerEvents: isFlipped ? 'auto' : 'none',
-                    }
-              }
-              className="absolute inset-0 h-full rounded-3xl bg-gradient-to-br from-[#141923] via-[#1B2231] to-[#2B1216] text-white p-7 sm:p-8 shadow-2xl border border-[#991B1B]/45 flex flex-col justify-between overflow-y-auto"
-            >
-              <div>
-                <div className="flex items-center justify-between gap-3 mb-5">
-                  <div>
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-amber-300 block">
-                      {member.dept} · {member.code}
-                    </span>
-                    <h4 className="font-extrabold text-xl text-white">{member.name}</h4>
-                  </div>
-                  <Award className="w-6 h-6 text-amber-300 shrink-0" />
-                </div>
-
-                <div className="p-4 rounded-2xl bg-white/8 border border-white/10 mb-5">
-                  <Quote className="w-4 h-4 text-amber-300 mb-1.5" />
-                  <p className="font-serif italic text-sm text-slate-200 leading-relaxed">
-                    &ldquo;{member.quote}&rdquo;
-                  </p>
-                </div>
-
-                <div>
-                  <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-amber-300 mb-3 flex items-center gap-1.5">
-                    <Layers className="w-3.5 h-3.5" />
-                    <span>Flagship Initiatives &amp; Impact</span>
-                  </div>
-                  <ul className="space-y-2.5">
-                    {member.highlights.map((item) => (
-                      <li
-                        key={item}
-                        className="text-xs sm:text-sm text-slate-200 flex items-start gap-2.5 leading-relaxed"
-                      >
-                        <CheckCircle2 className="w-4 h-4 text-amber-300 shrink-0 mt-0.5" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 pt-4 border-t border-white/12">
-                <button
-                  type="button"
-                  onClick={onToggleFlip}
-                  tabIndex={isFlipped ? 0 : -1}
-                  className="flex-1 py-3 px-4 rounded-xl bg-white text-[#991B1B] hover:bg-amber-50 font-bold text-xs sm:text-sm inline-flex items-center justify-center gap-2 transition-colors"
-                >
-                  <RotateCw className="w-4 h-4" />
-                  <span>Flip Back to Profile</span>
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-      </div>
-    </Reveal>
   );
 }

@@ -1,7 +1,6 @@
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 import { COMPETITIONS, SCHEDULE_ITEMS, type PageId } from '../../data/fessData';
-import { FESS_EASE } from '../MotionPrimitives';
 import emblemMark from '../../assets/logo/fess-emblem-mark.png';
 
 export interface Hero25Props {
@@ -15,14 +14,11 @@ const DAY_DATES: Record<(typeof DAYS)[number], string> = {
   '2': '4 December',
 };
 
+const EXPO = [0.16, 1, 0.3, 1] as const;
+const WORDMARK = ['F', 'E', 'S', 'S'];
+
 export function Hero25({ onNavigate }: Hero25Props) {
   const shouldReduce = Boolean(useReducedMotion());
-
-  const rise = (delay: number) => ({
-    initial: shouldReduce ? false : { opacity: 0, y: 16 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.55, delay, ease: FESS_EASE },
-  });
 
   return (
     <section
@@ -34,22 +30,29 @@ export function Hero25({ onNavigate }: Hero25Props) {
         aria-hidden="true"
         alt=""
         src={emblemMark}
-        initial={shouldReduce ? false : { opacity: 0, scale: 0.94 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1.1, ease: FESS_EASE }}
+        initial={shouldReduce ? false : { opacity: 0, scale: 0.82, rotate: -28 }}
+        animate={{ opacity: 1, scale: 1, rotate: 0 }}
+        transition={{ duration: 1.9, ease: EXPO }}
         className="pointer-events-none absolute right-[-28vw] top-[2%] w-[96vw] select-none lg:right-[-14vw] lg:top-[-18%] lg:w-[78vw]"
       />
 
       {/* Giant wordmark, cropped by the bottom edge */}
-      <motion.div
+      <div
         aria-hidden="true"
-        initial={shouldReduce ? false : { opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.9, ease: FESS_EASE }}
-        className="pointer-events-none absolute inset-x-0 bottom-0 select-none text-center font-[family-name:var(--font-headline)] font-extrabold leading-[0.8] tracking-[-0.06em] text-[#991B1B] [font-size:46vw] translate-y-[16%] lg:[font-size:40vw]"
+        className="pointer-events-none absolute inset-x-0 bottom-0 flex select-none justify-center font-[family-name:var(--font-headline)] font-extrabold leading-[0.8] tracking-[-0.06em] text-[#991B1B] [font-size:46vw] translate-y-[16%] lg:[font-size:40vw]"
       >
-        FESS
-      </motion.div>
+        {WORDMARK.map((letter, i) => (
+          <motion.span
+            key={i}
+            className="inline-block"
+            initial={shouldReduce ? false : { y: '105%', opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 1.1, delay: 0.25 + i * 0.1, ease: EXPO }}
+          >
+            {letter}
+          </motion.span>
+        ))}
+      </div>
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0C0F16]/60 to-transparent"
@@ -59,23 +62,41 @@ export function Hero25({ onNavigate }: Hero25Props) {
         {/* Left: type does the work */}
         <div className="min-w-0">
           <motion.p
-            {...rise(0)}
+            initial={shouldReduce ? false : { opacity: 0, x: -14 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.1, ease: EXPO }}
             className="mb-6 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.14em] text-amber-300 sm:text-xs sm:tracking-[0.2em]"
           >
             FAST Entrepreneurship &amp; Startup Society
           </motion.p>
 
-          <motion.h1
-            {...rise(0.08)}
-            className="font-[family-name:var(--font-headline)] text-5xl font-medium leading-[1] tracking-[-0.03em] [word-spacing:0.06em] sm:text-7xl lg:text-[5.25rem]"
-          >
-            Pitch it. Sell it.
-            <br />
-            Launch it<span className="text-amber-300">.</span>
-          </motion.h1>
+          <h1 className="font-[family-name:var(--font-headline)] text-5xl font-medium leading-[1] tracking-[-0.03em] [word-spacing:0.06em] sm:text-7xl lg:text-[5.25rem]">
+            <span className="-mb-[0.12em] block overflow-hidden pb-[0.12em]">
+              <motion.span
+                className="block"
+                initial={shouldReduce ? false : { y: '110%' }}
+                animate={{ y: 0 }}
+                transition={{ duration: 0.95, delay: 0.2, ease: EXPO }}
+              >
+                Pitch it. Sell it.
+              </motion.span>
+            </span>
+            <span className="-mb-[0.12em] block overflow-hidden pb-[0.12em]">
+              <motion.span
+                className="block"
+                initial={shouldReduce ? false : { y: '110%' }}
+                animate={{ y: 0 }}
+                transition={{ duration: 0.95, delay: 0.34, ease: EXPO }}
+              >
+                Launch it<span className="text-amber-300">.</span>
+              </motion.span>
+            </span>
+          </h1>
 
           <motion.p
-            {...rise(0.16)}
+            initial={shouldReduce ? false : { opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6, ease: EXPO }}
             className="mt-7 max-w-md text-base leading-relaxed text-slate-400 sm:text-lg"
           >
             Two days, three competitions and two nights on campus. Best pitch
@@ -85,13 +106,18 @@ export function Hero25({ onNavigate }: Hero25Props) {
 
         {/* Right: the real flagship programme, doubling as the one call to action */}
         <motion.aside
-          {...rise(0.2)}
+          initial={shouldReduce ? false : { opacity: 0, y: 36 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, delay: 0.45, ease: EXPO }}
           aria-label="Flagship event programme"
           className="relative min-w-0 [filter:drop-shadow(0_24px_36px_rgba(0,0,0,0.55))]"
         >
           {/* Ticket body: semicircular notches are cut out of both edges at the dashed tear line */}
-          <div
+          <motion.div
             className="overflow-hidden rounded-sm bg-[#FAF6F0] text-[#141923]"
+            initial={shouldReduce ? false : { clipPath: 'inset(0 0 100% 0)' }}
+            animate={{ clipPath: 'inset(0 0 0% 0)' }}
+            transition={{ duration: 1.2, delay: 0.55, ease: EXPO }}
             style={{
               WebkitMask:
                 'radial-gradient(circle 11px at 0 64px, #0000 98%, #000) left / 51% 100% no-repeat, radial-gradient(circle 11px at 100% 64px, #0000 98%, #000) right / 51% 100% no-repeat',
@@ -118,9 +144,13 @@ export function Hero25({ onNavigate }: Hero25Props) {
               <ul className="px-6 pb-3 pt-1">
                 {SCHEDULE_ITEMS.filter((item) => item.day === day).map((item) => {
                   const comp = COMPETITIONS.find((c) => c.id === item.title);
+                  const order = SCHEDULE_ITEMS.indexOf(item);
                   return (
-                    <li
+                    <motion.li
                       key={`${day}-${item.title}`}
+                      initial={shouldReduce ? false : { opacity: 0, x: 16 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.6, delay: 0.95 + order * 0.08, ease: EXPO }}
                       className="border-t border-dashed border-[#141923]/15 first:border-t-0"
                     >
                       <button
@@ -149,7 +179,7 @@ export function Hero25({ onNavigate }: Hero25Props) {
                           {item.time}
                         </span>
                       </button>
-                    </li>
+                    </motion.li>
                   );
                 })}
               </ul>
@@ -164,7 +194,7 @@ export function Hero25({ onNavigate }: Hero25Props) {
             Register for the flagship
             <ArrowRight className="h-4 w-4 text-amber-300 transition-transform group-hover:translate-x-0.5 group-hover:text-white" />
           </button>
-          </div>
+          </motion.div>
         </motion.aside>
       </div>
     </section>

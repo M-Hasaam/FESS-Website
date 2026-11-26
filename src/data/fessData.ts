@@ -117,6 +117,22 @@ export interface PastEventItem {
   imageAlt: string;
 }
 
+export interface SocialLink {
+  label: string;
+  handle: string;
+  url: string;
+}
+
+/** Official social profiles. Set `linkedin` to a profile URL to show it across the site. */
+export const SOCIAL_LINKS: { instagram: SocialLink; linkedin: SocialLink | null } = {
+  instagram: {
+    label: 'Instagram',
+    handle: '@officialfess',
+    url: 'https://www.instagram.com/officialfess/',
+  },
+  linkedin: null,
+};
+
 export const HERO_MEDIA = {
   image: '/src/assets/images/hero_fess_architecture_1795208286661.jpg',
   alt: 'Modern glass university innovation towers illuminated at twilight',

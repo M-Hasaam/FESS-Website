@@ -10,7 +10,7 @@ import {
   Plus,
   Send,
 } from 'lucide-react';
-import { CONNECT_FAQS, CONNECT_TOPICS } from '../data/fessData';
+import { CONNECT_FAQS, CONNECT_TOPICS, SOCIAL_LINKS } from '../data/fessData';
 import { sendContactMessage } from '../utils/apiClient';
 import { validateConnectForm } from '../utils/fessLogic';
 import { FESS_EASE, Reveal } from './MotionPrimitives';
@@ -343,28 +343,32 @@ export function ConnectPage({ onShowToast, introDelay = 0 }: ConnectPageProps) {
                 Follow updates for Movie Night, Qawali Night, and competition announcements.
               </p>
               <div className="mt-6 border-t border-dashed border-white/25">
-                <button
-                  type="button"
-                  onClick={() => onShowToast('Opening @fess_fast on Instagram')}
+                <a
+                  href={SOCIAL_LINKS.instagram.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="group flex min-h-[56px] w-full items-center justify-between border-b border-dashed border-white/25 text-left text-sm font-semibold transition-colors hover:text-amber-300"
                 >
                   <span className="flex items-center gap-3">
                     <Instagram className="h-4 w-4 text-amber-300" />
-                    @fess_fast
+                    {SOCIAL_LINKS.instagram.handle}
                   </span>
                   <ArrowUpRight className="h-4 w-4 text-amber-300 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onShowToast('Opening FESS on LinkedIn')}
-                  className="group flex min-h-[56px] w-full items-center justify-between border-b border-dashed border-white/25 text-left text-sm font-semibold transition-colors hover:text-amber-300"
-                >
-                  <span className="flex items-center gap-3">
-                    <Linkedin className="h-4 w-4 text-amber-300" />
-                    LinkedIn
-                  </span>
-                  <ArrowUpRight className="h-4 w-4 text-amber-300 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-                </button>
+                </a>
+                {SOCIAL_LINKS.linkedin && (
+                  <a
+                    href={SOCIAL_LINKS.linkedin.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex min-h-[56px] w-full items-center justify-between border-b border-dashed border-white/25 text-left text-sm font-semibold transition-colors hover:text-amber-300"
+                  >
+                    <span className="flex items-center gap-3">
+                      <Linkedin className="h-4 w-4 text-amber-300" />
+                      {SOCIAL_LINKS.linkedin.label}
+                    </span>
+                    <ArrowUpRight className="h-4 w-4 text-amber-300 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                  </a>
+                )}
               </div>
             </div>
           </Reveal>

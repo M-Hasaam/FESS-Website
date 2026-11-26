@@ -209,7 +209,7 @@ export default function App() {
           </AnimatePresence>
         </main>
 
-        <Footer onNavigate={navigateTo} onSocialToast={showToast} />
+        <Footer onNavigate={navigateTo} />
 
         <MobileBottomNav
           currentPage={currentPage}
